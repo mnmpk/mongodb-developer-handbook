@@ -1,0 +1,17 @@
+spring:
+  data:
+    mongodb:
+      uri: "mongodb+srv://admin:admin@demo.uskpz.mongodb.net/sample_mflix"
+      host: localhost
+      port: 27017
+      database: sample_mflix
+      username: admin
+      password: admin
+logging:
+  level:
+    org:
+      springframework:
+        data:
+          mongodb:
+            core:
+              MongoTemplate: DEBUG
