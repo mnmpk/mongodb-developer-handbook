@@ -1,12 +1,7 @@
 spring:
   data:
     mongodb:
-      uri: "mongodb+srv://admin:admin@demo.uskpz.mongodb.net/sample_mflix"
-      host: localhost
-      port: 27017
-      database: sample_mflix
-      username: admin
-      password: admin
+      uri: "mongodb+srv://admin:admin12345@demo.uskpz.mongodb.net/mongodb-java"
 logging:
   level:
     org:
@@ -15,3 +10,8 @@ logging:
           mongodb:
             core:
               MongoTemplate: DEBUG
+settings:
+  #App thread pool setting
+  corePoolsize: 10 
+  maxPoolSize: 30
+  queueSize: 100000
