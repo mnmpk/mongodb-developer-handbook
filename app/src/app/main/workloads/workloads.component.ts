@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
-import { Coventer, Implementation, OperationType, WorkloadType, WriteConcern } from '../../shared/models/workload';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Conventer, Implementation, OperationType, WorkloadType, WriteConcern } from '../../shared/models/workload';
 import { WorkloadsService } from '../workloads.service';
 import { UtilityService } from '../../shared/utilityService.service';
 import { Stat } from '../../shared/models/stats';
@@ -14,9 +14,10 @@ export class WorkloadsComponent {
   Implementation = Implementation;
   WorkloadType = WorkloadType;
   OperationType = OperationType;
-  Coventer = Coventer;
+  Conventer = Conventer;
   WriteConcern = WriteConcern;
   form!: FormGroup;
+  loading = false;
 
   constructor(private formBuilder: FormBuilder, private ultityService: UtilityService, private service: WorkloadsService) {
 
@@ -25,16 +26,17 @@ export class WorkloadsComponent {
 
   ngOnInit(): void {
     this.form = this.formBuilder.group({
-      impl: [Implementation.DRIVER],
-      type: [WorkloadType.WRITE],
-      coll: ["test"],
+      impl: [Implementation.DRIVER, Validators.required],
+      type: [WorkloadType.WRITE, Validators.required],
+      entity: ["users"],
+      coll: ["test", Validators.required],
       schema: [],
-      converter: [Coventer.SPRING],
-      opType: [OperationType.INSERT],
-      numWorkers: [1],
-      qty: [10000],
-      w: [WriteConcern.majority],
-      bulk: [true]
+      converter: [Conventer.MONGODB],
+      opType: [OperationType.INSERT, Validators.required],
+      numWorkers: [1, [Validators.required, Validators.min(1), Validators.max(100)]],
+      qty: [10000, Validators.required],
+      w: [WriteConcern.MAJORITY],
+      bulk: [true, Validators.required]
     });
   }
 
@@ -45,14 +47,19 @@ export class WorkloadsComponent {
       this.form.disable();
       formValue.impl = this.ultityService.enumValueToKey(Implementation, formValue.impl);
       formValue.type = this.ultityService.enumValueToKey(WorkloadType, formValue.type);
-      formValue.converter = this.ultityService.enumValueToKey(Coventer, formValue.converter);
+      formValue.converter = this.ultityService.enumValueToKey(Conventer, formValue.converter);
       formValue.opType = this.ultityService.enumValueToKey(OperationType, formValue.opType);
       formValue.w = this.ultityService.enumValueToKey(WriteConcern, formValue.w);
-      this.service.insert(formValue).subscribe({
+      this.loading = true;
+      this.service.load(formValue).subscribe({
         next: (event: Stat<any>) => {
-
+          this.form.enable();
+          this.loading = false;
         },
         error: (err: any) => {
+          alert(err.message);
+          this.form.enable();
+          this.loading = false;
         }
       });
     } else {

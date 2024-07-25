@@ -14,30 +14,33 @@ export enum OperationType {
     DELETE = "Delete",
     REPLACE = "Replace"
 }
-export enum WriteConcern{
-    majority = "majority",
-    w0 = "0",
-    w1 = "1",
-    w2 = "2",
-    w3 = "3"
+export enum WriteConcern {
+    ACKNOWLEDGED = "Acknowledge", 
+    W1 = "1", 
+    W2 = "2", 
+    W3 = "3", 
+    UNACKNOWLEDGED = "Unacknowledge", 
+    JOURNALED = "Journaled", 
+    MAJORITY = "Majority"
 }
-export enum Coventer{
+export enum Conventer {
     SPRING = "Spring converter",
     MONGODB = "MongoDB Codec",
 }
 export class Workload {
-    impl!:Implementation;
+    impl!: Implementation;
     type!: WorkloadType;
     coll!: string;
+    entity!: string;
     schema!: string;
-    converter!:Coventer;
+    converter!: Conventer;
     //TODO:Read options?
 
     //Write Option
-    opType!:OperationType;
-    numWorkers!:number;
-    qty!:number;
-    w!:WriteConcern|number;
-    bulk!:boolean;
+    opType!: OperationType;
+    numWorkers!: number;
+    qty!: number;
+    w!: WriteConcern;
+    bulk!: boolean;
 
 }

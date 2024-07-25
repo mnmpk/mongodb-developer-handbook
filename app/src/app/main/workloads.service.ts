@@ -6,7 +6,7 @@ import { Page } from '../shared/models/page';
 import { Stat } from '../shared/models/stats';
 import { Workload } from '../shared/models/workload';
 
-const baseURL = environment.apiUrl + '/workloads';
+const baseURL = environment.apiUrl;
 @Injectable({
 	providedIn: 'root'
 })
@@ -27,17 +27,19 @@ export class WorkloadsService {
 	find(id: string): Observable<Stat<any>> {
 		return this.httpClient.get<Stat<any>>(`${baseURL}/${id}`);
 	}
+	create(data: any): Observable<Stat<any>> {
+		return this.httpClient.post<Stat<any>>(baseURL, data);
+	}
 
-	insert(workload: Workload): Observable<Stat<any>> {
-		return this.httpClient.post<Stat<any>>(`${baseURL}/insert`, workload);
+	update(data: any): Observable<Stat<any>> {
+		return this.httpClient.put<Stat<any>>(`${baseURL}/${data.id}`, data);
 	}
-	update(workload: Workload): Observable<Stat<any>> {
-		return this.httpClient.post<Stat<any>>(`${baseURL}/update`, workload);
+
+	delete(id: string): Observable<Stat<any>> {
+		return this.httpClient.delete<Stat<any>>(`${baseURL}/${id}`);
 	}
-	delete(workload: Workload): Observable<Stat<any>> {
-		return this.httpClient.post<Stat<any>>(`${baseURL}/delete`, workload);
-	}
-	replace(workload: Workload): Observable<Stat<any>> {
-		return this.httpClient.post<Stat<any>>(`${baseURL}/replace`, workload);
+
+	load(workload: Workload): Observable<Stat<any>> {
+		return this.httpClient.post<Stat<any>>(`${baseURL}/${workload.entity}/load`, workload);
 	}
 }

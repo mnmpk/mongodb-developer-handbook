@@ -1,14 +1,13 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { MaterialModule } from './shared/material/material.module';
-import { FlexLayoutModule } from '@angular/flex-layout';
+import { SharedModule } from './shared/shared.module';
 import { MainModule } from './main/main.module';
-import { MetricsComponent } from './metrics/metrics/metrics.component';
+import { MetricsModule } from './metrics/metrics.module';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, FlexLayoutModule, MaterialModule, MainModule, MetricsComponent],
+  imports: [RouterOutlet, SharedModule, MainModule, MetricsModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })

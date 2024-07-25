@@ -9,5 +9,5 @@ export class Stat<T> {
     min!:number;
     max!:number;
     avg!:number;
-    data!:T;
+    data!:T[];
 }

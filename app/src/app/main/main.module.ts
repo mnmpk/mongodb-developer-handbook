@@ -1,8 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule } from '@angular/forms';
 import { WorkloadsComponent } from './workloads/workloads.component';
-import { MaterialModule } from '../shared/material/material.module';
+import { SharedModule } from '../shared/shared.module';
 
 
 
@@ -10,8 +9,7 @@ import { MaterialModule } from '../shared/material/material.module';
   declarations: [WorkloadsComponent],
   imports: [
     CommonModule, 
-    MaterialModule,
-    ReactiveFormsModule
+    SharedModule
   ]
 })
 export class MainModule { }

@@ -1,6 +1,7 @@
 package com.mongodb.javabasic.service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -8,6 +9,10 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.util.StopWatch;
+
+import com.mongodb.javabasic.model.Stat;
+import com.mongodb.javabasic.model.Workload;
 
 public abstract class GenericService<T> {
     @Autowired
@@ -24,13 +29,15 @@ public abstract class GenericService<T> {
     public abstract void delete(String id);
 
     public abstract T update(T entity);
-    
-    public abstract List<T> _bulk(List<T> entities);
 
-    public List<T> bulk(List<T> entities, int noOfThreads) {
+    public abstract Stat<T> _load(List<T> entities, Workload workload);
 
-        var ends = new ArrayList<CompletableFuture<List<T>>>();
-        int pageSize = entities.size() / noOfThreads;
+    public Stat<T> load(List<T> entities, Workload workload) {
+        Stat<T> stat = new Stat<>();
+        stat.setWorkload(workload);
+        StopWatch sw = new StopWatch();
+        var ends = new ArrayList<CompletableFuture<Stat<T>>>();
+        int pageSize = entities.size() / workload.getNoOfWorkers();
         if (pageSize <= 0) {
             pageSize = 1;
         }
@@ -40,24 +47,35 @@ public abstract class GenericService<T> {
             int toIdx = Math.min(entities.size(), (pageIdx + 1) * pageSize);
             var subList = entities.subList(fromIdx, toIdx);
 
-            ends.add(asyncService.bulk(subList, (List<T> l)-> _bulk(l)));
-            //ends.add(
-            //    CompletableFuture.supplyAsync(() -> {
-            //        return _bulk(subList);
-            //    }));
+            ends.add(asyncService.load(subList, (List<T> l) -> _load(l, workload)));
+            // ends.add(
+            // CompletableFuture.supplyAsync(() -> {
+            // return _bulk(subList);
+            // }));
 
             if (toIdx == entities.size()) {
                 break;
             }
         }
+        stat.setStartAt(new Date());
+        sw.start();
         CompletableFuture<Void> allFuturesResult = CompletableFuture
                 .allOf(ends.toArray(new CompletableFuture<?>[ends.size()]));
-
-        List<List<T>> list = allFuturesResult
+        List<Stat<T>> list = allFuturesResult
                 .thenApply(v -> ends.stream().map(CompletableFuture::join).collect(Collectors.toList())).join();
-        return list.stream()
-                .flatMap(List::stream)
-                .collect(Collectors.toList());
+        List<T> data = new ArrayList<>();
+        list.stream().forEach(s -> {
+            data.addAll(s.getData());
+            if (stat.getMaxLatency() == 0)
+                stat.setMaxLatency(s.getMaxLatency());
+            stat.setMinLatency(Math.min(stat.getMinLatency(), s.getMinLatency()));
+            stat.setMaxLatency(Math.max(stat.getMaxLatency(), s.getMaxLatency()));
+        });
+        stat.setData(data);
+        sw.stop();
+        stat.setEndAt(new Date());
+        stat.setDuration(sw.getTotalTimeMillis());
+        return stat;
     }
 
 }

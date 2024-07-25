@@ -1,7 +1,5 @@
 package com.mongodb.javabasic.controller;
 
-import java.util.List;
-
 import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,8 +9,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.mongodb.javabasic.model.Stat;
+import com.mongodb.javabasic.model.Workload;
 
 public abstract class GenericController<T> {
 	/**
@@ -60,6 +60,6 @@ public abstract class GenericController<T> {
 	@DeleteMapping("/{id}")
 	public abstract void delete(@PathVariable String id);
 
-	@PostMapping("/bulk")
-	public abstract List<T> bulk(@RequestParam int noOfThreads, @RequestParam int itemsPerThreads);
+	@PostMapping("/load")
+	public abstract Stat<T> load(@RequestBody Workload workload);
 }
