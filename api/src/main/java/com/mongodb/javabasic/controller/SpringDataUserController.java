@@ -1,8 +1,6 @@
 package com.mongodb.javabasic.controller;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import org.bson.types.ObjectId;
