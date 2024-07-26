@@ -69,9 +69,17 @@ public class UserController extends GenericController<User> {
 	public Stat<User> load(Workload workload) {
 		EasyRandom generator = new EasyRandom();
 		List<User> users = generator.objects(User.class, workload.getQuantity()).map(u -> {
-			// u.setId(new ObjectId().toHexString());
-			if (workload.getOperationType() == OperationType.INSERT)
-				u.setId(null);
+			switch (workload.getOperationType()) {
+				case INSERT:
+					u.setId(null);
+					//TODO: add seq id for targeting
+				case DELETE:
+				case REPLACE:
+				case UPDATE:
+					//TODO: target doc by seq id
+					u.setId(new ObjectId().toHexString());
+					break;
+			}
 			return u;
 		})
 				.collect(Collectors.toList());

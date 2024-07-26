@@ -52,14 +52,14 @@
         </div>
         <div *ngIf="form.get('type')?.value==WorkloadType.WRITE">
             <h2>Write workload</h2>
-            <div>
+            <mat-form-field>
                 <mat-label>Type</mat-label>
                 <mat-select formControlName="opType">
                     @for (opType of OperationType | keyvalue; track opType) {
                     <mat-option [value]="opType.value">{{opType.value}}</mat-option>
                     }
                 </mat-select>
-            </div>
+            </mat-form-field>
             <mat-form-field>
                 <mat-label>No. of Workers</mat-label>
                 <input matInput type="number" formControlName="numWorkers">

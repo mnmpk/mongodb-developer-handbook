@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.bson.BsonValue;
+import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -92,7 +93,7 @@ public class DriverUserService extends UserService {
             switch (workload.getOperationType()) {
                 case DELETE:
                     collection.bulkWrite(entities.stream()
-                            .map(e -> new DeleteOneModel<User>(Filters.eq("_id", e.getId()))).toList());
+                            .map(e -> new DeleteOneModel<User>(Filters.eq("_id", new ObjectId(e.getId())))).toList());
                     break;
                 case INSERT:
                     List<BulkWriteInsert> inserts = collection
@@ -104,7 +105,7 @@ public class DriverUserService extends UserService {
                 case REPLACE:
                     List<BulkWriteUpsert> newReplaces = collection
                             .bulkWrite(
-                                    entities.stream().map(e -> new ReplaceOneModel<>(Filters.eq("_id", e.getId()),
+                                    entities.stream().map(e -> new ReplaceOneModel<>(Filters.eq("_id", new ObjectId(e.getId())),
                                             e, new ReplaceOptions().upsert(true))).toList())
                             .getUpserts();
                     for (int i = 0; i < newReplaces.size(); i++) {
@@ -114,7 +115,7 @@ public class DriverUserService extends UserService {
                 case UPDATE:
                     List<BulkWriteUpsert> upserts = collection
                             .bulkWrite(
-                                    entities.stream().map(e -> new UpdateOneModel<User>(Filters.eq("_id", e.getId()),
+                                    entities.stream().map(e -> new UpdateOneModel<User>(Filters.eq("_id", new ObjectId(e.getId())),
                                             Updates.combine(Updates.inc("v", 1)), new UpdateOptions().upsert(true)))
                                             .toList())
                             .getUpserts();
@@ -123,12 +124,6 @@ public class DriverUserService extends UserService {
                     }
                     break;
             }
-            if (workload.getWriteConcern() == com.mongodb.javabasic.model.Workload.WriteConcern.UNACKNOWLEDGED) {
-                ;
-            } else
-                for (Entry<Integer, BsonValue> e : collection.insertMany(entities).getInsertedIds().entrySet()) {
-                    entities.get(e.getKey()).setId(e.getValue().asObjectId().getValue().toHexString());
-                }
             stat.setData(entities);
             sw.stop();
             min = sw.getTotalTimeMillis();

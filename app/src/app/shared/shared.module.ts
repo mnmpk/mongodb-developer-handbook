@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { MaterialModule } from './material/material.module';
 import { ReactiveFormsModule } from '@angular/forms';
+import { NgxEchartsModule } from 'ngx-echarts';
 
 
 
@@ -11,9 +12,18 @@ import { ReactiveFormsModule } from '@angular/forms';
   imports: [
     CommonModule,
     FlexLayoutModule,
-    ReactiveFormsModule, 
-    MaterialModule
+    ReactiveFormsModule,
+    MaterialModule,
+    NgxEchartsModule.forRoot({
+      echarts: () => import('echarts')
+    })
   ],
-  exports:[FlexLayoutModule, ReactiveFormsModule, MaterialModule]
+  exports: [
+    CommonModule,
+    FlexLayoutModule,
+    ReactiveFormsModule,
+    MaterialModule,
+    NgxEchartsModule
+  ]
 })
 export class SharedModule { }

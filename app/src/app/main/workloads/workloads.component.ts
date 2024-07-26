@@ -4,6 +4,7 @@ import { Conventer, Implementation, OperationType, WorkloadType, WriteConcern } 
 import { WorkloadsService } from '../workloads.service';
 import { UtilityService } from '../../shared/utilityService.service';
 import { Stat } from '../../shared/models/stats';
+import { MetricsService } from '../../metrics/metrics.service';
 
 @Component({
   selector: 'app-workloads',
@@ -19,7 +20,7 @@ export class WorkloadsComponent {
   form!: FormGroup;
   loading = false;
 
-  constructor(private formBuilder: FormBuilder, private ultityService: UtilityService, private service: WorkloadsService) {
+  constructor(private formBuilder: FormBuilder, private ultityService: UtilityService, private service: WorkloadsService, private metricsService: MetricsService) {
 
   }
 
@@ -52,9 +53,10 @@ export class WorkloadsComponent {
       formValue.w = this.ultityService.enumValueToKey(WriteConcern, formValue.w);
       this.loading = true;
       this.service.load(formValue).subscribe({
-        next: (event: Stat<any>) => {
+        next: (stat: Stat<any>) => {
           this.form.enable();
           this.loading = false;
+          this.metricsService.addResult(stat);
         },
         error: (err: any) => {
           alert(err.message);

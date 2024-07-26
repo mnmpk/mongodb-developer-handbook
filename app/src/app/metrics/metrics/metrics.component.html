@@ -1,1 +1,4 @@
-<p>metrics works!</p>
+<div fxLayout="row">
+    <div fxFlex echarts [options]="throughput" [merge]="throughputUpdate"></div>
+    <div fxFlex echarts [options]="latency" [merge]="latencyUpdate"></div>
+</div>
