@@ -1,10 +1,11 @@
 package com.mongodb.javabasic.model;
 
-
-
+import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIncludeProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
@@ -17,6 +18,15 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Stat<T> {
+    private List<String> fields;
+
+    public Stat(Class<T> clazz) {
+        fields = new ArrayList<>();
+        for (Field f : clazz.getDeclaredFields()) {
+            this.fields.add(f.getName());
+        }
+    }
+
     private Date startAt;
     private Date endAt;
     private Workload workload;
@@ -33,7 +43,7 @@ public class Stat<T> {
 
     public void setDuration(long duration) {
         this.duration = duration;
-        this.operationPerSecond = ((double)workload.getQuantity() / this.duration) * 1000;
+        this.operationPerSecond = ((double) workload.getQuantity() / this.duration) * 1000;
         this.avgLatency = ((double) this.duration / workload.getQuantity());
     }
 }

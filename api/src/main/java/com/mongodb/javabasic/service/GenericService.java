@@ -70,6 +70,8 @@ public abstract class GenericService<T> {
                 stat.setMaxLatency(s.getMaxLatency());
             stat.setMinLatency(Math.min(stat.getMinLatency(), s.getMinLatency()));
             stat.setMaxLatency(Math.max(stat.getMaxLatency(), s.getMaxLatency()));
+            if(stat.getFields()==null)
+                stat.setFields(s.getFields());
         });
         stat.setData(data);
         sw.stop();

@@ -74,7 +74,7 @@ public class SpringUserService extends UserService {
 
     @Override
     public Stat<User> _load(List<User> entities, Workload workload) {
-        Stat<User> stat = new Stat<>();
+        Stat<User> stat = new Stat<>(User.class);
         stat.setWorkload(Workload.builder().implementation(workload.getImplementation())
                 .converter(workload.getConverter()).bulk(workload.isBulk()).writeConcern(workload.getWriteConcern())
                 .operationType(workload.getOperationType())
@@ -141,6 +141,7 @@ public class SpringUserService extends UserService {
                 sw.start();
                 //TODO
                 //e.setId(collection.insertOne(e).getInsertedId().asObjectId().getValue().toHexString());
+                newEntities.add(e);
                 sw.stop();
                 long time = sw.getTotalTimeMillis();
                 total += time;
