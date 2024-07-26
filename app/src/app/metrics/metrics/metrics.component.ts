@@ -51,6 +51,10 @@ export class MetricsComponent {
       title: {
         text: 'Latency (ms)',
       },
+      legend: {
+        data: ['min', 'avg', 'max'],
+        align: 'left',
+      },
       tooltip: {
         trigger: 'axis',
         formatter: (params: any) => {
@@ -73,9 +77,22 @@ export class MetricsComponent {
       },
       series: [
         {
+          name: 'min',
           type: 'line',
           showSymbol: false,
-          data: this.metricsService.getResults().map((s, i) => { return { name: "" + i + 1, value: [i + 1, s.avg, s.startAt, s.endAt, s.duration, s.workload.qty, s.workload.numWorkers] } })
+          data: this.metricsService.getResults().map((s, i) => { return { name: "" + i + 1, value: [i + 1, s.min, s.min, s.avg, s.max, s.startAt, s.endAt, s.duration, s.workload.qty, s.workload.numWorkers] } })
+        },
+        {
+          name: 'avg',
+          type: 'line',
+          showSymbol: false,
+          data: this.metricsService.getResults().map((s, i) => { return { name: "" + i + 1, value: [i + 1, s.avg, s.min, s.avg, s.max, s.startAt, s.endAt, s.duration, s.workload.qty, s.workload.numWorkers] } })
+        },
+        {
+          name: 'max',
+          type: 'line',
+          showSymbol: false,
+          data: this.metricsService.getResults().map((s, i) => { return { name: "" + i + 1, value: [i + 1, s.max, s.min, s.avg, s.max, s.startAt, s.endAt, s.duration, s.workload.qty, s.workload.numWorkers] } })
         },
       ],
     };
@@ -90,7 +107,13 @@ export class MetricsComponent {
       this.latencyUpdate = {
         series: [
           {
-            data: this.metricsService.getResults().map((s, i) => { return { name: "" + i + 1, value: [i + 1, s.avg, s.startAt, s.endAt, s.duration, s.workload.qty, s.workload.numWorkers] } })
+            data: this.metricsService.getResults().map((s, i) => { return { name: "" + i + 1, value: [i + 1, s.min, s.min, s.avg, s.max, s.startAt, s.endAt, s.duration, s.workload.qty, s.workload.numWorkers] } })
+          },
+          {
+            data: this.metricsService.getResults().map((s, i) => { return { name: "" + i + 1, value: [i + 1, s.avg, s.min, s.avg, s.max, s.startAt, s.endAt, s.duration, s.workload.qty, s.workload.numWorkers] } })
+          },
+          {
+            data: this.metricsService.getResults().map((s, i) => { return { name: "" + i + 1, value: [i + 1, s.max, s.min, s.avg, s.max, s.startAt, s.endAt, s.duration, s.workload.qty, s.workload.numWorkers] } })
           },
         ],
       };

@@ -79,8 +79,8 @@
             <div>
                 <label>Type</label>
                 <mat-radio-group formControlName="bulk">
-                    <mat-radio-button [value]="true">Bulk write</mat-radio-button>
-                    <mat-radio-button [value]="false">Distributed write</mat-radio-button>
+                    <mat-radio-button [value]="false">{{form.get('impl')?.value==Implementation.REPO?"save":"Single operations"}}</mat-radio-button>
+                    <mat-radio-button [value]="true">{{form.get('impl')?.value==Implementation.REPO?"saveAll":"Bulk operations"}}</mat-radio-button>
                 </mat-radio-group>
             </div>
             Aggregation?

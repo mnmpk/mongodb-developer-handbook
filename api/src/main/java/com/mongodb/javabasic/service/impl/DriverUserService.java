@@ -3,9 +3,7 @@ package com.mongodb.javabasic.service.impl;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map.Entry;
 
-import org.bson.BsonValue;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.aggregation.StringOperators.ReplaceOne;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StopWatch;
 
@@ -32,7 +29,6 @@ import com.mongodb.client.model.Updates;
 import com.mongodb.javabasic.model.Stat;
 import com.mongodb.javabasic.model.User;
 import com.mongodb.javabasic.model.Workload;
-import com.mongodb.javabasic.repositories.UserRepository;
 import com.mongodb.javabasic.service.UserService;
 
 @Service("userService")
@@ -134,6 +130,7 @@ public class DriverUserService extends UserService {
             for (User e : entities) {
                 StopWatch sw = new StopWatch();
                 sw.start();
+                //TODO:update, replace, delete
                 e.setId(collection.insertOne(e).getInsertedId().asObjectId().getValue().toHexString());
                 sw.stop();
                 long time = sw.getTotalTimeMillis();

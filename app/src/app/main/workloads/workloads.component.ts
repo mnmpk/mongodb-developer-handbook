@@ -35,9 +35,9 @@ export class WorkloadsComponent {
       converter: [Conventer.MONGODB],
       opType: [OperationType.INSERT, Validators.required],
       numWorkers: [1, [Validators.required, Validators.min(1), Validators.max(100)]],
-      qty: [10000, Validators.required],
+      qty: [1000, Validators.required],
       w: [WriteConcern.MAJORITY],
-      bulk: [true, Validators.required]
+      bulk: [false, Validators.required]
     });
   }
 
