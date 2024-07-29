@@ -49,7 +49,7 @@ public class SpringUserService extends UserService {
     }
 
     @Override
-    public Page<User> list(Pageable pageable) {
+    public Stat<Page<User>> list(Workload workload, Pageable pageable) {
         return null;
     }
 

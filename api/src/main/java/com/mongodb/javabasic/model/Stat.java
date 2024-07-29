@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonIncludeProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
@@ -43,7 +42,9 @@ public class Stat<T> {
 
     public void setDuration(long duration) {
         this.duration = duration;
-        this.operationPerSecond = ((double) workload.getQuantity() / this.duration) * 1000;
-        this.avgLatency = ((double) this.duration / workload.getQuantity());
+        if (workload != null && workload.getQuantity() > 0) {
+            this.operationPerSecond = ((double) workload.getQuantity() / this.duration) * 1000;
+            this.avgLatency = ((double) this.duration / workload.getQuantity());
+        }
     }
 }

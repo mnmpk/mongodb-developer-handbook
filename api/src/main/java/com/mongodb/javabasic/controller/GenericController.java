@@ -26,8 +26,8 @@ public abstract class GenericController<T> {
 	 * @param pageable
 	 * @return
 	 */
-	@GetMapping
-	public abstract Page<T> list(Pageable pageable);
+	@PostMapping("/list")
+	public abstract Stat<Page<T>> list(Workload workload, Pageable pageable);
 
 	/**
 	 * @param id

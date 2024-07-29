@@ -1,5 +1,5 @@
-<form [formGroup]="form" submit="return false;">
-    <div fxLayout="column" fxLayoutGap="0.5%">
+<form fxFlex [formGroup]="form" submit="return false;">
+    <div fxFlex fxLayout="column" fxLayoutGap="0.5%">
         <h1>Workloads</h1>
         <mat-form-field>
             <mat-label>Implementation</mat-label>
@@ -28,15 +28,16 @@
                 <textarea matInput type="text" formControlName="schema"></textarea>
             </mat-form-field>
         </ng-container>
-        <div>
+        <!--div>
             <label>Workload type</label>
             <mat-radio-group formControlName="type">
                 @for (type of WorkloadType | keyvalue; track type) {
                 <mat-radio-button [value]="type.value">{{type.value}}</mat-radio-button>
                 }
             </mat-radio-group>
-        </div>
-        <div *ngIf="form.get('type')?.value==WorkloadType.READ" fxLayout="column">
+        </div-->
+        
+        <div fxFlex fxLayout="column">
             <h2>Read workload</h2>
             <div *ngIf="form.get('impl')?.value==Implementation.DRIVER">
                 <label>Converter</label>
@@ -46,7 +47,7 @@
                     }
                 </mat-radio-group>
             </div>
-            <div fxFlex fxFill fxLayout="column" fxLayoutGap="0.5%">
+            <div fxFlex fxLayout="column" fxLayoutAlign="space-around" fxLayoutGap="0.5%">
                 <div fxLayoutAlign="end" fxLayoutGap="0.5%">
                     <button type="button" mat-raised-button (click)="create()">
                         <mat-icon>add</mat-icon>New {{form.get('entity')?.value}}
@@ -56,7 +57,7 @@
                     <mat-label>Search</mat-label>
                     <input matInput (keyup)="search($event)" placeholder="" #input>
                 </mat-form-field>
-                <div class="scroll-container">
+                <div fxFlex class="scroll-container">
                     <table mat-table [dataSource]="dataSource" cdkDropList cdkDropListOrientation="horizontal"
                         (cdkDropListDropped)="dropColumn($event)" matSort>
 
@@ -109,9 +110,9 @@
                             <td mat-footer-cell *matFooterCellDef aria-label="row">&nbsp;</td>
                         </ng-container>
 
-                        <tr mat-header-row *matHeaderRowDef="columns; sticky"></tr>
+                        <tr mat-header-row *matHeaderRowDef="columns; sticky:true"></tr>
                         <tr mat-row *matRowDef="let row; columns: columns;"></tr>
-                        <tr mat-footer-row *matFooterRowDef="columns; sticky"></tr>
+                        <tr mat-footer-row *matFooterRowDef="columns; sticky:true"></tr>
 
                         <!-- Row shown when there is no matching data. -->
                         <tr class="mat-row" *matNoDataRow>
@@ -163,7 +164,7 @@
         </div>
         <div>
             <button type="button" mat-flat-button [disabled]="form.invalid || loading"
-                (click)="save()"><mat-icon>check</mat-icon>Submit</button>
+                (click)="submit()"><mat-icon>check</mat-icon>Submit</button>
         </div>
     </div>
 </form>

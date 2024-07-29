@@ -14,7 +14,7 @@ export class WorkloadsService {
 
 	constructor(private httpClient: HttpClient) { }
 
-	list(page = 0, size = environment.defaultPageSize, sort?: string, direction?: string): Observable<Stat<Page<any>>> {
+	list(workload: Workload, page = 0, size = environment.defaultPageSize, sort?: string, direction?: string): Observable<Stat<Page<any>>> {
 		let pageable: any = {
 			page: page,
 			size: size
@@ -22,7 +22,7 @@ export class WorkloadsService {
 		if (sort && direction) {
 			pageable.sort = sort + "," + direction
 		}
-		return this.httpClient.get<Stat<Page<any>>>(baseURL, { params: pageable });
+		return this.httpClient.post<Stat<Page<any>>>(`${baseURL}/${workload.entity}/list`, workload, { params: pageable });
 	}
 	find(id: string): Observable<Stat<any>> {
 		return this.httpClient.get<Stat<any>>(`${baseURL}/${id}`);

@@ -1,6 +1,6 @@
 import { Component, EventEmitter, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Conventer, Implementation, OperationType, WorkloadType, WriteConcern } from '../../shared/models/workload';
+import { Conventer, Implementation, OperationType, Workload, WorkloadType, WriteConcern } from '../../shared/models/workload';
 import { WorkloadsService } from '../workloads.service';
 import { UtilityService } from '../../shared/utilityService.service';
 import { Stat } from '../../shared/models/stats';
@@ -11,6 +11,7 @@ import { Page } from '../../shared/models/page';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
+import { map, merge, startWith, switchMap } from 'rxjs';
 
 @Component({
   selector: 'app-workloads',
@@ -25,9 +26,9 @@ export class WorkloadsComponent {
   WriteConcern = WriteConcern;
   form!: FormGroup;
 
-  
+
   update$: EventEmitter<any> = new EventEmitter();
-  columns: string[] = [];
+  columns: string[] = ["id"];
   dataSource: MatTableDataSource<any> = new MatTableDataSource();
   selection = new SelectionModel<any>(true, []);
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -57,32 +58,53 @@ export class WorkloadsComponent {
       bulk: [false, Validators.required]
     });
   }
-  search(event: Event){
-    
+
+  ngAfterViewInit() {
+    this.sort.sortChange.subscribe(() => (this.paginator.pageIndex = 0));
+    merge(this.update$, this.sort.sortChange, this.paginator.page).pipe(
+      startWith({}),
+      switchMap(() => {
+        let formValue = {...this.getFormValue(WorkloadType.READ), qty:this.paginator.pageSize};
+        return this.service.list(formValue, this.paginator.pageIndex, this.paginator.pageSize, this.sort.active, this.sort.direction)
+      }),
+      map((stat: Stat<Page<any>>) => {
+        this.metricsService.addResult(stat);
+        console.log(stat.data[0].content);
+        this.dataSource = new MatTableDataSource(stat.data[0].content);
+        this.page = stat.data[0];
+      }),
+    ).subscribe();
   }
-  create(){
-    
+
+  search(event: Event) {
+
   }
-  edit(){
-    
+  create() {
+
   }
-  delete(row:any){
-    
+  edit() {
+
   }
-  getFields(){
+  delete(row: any) {
+
+  }
+  getFields() {
     return ["test"];
   }
 
-  save() {
+  getFormValue(type: WorkloadType) {
+    let formValue = this.form.value;
+    formValue.impl = this.ultityService.enumValueToKey(Implementation, formValue.impl);
+    formValue.type = this.ultityService.enumValueToKey(WorkloadType, type);
+    formValue.converter = this.ultityService.enumValueToKey(Conventer, formValue.converter);
+    formValue.opType = this.ultityService.enumValueToKey(OperationType, formValue.opType);
+    formValue.w = this.ultityService.enumValueToKey(WriteConcern, formValue.w);
+    return formValue;
+  }
+
+  submit() {
     if (this.form.valid) {
-      this.form.enable();
-      let formValue = this.form.value;
-      this.form.disable();
-      formValue.impl = this.ultityService.enumValueToKey(Implementation, formValue.impl);
-      formValue.type = this.ultityService.enumValueToKey(WorkloadType, formValue.type);
-      formValue.converter = this.ultityService.enumValueToKey(Conventer, formValue.converter);
-      formValue.opType = this.ultityService.enumValueToKey(OperationType, formValue.opType);
-      formValue.w = this.ultityService.enumValueToKey(WriteConcern, formValue.w);
+      let formValue = this.getFormValue(WorkloadType.WRITE);
       this.loading = true;
       this.service.load(formValue).subscribe({
         next: (stat: Stat<any>) => {
@@ -101,7 +123,7 @@ export class WorkloadsComponent {
     }
     this.form.markAllAsTouched();
   }
-  
+
   dropColumn(event: CdkDragDrop<string[]>) {
     moveItemInArray(this.columns, event.previousIndex, event.currentIndex);
   }

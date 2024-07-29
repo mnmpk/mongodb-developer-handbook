@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.util.StopWatch;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.mongodb.javabasic.model.Stat;
 import com.mongodb.javabasic.model.Workload;
@@ -20,7 +22,7 @@ public abstract class GenericService<T> {
 
     public abstract Page<T> search(String query, Pageable pageable);
 
-    public abstract Page<T> list(Pageable pageable);
+    public abstract Stat<Page<T>> list(@RequestBody Workload workload, @RequestParam Pageable pageable);
 
     public abstract T get(String id);
 

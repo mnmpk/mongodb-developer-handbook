@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.mongodb.javabasic.model.Stat;
 import com.mongodb.javabasic.model.User;
 import com.mongodb.javabasic.model.Workload;
-import com.mongodb.javabasic.model.Workload.OperationType;
 import com.mongodb.javabasic.service.UserService;
 
 @RestController
@@ -41,8 +40,8 @@ public class UserController extends GenericController<User> {
 	}
 
 	@Override
-	public Page<User> list(Pageable pageable) {
-		return repoService.list(pageable);
+	public Stat<Page<User>> list(Workload workload, Pageable pageable) {
+		return repoService.list(workload, pageable);
 	}
 
 	@Override

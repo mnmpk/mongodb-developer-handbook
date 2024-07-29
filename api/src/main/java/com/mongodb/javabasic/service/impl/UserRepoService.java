@@ -32,8 +32,24 @@ public class UserRepoService extends UserService {
     }
 
     @Override
-    public Page<User> list(Pageable pageable) {
-        return repository.findAll(pageable);
+    public Stat<Page<User>> list(Workload workload, Pageable pageable) {
+        Stat<Page<User>> stat = new Stat<>();
+        stat.setWorkload(Workload.builder().implementation(workload.getImplementation())
+                .converter(workload.getConverter()).bulk(workload.isBulk()).writeConcern(workload.getWriteConcern())
+                .operationType(workload.getOperationType())
+                .collection(workload.getCollection()).noOfWorkers(1)
+                .quantity(workload.getQuantity()).build());
+        stat.setStartAt(new Date());
+        StopWatch sw = new StopWatch();
+        sw.start();
+        stat.setData(List.of(repository.findAll(pageable)));
+        sw.stop();
+        stat.setMinLatency(sw.getTotalTimeMillis());
+        stat.setMaxLatency(sw.getTotalTimeMillis());
+        stat.setDuration(sw.getTotalTimeMillis());
+        stat.setEndAt(new Date());
+        stat.setDuration(sw.getTotalTimeMillis());
+        return stat;
     }
 
     @Override

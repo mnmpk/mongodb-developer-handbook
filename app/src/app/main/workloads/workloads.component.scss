@@ -1,0 +1,9 @@
+:host {
+    height: 100%;
+}
+.scroll-container{
+    overflow: auto;
+    width: 100%;
+    min-height: 200px;
+    max-height: 400px;
+}
