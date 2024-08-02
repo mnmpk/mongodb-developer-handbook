@@ -34,21 +34,10 @@ public class UserRepoService extends UserService {
     @Override
     public Stat<Page<User>> list(Workload workload, Pageable pageable) {
         Stat<Page<User>> stat = new Stat<>(User.class);
-        stat.setWorkload(Workload.builder().implementation(workload.getImplementation())
-                .converter(workload.getConverter()).bulk(workload.isBulk()).writeConcern(workload.getWriteConcern())
-                .operationType(workload.getOperationType())
-                .collection(workload.getCollection()).noOfWorkers(1)
-                .quantity(workload.getQuantity()).build());
-        stat.setStartAt(new Date());
-        StopWatch sw = new StopWatch();
-        sw.start();
-        stat.setData(List.of(repository.findAll(pageable)));
-        sw.stop();
-        stat.setMinLatency(sw.getTotalTimeMillis());
-        stat.setMaxLatency(sw.getTotalTimeMillis());
-        stat.setDuration(sw.getTotalTimeMillis());
-        stat.setEndAt(new Date());
-        stat.setDuration(sw.getTotalTimeMillis());
+        time(stat, workload, (v) -> {
+            stat.setData(List.of(repository.findAll(pageable)));
+            return null;
+        });
         return stat;
     }
 
@@ -75,45 +64,22 @@ public class UserRepoService extends UserService {
     @Override
     public Stat<User> _load(List<User> entities, Workload workload) {
         Stat<User> stat = new Stat<>(User.class);
-        stat.setWorkload(Workload.builder().implementation(workload.getImplementation())
-                .converter(workload.getConverter()).bulk(workload.isBulk()).writeConcern(workload.getWriteConcern())
-                .operationType(workload.getOperationType())
-                .collection(workload.getCollection()).noOfWorkers(1)
-                .quantity(entities.size()).build());
-        stat.setStartAt(new Date());
-        long min = 0;
-        long max = 0;
-        long total = 0;
         if (workload.isBulk()) {
-            StopWatch sw = new StopWatch();
-            sw.start();
-            stat.setData(repository.saveAll(entities));
-            sw.stop();
-            min = sw.getTotalTimeMillis();
-            max = sw.getTotalTimeMillis();
-            total = sw.getTotalTimeMillis();
+            time(stat, workload, (v) -> {
+                stat.setData(repository.saveAll(entities));
+                return null;
+            });
         } else {
             List<User> newEntities = new ArrayList<>();
             for (User e : entities) {
-                StopWatch sw = new StopWatch();
-                sw.start();
-                newEntities.add(repository.save(e));
-                sw.stop();
-                long time = sw.getTotalTimeMillis();
-                total += time;
-                if (min == 0) {
-                    min = time;
-                }
-                min = Math.min(min, time);
-                max = Math.max(max, time);
+
+                time(stat, workload, (v) -> {
+                    newEntities.add(repository.save(e));
+                    return null;
+                });
             }
             stat.setData(newEntities);
         }
-        stat.setMinLatency(min);
-        stat.setMaxLatency(max);
-        stat.setDuration(total);
-        stat.setEndAt(new Date());
-        stat.setDuration(total);
         return stat;
     }
 

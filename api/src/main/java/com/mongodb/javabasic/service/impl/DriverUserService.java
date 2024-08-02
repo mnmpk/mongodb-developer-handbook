@@ -67,58 +67,46 @@ public class DriverUserService extends UserService {
     @Override
     public Stat<Page<User>> list(Workload workload, Pageable pageable) {
         Stat<Page<User>> stat = new Stat<>(User.class);
-        stat.setWorkload(Workload.builder().implementation(workload.getImplementation())
-                .converter(workload.getConverter()).bulk(workload.isBulk()).writeConcern(workload.getWriteConcern())
-                .operationType(workload.getOperationType())
-                .collection(workload.getCollection()).noOfWorkers(1)
-                .quantity(workload.getQuantity()).build());
-        stat.setStartAt(new Date());
-        StopWatch sw = new StopWatch();
-        sw.start();
+        time(stat, workload, (v) -> {
+            MongoCollection<Document> collection = mongoTemplate
+                    .getCollection(mongoTemplate.getCollectionName(User.class));
+            List<Bson> pipeline = new ArrayList<>();
 
-        MongoCollection<Document> collection = mongoTemplate
-                .getCollection(mongoTemplate.getCollectionName(User.class));
-        List<Bson> pipeline = new ArrayList<>();
+            Sort sort = pageable.getSort();
+            if (sort != null && sort.isSorted()) {
+                List<Bson> orders = new ArrayList<>();
+                sort.forEach(o -> {
+                    if (o.isAscending()) {
+                        orders.add(Sorts.ascending(o.getProperty()));
+                    } else {
+                        orders.add(Sorts.descending(o.getProperty()));
+                    }
+                });
+                if (orders.size() > 0)
+                    pipeline.add(Aggregates.sort(Sorts.orderBy(orders)));
+            }
+            pipeline.add(Aggregates.facet(new Facet("meta", List.of(Aggregates.count("count"))),
+                    new Facet("data", List.of(Aggregates.skip(pageable.getPageNumber() * pageable.getPageSize()),
+                            Aggregates.limit(pageable.getPageSize())))));
+            Document result = collection.withDocumentClass(Document.class)
+                    .aggregate(pipeline).first();
 
-        Sort sort = pageable.getSort();
-        if (sort != null && sort.isSorted()) {
-            List<Bson> orders = new ArrayList<>();
-            sort.forEach(o -> {
-                if (o.isAscending()) {
-                    orders.add(Sorts.ascending(o.getProperty()));
-                } else {
-                    orders.add(Sorts.descending(o.getProperty()));
-                }
-            });
-            if (orders.size() > 0)
-                pipeline.add(Aggregates.sort(Sorts.orderBy(orders)));
-        }
-        pipeline.add(Aggregates.facet(new Facet("meta", List.of(Aggregates.count("count"))),
-                new Facet("data", List.of(Aggregates.skip(pageable.getPageNumber() * pageable.getPageSize()),
-                        Aggregates.limit(pageable.getPageSize())))));
-        Document result = collection.withDocumentClass(Document.class)
-                .aggregate(pipeline).first();
+            List<User> list = new ArrayList<User>();
+            Stream<Document> s = result.getList("data", Document.class).stream();
+            if (Converter.SPRING == workload.getConverter()) {
+                list = s.map(d -> mongoConverter.read(User.class, d))
+                        .toList();
+            } else {
+                DecoderContext dc = DecoderContext.builder().build();
+                list = s.map(d -> pojoCodecRegistry.get(User.class).decode(d.toBsonDocument().asBsonReader(), dc))
+                        .toList();
+            }
 
-        List<User> list = new ArrayList<User>();
-        Stream<Document> s = result.getList("data", Document.class).stream();
-        if (Converter.SPRING == workload.getConverter()) {
-            list = s.map(d -> mongoConverter.read(User.class, d))
-                    .toList();
-        } else {
-            DecoderContext dc = DecoderContext.builder().build();
-            list = s.map(d -> pojoCodecRegistry.get(User.class).decode(d.toBsonDocument().asBsonReader(), dc))
-                    .toList();
-        }
+            stat.setData(List.of(new PageImpl<>(list, pageable,
+                    result.getList("meta", Document.class).get(0).getInteger("count"))));
 
-        stat.setData(List.of(new PageImpl<>(list, pageable,
-                result.getList("meta", Document.class).get(0).getInteger("count"))));
-
-        sw.stop();
-        stat.setMinLatency(sw.getTotalTimeMillis());
-        stat.setMaxLatency(sw.getTotalTimeMillis());
-        stat.setDuration(sw.getTotalTimeMillis());
-        stat.setEndAt(new Date());
-        stat.setDuration(sw.getTotalTimeMillis());
+            return null;
+        });
         return stat;
     }
 
@@ -144,89 +132,68 @@ public class DriverUserService extends UserService {
     @Override
     public Stat<User> _load(List<User> entities, Workload workload) {
         Stat<User> stat = new Stat<>(User.class);
-        stat.setWorkload(Workload.builder().implementation(workload.getImplementation())
-                .converter(workload.getConverter()).bulk(workload.isBulk()).writeConcern(workload.getWriteConcern())
-                .operationType(workload.getOperationType())
-                .collection(workload.getCollection()).noOfWorkers(1)
-                .quantity(entities.size()).build());
-        stat.setStartAt(new Date());
         MongoCollection<User> collection = mongoTemplate.getCollection(mongoTemplate.getCollectionName(User.class))
                 .withWriteConcern(WriteConcern.valueOf(workload.getWriteConcern().name()))
                 .withDocumentClass(User.class);
-        long min = 0;
-        long max = 0;
-        long total = 0;
         if (workload.isBulk()) {
-            StopWatch sw = new StopWatch();
-            sw.start();
-            switch (workload.getOperationType()) {
-                case DELETE:
-                    collection.bulkWrite(entities.stream()
-                            .map(e -> new DeleteOneModel<User>(Filters.eq("_id", new ObjectId(e.getId())))).toList());
-                    break;
-                case INSERT:
-                    List<BulkWriteInsert> inserts = collection
-                            .bulkWrite(entities.stream().map(e -> new InsertOneModel<>(e)).toList()).getInserts();
-                    for (int i = 0; i < inserts.size(); i++) {
-                        entities.get(i).setId(inserts.get(i).getId().asObjectId().getValue().toHexString());
-                    }
-                    break;
-                case REPLACE:
-                    List<BulkWriteUpsert> newReplaces = collection
-                            .bulkWrite(
-                                    entities.stream()
-                                            .map(e -> new ReplaceOneModel<>(Filters.eq("_id", new ObjectId(e.getId())),
-                                                    e, new ReplaceOptions().upsert(true)))
-                                            .toList())
-                            .getUpserts();
-                    for (int i = 0; i < newReplaces.size(); i++) {
-                        entities.get(i).setId(newReplaces.get(i).getId().asObjectId().getValue().toHexString());
-                    }
-                    break;
-                case UPDATE:
-                    List<BulkWriteUpsert> upserts = collection
-                            .bulkWrite(
-                                    entities.stream()
-                                            .map(e -> new UpdateOneModel<User>(
-                                                    Filters.eq("_id", new ObjectId(e.getId())),
-                                                    Updates.combine(Updates.inc("v", 1)),
-                                                    new UpdateOptions().upsert(true)))
-                                            .toList())
-                            .getUpserts();
-                    for (int i = 0; i < upserts.size(); i++) {
-                        entities.get(i).setId(upserts.get(i).getId().asObjectId().getValue().toHexString());
-                    }
-                    break;
-            }
-            stat.setData(entities);
-            sw.stop();
-            min = sw.getTotalTimeMillis();
-            max = sw.getTotalTimeMillis();
-            total = sw.getTotalTimeMillis();
+
+            time(stat, workload, (v) -> {
+                switch (workload.getOperationType()) {
+                    case DELETE:
+                        collection.bulkWrite(entities.stream()
+                                .map(e -> new DeleteOneModel<User>(Filters.eq("_id", new ObjectId(e.getId()))))
+                                .toList());
+                        break;
+                    case INSERT:
+                        List<BulkWriteInsert> inserts = collection
+                                .bulkWrite(entities.stream().map(e -> new InsertOneModel<>(e)).toList()).getInserts();
+                        for (int i = 0; i < inserts.size(); i++) {
+                            entities.get(i).setId(inserts.get(i).getId().asObjectId().getValue().toHexString());
+                        }
+                        break;
+                    case REPLACE:
+                        List<BulkWriteUpsert> newReplaces = collection
+                                .bulkWrite(
+                                        entities.stream()
+                                                .map(e -> new ReplaceOneModel<>(
+                                                        Filters.eq("_id", new ObjectId(e.getId())),
+                                                        e, new ReplaceOptions().upsert(true)))
+                                                .toList())
+                                .getUpserts();
+                        for (int i = 0; i < newReplaces.size(); i++) {
+                            entities.get(i).setId(newReplaces.get(i).getId().asObjectId().getValue().toHexString());
+                        }
+                        break;
+                    case UPDATE:
+                        List<BulkWriteUpsert> upserts = collection
+                                .bulkWrite(
+                                        entities.stream()
+                                                .map(e -> new UpdateOneModel<User>(
+                                                        Filters.eq("_id", new ObjectId(e.getId())),
+                                                        Updates.combine(Updates.inc("v", 1)),
+                                                        new UpdateOptions().upsert(true)))
+                                                .toList())
+                                .getUpserts();
+                        for (int i = 0; i < upserts.size(); i++) {
+                            entities.get(i).setId(upserts.get(i).getId().asObjectId().getValue().toHexString());
+                        }
+                        break;
+                }
+                stat.setData(entities);
+                return null;
+            });
         } else {
             List<User> newEntities = new ArrayList<>();
             for (User e : entities) {
-                StopWatch sw = new StopWatch();
-                sw.start();
-                // TODO:update, replace, delete
-                e.setId(collection.insertOne(e).getInsertedId().asObjectId().getValue().toHexString());
-                newEntities.add(e);
-                sw.stop();
-                long time = sw.getTotalTimeMillis();
-                total += time;
-                if (min == 0) {
-                    min = time;
-                }
-                min = Math.min(min, time);
-                max = Math.max(max, time);
+                time(stat, workload, (v) -> {
+                    // TODO:update, replace, delete
+                    e.setId(collection.insertOne(e).getInsertedId().asObjectId().getValue().toHexString());
+                    newEntities.add(e);
+                    return null;
+                });
             }
             stat.setData(newEntities);
         }
-        stat.setMinLatency(min);
-        stat.setMaxLatency(max);
-        stat.setDuration(total);
-        stat.setEndAt(new Date());
-        stat.setDuration(total);
         return stat;
     }
 

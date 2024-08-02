@@ -38,8 +38,6 @@ public abstract class GenericService<T> {
 
     public Stat<T> load(List<T> entities, Workload workload) {
         Stat<T> stat = new Stat<>();
-        stat.setWorkload(workload);
-        StopWatch sw = new StopWatch();
         var ends = new ArrayList<CompletableFuture<Stat<T>>>();
         int pageSize = entities.size() / workload.getNoOfWorkers();
         if (pageSize <= 0) {
@@ -61,26 +59,25 @@ public abstract class GenericService<T> {
                 break;
             }
         }
-        stat.setStartAt(new Date());
-        sw.start();
-        CompletableFuture<Void> allFuturesResult = CompletableFuture
-                .allOf(ends.toArray(new CompletableFuture<?>[ends.size()]));
-        List<Stat<T>> list = allFuturesResult
-                .thenApply(v -> ends.stream().map(CompletableFuture::join).collect(Collectors.toList())).join();
-        List<T> data = new ArrayList<>();
-        list.stream().forEach(s -> {
-            data.addAll(s.getData());
-            if (stat.getMaxLatency() == 0)
-                stat.setMaxLatency(s.getMaxLatency());
-            stat.setMinLatency(Math.min(stat.getMinLatency(), s.getMinLatency()));
-            stat.setMaxLatency(Math.max(stat.getMaxLatency(), s.getMaxLatency()));
-            if (stat.getFields() == null)
-                stat.setFields(s.getFields());
+
+        time(stat, workload, (v) -> {
+            CompletableFuture<Void> allFuturesResult = CompletableFuture
+                    .allOf(ends.toArray(new CompletableFuture<?>[ends.size()]));
+            List<Stat<T>> list = allFuturesResult
+                    .thenApply(v2 -> ends.stream().map(CompletableFuture::join).collect(Collectors.toList())).join();
+            List<T> data = new ArrayList<>();
+            list.stream().forEach(s -> {
+                data.addAll(s.getData());
+                if (stat.getMaxLatency() == 0)
+                    stat.setMaxLatency(s.getMaxLatency());
+                stat.setMinLatency(Math.min(stat.getMinLatency(), s.getMinLatency()));
+                stat.setMaxLatency(Math.max(stat.getMaxLatency(), s.getMaxLatency()));
+                if (stat.getFields() == null)
+                    stat.setFields(s.getFields());
+            });
+            stat.setData(data);
+            return null;
         });
-        stat.setData(data);
-        sw.stop();
-        stat.setEndAt(new Date());
-        stat.setDuration(sw.getTotalTimeMillis());
         return stat;
     }
 
@@ -101,7 +98,7 @@ public abstract class GenericService<T> {
         }
         stat.setMinLatency(Math.min(stat.getMinLatency(), sw.getTotalTimeMillis()));
         stat.setMaxLatency(Math.max(stat.getMaxLatency(), sw.getTotalTimeMillis()));
-        stat.setDuration(stat.getDuration()+sw.getTotalTimeMillis());
+        stat.setDuration(stat.getDuration() + sw.getTotalTimeMillis());
         stat.setEndAt(new Date());
     }
 }
