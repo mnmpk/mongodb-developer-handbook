@@ -10,4 +10,5 @@ export class Stat<T> {
     max!:number;
     avg!:number;
     data!:T[];
+    fields:string[]=[];
 }

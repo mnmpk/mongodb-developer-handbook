@@ -13,7 +13,7 @@ export class MetricsComponent {
   throughputUpdate!: EChartsOption;
   latency!: EChartsOption;
   latencyUpdate!: EChartsOption;
-  constructor(private metricsService: MetricsService) { }
+  constructor(public metricsService: MetricsService) { }
   ngOnInit(): void {
     this.throughput = {
       title: {
@@ -23,9 +23,14 @@ export class MetricsComponent {
         trigger: 'axis',
         formatter: (params: any) => {
           params = params[0];
-
           return (
-            params.value.join("<br/>")
+            params.value[0]+"<br/>"+
+            "ops:"+params.value[1]+"<br/>"+
+            "start:"+params.value[2]+"<br/>"+
+            "end:"+params.value[3]+"<br/>"+
+            "duration:"+params.value[4]+"<br/>"+
+            "qty:"+params.value[5]+"<br/>"+
+            "worker:"+params.value[6]
           );
         },
         axisPointer: {
@@ -61,7 +66,15 @@ export class MetricsComponent {
           params = params[0];
 
           return (
-            params.value.join("<br/>")
+            params.value[0]+"<br/>"+
+            "min:"+params.value[2]+"<br/>"+
+            "avg:"+params.value[3]+"<br/>"+
+            "max:"+params.value[4]+"<br/>"+
+            "start:"+params.value[5]+"<br/>"+
+            "end:"+params.value[6]+"<br/>"+
+            "duration:"+params.value[7]+"<br/>"+
+            "qty:"+params.value[8]+"<br/>"+
+            "worker:"+params.value[9]
           );
         },
         axisPointer: {

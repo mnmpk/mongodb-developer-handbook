@@ -33,7 +33,7 @@ public class UserRepoService extends UserService {
 
     @Override
     public Stat<Page<User>> list(Workload workload, Pageable pageable) {
-        Stat<Page<User>> stat = new Stat<>();
+        Stat<Page<User>> stat = new Stat<>(User.class);
         stat.setWorkload(Workload.builder().implementation(workload.getImplementation())
                 .converter(workload.getConverter()).bulk(workload.isBulk()).writeConcern(workload.getWriteConcern())
                 .operationType(workload.getOperationType())

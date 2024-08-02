@@ -17,6 +17,7 @@ export class MetricsService {
   }
   clearResult(){
     MetricsService.histories=[];
+    MetricsService.update$.emit();
   }
   getResults(){
     return MetricsService.histories;

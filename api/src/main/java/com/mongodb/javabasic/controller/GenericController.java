@@ -20,14 +20,14 @@ public abstract class GenericController<T> {
 	 * @return
 	 */
 	@PostMapping("/search")
-	public abstract Page<T> search(String query, Pageable pageable);
+	public abstract Page<T> search(@RequestBody String query, Pageable pageable);
 
 	/**
 	 * @param pageable
 	 * @return
 	 */
 	@PostMapping("/list")
-	public abstract Stat<Page<T>> list(Workload workload, Pageable pageable);
+	public abstract Stat<Page<T>> list(@RequestBody Workload workload, Pageable pageable);
 
 	/**
 	 * @param id

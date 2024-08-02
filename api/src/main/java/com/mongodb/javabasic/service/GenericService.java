@@ -4,16 +4,18 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.util.StopWatch;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import com.mongodb.javabasic.model.Stat;
+import com.mongodb.javabasic.model.User;
 import com.mongodb.javabasic.model.Workload;
 
 public abstract class GenericService<T> {
@@ -22,7 +24,7 @@ public abstract class GenericService<T> {
 
     public abstract Page<T> search(String query, Pageable pageable);
 
-    public abstract Stat<Page<T>> list(@RequestBody Workload workload, @RequestParam Pageable pageable);
+    public abstract Stat<Page<T>> list(Workload workload, Pageable pageable);
 
     public abstract T get(String id);
 
@@ -72,7 +74,7 @@ public abstract class GenericService<T> {
                 stat.setMaxLatency(s.getMaxLatency());
             stat.setMinLatency(Math.min(stat.getMinLatency(), s.getMinLatency()));
             stat.setMaxLatency(Math.max(stat.getMaxLatency(), s.getMaxLatency()));
-            if(stat.getFields()==null)
+            if (stat.getFields() == null)
                 stat.setFields(s.getFields());
         });
         stat.setData(data);
@@ -82,4 +84,24 @@ public abstract class GenericService<T> {
         return stat;
     }
 
+    public void time(Stat<?> stat, Workload workload, Function<Void, Void> function) {
+        stat.setWorkload(Workload.builder().implementation(workload.getImplementation())
+                .converter(workload.getConverter()).bulk(workload.isBulk()).writeConcern(workload.getWriteConcern())
+                .operationType(workload.getOperationType())
+                .collection(workload.getCollection()).noOfWorkers(1)
+                .quantity(workload.getQuantity()).build());
+        stat.setStartAt(new Date());
+        StopWatch sw = new StopWatch();
+        sw.start();
+        function.apply(null);
+        sw.stop();
+
+        if (stat.getMinLatency() == 0) {
+            stat.setMinLatency(sw.getTotalTimeMillis());
+        }
+        stat.setMinLatency(Math.min(stat.getMinLatency(), sw.getTotalTimeMillis()));
+        stat.setMaxLatency(Math.max(stat.getMaxLatency(), sw.getTotalTimeMillis()));
+        stat.setDuration(stat.getDuration()+sw.getTotalTimeMillis());
+        stat.setEndAt(new Date());
+    }
 }

@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -41,7 +42,15 @@ public class UserController extends GenericController<User> {
 
 	@Override
 	public Stat<Page<User>> list(Workload workload, Pageable pageable) {
-		return repoService.list(workload, pageable);
+		switch ((workload.getImplementation())) {
+			case DRIVER:
+				return driverService.list(workload, pageable);
+			case REPO:
+				return repoService.list(workload, pageable);
+			case SPRING:
+				return springService.list(workload, pageable);
+		}
+		return null;
 	}
 
 	@Override

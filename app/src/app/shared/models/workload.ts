@@ -23,7 +23,7 @@ export enum WriteConcern {
     JOURNALED = "Journaled", 
     MAJORITY = "Majority"
 }
-export enum Conventer {
+export enum Converter {
     SPRING = "Spring converter",
     MONGODB = "MongoDB Codec",
 }
@@ -33,7 +33,7 @@ export class Workload {
     coll!: string;
     entity!: string;
     schema!: string;
-    converter!: Conventer;
+    converter!: Converter;
     //TODO:Read options?
 
     //Write Option

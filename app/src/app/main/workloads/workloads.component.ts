@@ -1,6 +1,6 @@
 import { Component, EventEmitter, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Conventer, Implementation, OperationType, Workload, WorkloadType, WriteConcern } from '../../shared/models/workload';
+import { Converter, Implementation, OperationType, Workload, WorkloadType, WriteConcern } from '../../shared/models/workload';
 import { WorkloadsService } from '../workloads.service';
 import { UtilityService } from '../../shared/utilityService.service';
 import { Stat } from '../../shared/models/stats';
@@ -22,17 +22,18 @@ export class WorkloadsComponent {
   Implementation = Implementation;
   WorkloadType = WorkloadType;
   OperationType = OperationType;
-  Conventer = Conventer;
+  Converter = Converter;
   WriteConcern = WriteConcern;
   form!: FormGroup;
 
 
   update$: EventEmitter<any> = new EventEmitter();
-  columns: string[] = ["id"];
+  columns: string[] = [];
   dataSource: MatTableDataSource<any> = new MatTableDataSource();
   selection = new SelectionModel<any>(true, []);
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
+  stat!: Stat<Page<any>>;
   page!: Page<any>;
 
   loading = false;
@@ -50,7 +51,7 @@ export class WorkloadsComponent {
       entity: ["users"],
       coll: ["test", Validators.required],
       schema: [],
-      converter: [Conventer.MONGODB],
+      converter: [Converter.MONGODB],
       opType: [OperationType.INSERT, Validators.required],
       numWorkers: [1, [Validators.required, Validators.min(1), Validators.max(100)]],
       qty: [1000, Validators.required],
@@ -69,7 +70,8 @@ export class WorkloadsComponent {
       }),
       map((stat: Stat<Page<any>>) => {
         this.metricsService.addResult(stat);
-        console.log(stat.data[0].content);
+        this.stat = stat;
+        this.columns = this.stat.fields;
         this.dataSource = new MatTableDataSource(stat.data[0].content);
         this.page = stat.data[0];
       }),
@@ -89,14 +91,14 @@ export class WorkloadsComponent {
 
   }
   getFields() {
-    return ["test"];
+    return this.stat?.fields;
   }
 
   getFormValue(type: WorkloadType) {
-    let formValue = this.form.value;
+    let formValue = {...this.form.value};
     formValue.impl = this.ultityService.enumValueToKey(Implementation, formValue.impl);
     formValue.type = this.ultityService.enumValueToKey(WorkloadType, type);
-    formValue.converter = this.ultityService.enumValueToKey(Conventer, formValue.converter);
+    formValue.converter = this.ultityService.enumValueToKey(Converter, formValue.converter);
     formValue.opType = this.ultityService.enumValueToKey(OperationType, formValue.opType);
     formValue.w = this.ultityService.enumValueToKey(WriteConcern, formValue.w);
     return formValue;

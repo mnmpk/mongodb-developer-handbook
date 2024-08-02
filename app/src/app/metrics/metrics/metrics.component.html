@@ -1,4 +1,11 @@
-<div fxLayout="row">
-    <div fxFlex echarts [options]="throughput" [merge]="throughputUpdate"></div>
-    <div fxFlex echarts [options]="latency" [merge]="latencyUpdate"></div>
+<div fxLayout="column">
+    <div fxLayout="row" fxLayoutAlign="end">
+        <button type="button" mat-raised-button (click)="metricsService.clearResult()">
+            <mat-icon>remove</mat-icon>Clear
+        </button>
+    </div>
+    <div fxLayout="row">
+        <div fxFlex echarts [options]="throughput" [merge]="throughputUpdate"></div>
+        <div fxFlex echarts [options]="latency" [merge]="latencyUpdate"></div>
+    </div>
 </div>

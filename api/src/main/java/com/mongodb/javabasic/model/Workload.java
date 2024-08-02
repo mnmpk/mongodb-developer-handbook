@@ -28,7 +28,7 @@ public class Workload {
         ACKNOWLEDGED, W1, W2, W3, UNACKNOWLEDGED, JOURNALED, MAJORITY
     }
 
-    public enum Conventer {
+    public enum Converter {
         SPRING,
         MONGODB
     }
@@ -39,7 +39,7 @@ public class Workload {
     @JsonProperty("coll")
     private String collection;
     private String schema;
-    private Conventer converter;
+    private Converter converter;
     // TODO:Read options?
 
     // Write Option

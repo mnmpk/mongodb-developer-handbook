@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.BulkOperations;
@@ -21,18 +21,9 @@ import org.springframework.util.StopWatch;
 
 import com.mongodb.bulk.BulkWriteInsert;
 import com.mongodb.bulk.BulkWriteUpsert;
-import com.mongodb.client.model.DeleteOneModel;
-import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.InsertOneModel;
-import com.mongodb.client.model.ReplaceOneModel;
-import com.mongodb.client.model.ReplaceOptions;
-import com.mongodb.client.model.UpdateOneModel;
-import com.mongodb.client.model.UpdateOptions;
-import com.mongodb.client.model.Updates;
 import com.mongodb.javabasic.model.Stat;
 import com.mongodb.javabasic.model.User;
 import com.mongodb.javabasic.model.Workload;
-import com.mongodb.javabasic.repositories.UserRepository;
 import com.mongodb.javabasic.service.UserService;
 
 @Service("springUserService")
@@ -50,7 +41,15 @@ public class SpringUserService extends UserService {
 
     @Override
     public Stat<Page<User>> list(Workload workload, Pageable pageable) {
-        return null;
+        Stat<Page<User>> stat = new Stat<>(User.class);
+        time(stat, workload, (v) -> {
+            var list = template.find(
+                    new Query().with(pageable.getSort()).skip(pageable.getPageNumber()).limit(pageable.getPageSize()),
+                    User.class);
+            stat.setData(List.of(new PageImpl<>(list, pageable, template.count(new Query(), User.class))));
+            return null;
+        });
+        return stat;
     }
 
     @Override
@@ -75,89 +74,62 @@ public class SpringUserService extends UserService {
     @Override
     public Stat<User> _load(List<User> entities, Workload workload) {
         Stat<User> stat = new Stat<>(User.class);
-        stat.setWorkload(Workload.builder().implementation(workload.getImplementation())
-                .converter(workload.getConverter()).bulk(workload.isBulk()).writeConcern(workload.getWriteConcern())
-                .operationType(workload.getOperationType())
-                .collection(workload.getCollection()).noOfWorkers(1)
-                .quantity(entities.size()).build());
-        stat.setStartAt(new Date());
-        long min = 0;
-        long max = 0;
-        long total = 0;
+
         if (workload.isBulk()) {
-            StopWatch sw = new StopWatch();
-            sw.start();
-            switch (workload.getOperationType()) {
-                case DELETE:
-                    BulkOperations bulkRemoves = template.bulkOps(BulkMode.ORDERED, User.class);
-                    entities.stream().forEach(e -> {
-                        bulkRemoves.remove(new Query(Criteria.where("_id").is(e.getId())));
-                    });
-                    bulkRemoves.execute();
-                    break;
-                case INSERT:
-                    BulkOperations bulkInserts = template.bulkOps(BulkMode.ORDERED, User.class);
-                    entities.stream().forEach(e -> {
-                        bulkInserts.insert(e);
-                    });
-                    List<BulkWriteInsert> inserts = bulkInserts.execute().getInserts();
-                    for (int i = 0; i < inserts.size(); i++) {
-                        entities.get(i).setId(inserts.get(i).getId().asObjectId().getValue().toHexString());
-                    }
-                    break;
-                case REPLACE:
-                    BulkOperations bulkReplaces = template.bulkOps(BulkMode.ORDERED, User.class);
-                    entities.stream().forEach(e -> {
-                        bulkReplaces.replaceOne(new Query(Criteria.where("_id").is(e.getId())), e);
-                    });
-                    List<BulkWriteUpsert> newReplaces = bulkReplaces.execute().getUpserts();
-
-                    for (int i = 0; i < newReplaces.size(); i++) {
-                        entities.get(i).setId(newReplaces.get(i).getId().asObjectId().getValue().toHexString());
-                    }
-                    break;
-                case UPDATE:
-
-                    BulkOperations bulkUpdates = template.bulkOps(BulkMode.ORDERED, User.class);
-                    entities.stream().forEach(e -> {
-                        bulkUpdates.updateOne(new Query(Criteria.where("_id").is(e.getId())), new Update().inc("v", 1));
-                    });
-                    List<BulkWriteUpsert> upserts = bulkUpdates.execute().getUpserts();
-
-                    for (int i = 0; i < upserts.size(); i++) {
-                        entities.get(i).setId(upserts.get(i).getId().asObjectId().getValue().toHexString());
-                    }
-                    break;
-            }
-            stat.setData(entities);
-            sw.stop();
-            min = sw.getTotalTimeMillis();
-            max = sw.getTotalTimeMillis();
-            total = sw.getTotalTimeMillis();
+            time(stat, workload, (v) -> {
+                switch (workload.getOperationType()) {
+                    case DELETE:
+                        BulkOperations bulkRemoves = template.bulkOps(BulkMode.ORDERED, User.class);
+                        entities.stream().forEach(e -> {
+                            bulkRemoves.remove(new Query(Criteria.where("_id").is(e.getId())));
+                        });
+                        bulkRemoves.execute();
+                        break;
+                    case INSERT:
+                        BulkOperations bulkInserts = template.bulkOps(BulkMode.ORDERED, User.class);
+                        entities.stream().forEach(e -> {
+                            bulkInserts.insert(e);
+                        });
+                        List<BulkWriteInsert> inserts = bulkInserts.execute().getInserts();
+                        for (int i = 0; i < inserts.size(); i++) {
+                            entities.get(i).setId(inserts.get(i).getId().asObjectId().getValue().toHexString());
+                        }
+                        break;
+                    case REPLACE:
+                        BulkOperations bulkReplaces = template.bulkOps(BulkMode.ORDERED, User.class);
+                        entities.stream().forEach(e -> {
+                            bulkReplaces.replaceOne(new Query(Criteria.where("_id").is(e.getId())), e);
+                        });
+                        List<BulkWriteUpsert> newReplaces = bulkReplaces.execute().getUpserts();
+                        for (int i = 0; i < newReplaces.size(); i++) {
+                            entities.get(i).setId(newReplaces.get(i).getId().asObjectId().getValue().toHexString());
+                        }
+                        break;
+                    case UPDATE:
+                        BulkOperations bulkUpdates = template.bulkOps(BulkMode.ORDERED, User.class);
+                        entities.stream().forEach(e -> {
+                            bulkUpdates.updateOne(new Query(Criteria.where("_id").is(e.getId())),
+                                    new Update().inc("v", 1));
+                        });
+                        List<BulkWriteUpsert> upserts = bulkUpdates.execute().getUpserts();
+                        for (int i = 0; i < upserts.size(); i++) {
+                            entities.get(i).setId(upserts.get(i).getId().asObjectId().getValue().toHexString());
+                        }
+                        break;
+                }
+                stat.setData(entities);
+                return null;
+            });
         } else {
             List<User> newEntities = new ArrayList<>();
             for (User e : entities) {
-                StopWatch sw = new StopWatch();
-                sw.start();
-                //TODO
-                //e.setId(collection.insertOne(e).getInsertedId().asObjectId().getValue().toHexString());
-                newEntities.add(e);
-                sw.stop();
-                long time = sw.getTotalTimeMillis();
-                total += time;
-                if (min == 0) {
-                    min = time;
-                }
-                min = Math.min(min, time);
-                max = Math.max(max, time);
+                time(stat, workload, (v) -> {
+                    newEntities.add(template.insert(e));
+                    return null;
+                });
             }
             stat.setData(newEntities);
         }
-        stat.setMinLatency(min);
-        stat.setMaxLatency(max);
-        stat.setDuration(total);
-        stat.setEndAt(new Date());
-        stat.setDuration(total);
         return stat;
     }
 

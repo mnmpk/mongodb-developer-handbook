@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
 public class Stat<T> {
     private List<String> fields;
 
-    public Stat(Class<T> clazz) {
+    public Stat(Class<?> clazz) {
         fields = new ArrayList<>();
         for (Field f : clazz.getDeclaredFields()) {
             this.fields.add(f.getName());

@@ -42,13 +42,16 @@
             <div *ngIf="form.get('impl')?.value==Implementation.DRIVER">
                 <label>Converter</label>
                 <mat-radio-group formControlName="converter">
-                    @for (converter of Conventer | keyvalue; track converter) {
+                    @for (converter of Converter | keyvalue; track converter) {
                     <mat-radio-button [value]="converter.value">{{converter.value}}</mat-radio-button>
                     }
                 </mat-radio-group>
             </div>
             <div fxFlex fxLayout="column" fxLayoutAlign="space-around" fxLayoutGap="0.5%">
                 <div fxLayoutAlign="end" fxLayoutGap="0.5%">
+                    <button type="button" mat-raised-button (click)="update$.emit()">
+                        <mat-icon>refresh</mat-icon>Refresh
+                    </button>
                     <button type="button" mat-raised-button (click)="create()">
                         <mat-icon>add</mat-icon>New {{form.get('entity')?.value}}
                     </button>
@@ -76,13 +79,6 @@
                                     [checked]="selection.isSelected(row)" [aria-label]="checkboxLabel(row)">
                                 </mat-checkbox>
                             </td>
-                            <td mat-footer-cell *matFooterCellDef aria-label="row">&nbsp;</td>
-                        </ng-container>
-
-                        <!-- ID Column -->
-                        <ng-container matColumnDef="id" sticky>
-                            <th mat-header-cell cdkDrag *matHeaderCellDef mat-sort-header> ID </th>
-                            <td mat-cell *matCellDef="let row"> {{row.id}} </td>
                             <td mat-footer-cell *matFooterCellDef aria-label="row">&nbsp;</td>
                         </ng-container>
 
@@ -162,7 +158,7 @@
             </div>
             Aggregation?
         </div>
-        <div>
+        <div fxFlex fxLayoutAlign="end">
             <button type="button" mat-flat-button [disabled]="form.invalid || loading"
                 (click)="submit()"><mat-icon>check</mat-icon>Submit</button>
         </div>
