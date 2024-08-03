@@ -26,7 +26,7 @@ public class UserRepoService extends UserService {
     private UserRepository repository;
 
     @Override
-    public Page<User> search(String query, Pageable pageable) {
+    public Stat<Page<User>> search(String query, Pageable pageable) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'search'");
     }
@@ -42,23 +42,44 @@ public class UserRepoService extends UserService {
     }
 
     @Override
-    public User get(String id) {
-        return repository.findById(id).get();
+    public Stat<User> get(String id) {
+        Stat<User> stat = new Stat<>(User.class);
+        time(stat, null, (v) -> {
+            stat.setData(List.of(repository.findById(id).get()));
+            return null;
+        });
+        return stat;
     }
 
     @Override
-    public User create(User entity) {
-        return repository.save(entity);
+    public Stat<User> create(User entity) {
+        Stat<User> stat = new Stat<>(User.class);
+        time(stat, null, (v) -> {
+            stat.setData(List.of(repository.save(entity)));
+            return null;
+        });
+        return stat;
     }
 
     @Override
-    public void delete(String id) {
-        repository.deleteById(id);
+    public Stat<User> delete(String id) {
+        Stat<User> stat = new Stat<>(User.class);
+        time(stat, null, (v) -> {
+            repository.deleteById(id);
+            stat.setData(List.of());
+            return null;
+        });
+        return stat;
     }
 
     @Override
-    public User update(User entity) {
-        return repository.save(entity);
+    public Stat<User> update(User entity) {
+        Stat<User> stat = new Stat<>(User.class);
+        time(stat, null, (v) -> {
+            stat.setData(List.of(repository.save(entity)));
+            return null;
+        });
+        return stat;
     }
 
     @Override

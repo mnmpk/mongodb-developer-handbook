@@ -34,7 +34,7 @@ public class SpringUserService extends UserService {
     private MongoTemplate template;
 
     @Override
-    public Page<User> search(String query, Pageable pageable) {
+    public Stat<Page<User>> search(String query, Pageable pageable) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'search'");
     }
@@ -53,21 +53,22 @@ public class SpringUserService extends UserService {
     }
 
     @Override
-    public User get(String id) {
+    public Stat<User> get(String id) {
         return null;
     }
 
     @Override
-    public User create(User entity) {
+    public Stat<User> create(User entity) {
         return null;
     }
 
     @Override
-    public void delete(String id) {
+    public Stat<User> delete(String id) {
+        return null;
     }
 
     @Override
-    public User update(User entity) {
+    public Stat<User> update(User entity) {
         return null;
     }
 

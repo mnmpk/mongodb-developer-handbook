@@ -2,7 +2,7 @@ import { Component, EventEmitter, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Converter, Implementation, OperationType, Workload, WorkloadType, WriteConcern } from '../../shared/models/workload';
 import { WorkloadsService } from '../workloads.service';
-import { UtilityService } from '../../shared/utilityService.service';
+import { UtilityService } from '../../shared/utility.service';
 import { Stat } from '../../shared/models/stats';
 import { MetricsService } from '../../metrics/metrics.service';
 import { SelectionModel } from '@angular/cdk/collections';
@@ -19,6 +19,7 @@ import { map, merge, startWith, switchMap } from 'rxjs';
   styleUrl: './workloads.component.scss'
 })
 export class WorkloadsComponent {
+  UtilityService = UtilityService;
   Implementation = Implementation;
   WorkloadType = WorkloadType;
   OperationType = OperationType;
@@ -46,7 +47,6 @@ export class WorkloadsComponent {
 
   ngOnInit(): void {
     this.form = this.formBuilder.group({
-      impl: [Implementation.DRIVER, Validators.required],
       type: [WorkloadType.WRITE, Validators.required],
       entity: ["users"],
       coll: ["test", Validators.required],
@@ -96,7 +96,7 @@ export class WorkloadsComponent {
 
   getFormValue(type: WorkloadType) {
     let formValue = {...this.form.value};
-    formValue.impl = this.ultityService.enumValueToKey(Implementation, formValue.impl);
+    formValue.impl = this.ultityService.enumValueToKey(Implementation, UtilityService.implementation);
     formValue.type = this.ultityService.enumValueToKey(WorkloadType, type);
     formValue.converter = this.ultityService.enumValueToKey(Converter, formValue.converter);
     formValue.opType = this.ultityService.enumValueToKey(OperationType, formValue.opType);

@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.mongodb</groupId>
-	<artifactId>java-basic</artifactId>
+	<artifactId>java-api</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>java-basic</name>
+	<name>java-api</name>
 	<description>Demo project for Spring Boot and MongoDB</description>
 	<properties>
 		<java.version>17</java.version>

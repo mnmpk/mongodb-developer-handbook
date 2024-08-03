@@ -1,8 +1,6 @@
 package com.mongodb.javabasic.service.impl;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -20,9 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.convert.MongoConverter;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StopWatch;
 
 import com.mongodb.WriteConcern;
 import com.mongodb.bulk.BulkWriteInsert;
@@ -59,7 +55,7 @@ public class DriverUserService extends UserService {
     private CodecRegistry pojoCodecRegistry;
 
     @Override
-    public Page<User> search(String query, Pageable pageable) {
+    public Stat<Page<User>> search(String query, Pageable pageable) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'search'");
     }
@@ -111,21 +107,26 @@ public class DriverUserService extends UserService {
     }
 
     @Override
-    public User get(String id) {
+    public Stat<User> get(String id) {
+        Stat<User> stat = new Stat<>(User.class);
+        time(stat, null, (v) -> {
+            return null;
+        });
+        return stat;
+    }
+
+    @Override
+    public Stat<User> create(User entity) {
         return null;
     }
 
     @Override
-    public User create(User entity) {
+    public Stat<User> delete(String id) {
         return null;
     }
 
     @Override
-    public void delete(String id) {
-    }
-
-    @Override
-    public User update(User entity) {
+    public Stat<User> update(User entity) {
         return null;
     }
 

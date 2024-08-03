@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -36,7 +35,7 @@ public class UserController extends GenericController<User> {
 	UserService springService;
 
 	@Override
-	public Page<User> search(String query, Pageable pageable) {
+	public Stat<Page<User>> search(String query, Pageable pageable) {
 		return repoService.search(query, pageable);
 	}
 
@@ -54,23 +53,23 @@ public class UserController extends GenericController<User> {
 	}
 
 	@Override
-	public User get(String id) {
+	public Stat<User> get(String id) {
 		return repoService.get(id);
 	}
 
 	@Override
-	public User create(User entity) {
+	public Stat<User> create(User entity) {
 		return repoService.create(entity);
 	}
 
 	@Override
-	public User update(String id, User entity) {
+	public Stat<User> update(String id, User entity) {
 		return repoService.update(entity);
 	}
 
 	@Override
-	public void delete(String id) {
-		repoService.delete(id);
+	public Stat<User> delete(String id) {
+		return repoService.delete(id);
 	}
 
 	@Override

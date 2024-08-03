@@ -20,7 +20,7 @@ public abstract class GenericController<T> {
 	 * @return
 	 */
 	@PostMapping("/search")
-	public abstract Page<T> search(@RequestBody String query, Pageable pageable);
+	public abstract Stat<Page<T>> search(@RequestBody String query, Pageable pageable);
 
 	/**
 	 * @param pageable
@@ -35,14 +35,14 @@ public abstract class GenericController<T> {
 	 * @throws NotFoundException
 	 */
 	@GetMapping("/{id}")
-	public abstract @ResponseBody T get(@PathVariable String id);
+	public abstract @ResponseBody Stat<T> get(@PathVariable String id);
 
 	/**
 	 * @param entity
 	 * @return
 	 */
 	@PostMapping
-	public abstract @ResponseBody T create(@RequestBody T entity);
+	public abstract @ResponseBody Stat<T> create(@RequestBody T entity);
 
 	/**
 	 * @param id
@@ -51,14 +51,14 @@ public abstract class GenericController<T> {
 	 * @throws NotFoundException
 	 */
 	@PutMapping("/{id}")
-	public abstract @ResponseBody T update(@PathVariable String id, @RequestBody T entity);
+	public abstract @ResponseBody Stat<T> update(@PathVariable String id, @RequestBody T entity);
 
 	/**
 	 * @param id
 	 * @throws NotFoundException
 	 */
 	@DeleteMapping("/{id}")
-	public abstract void delete(@PathVariable String id);
+	public abstract Stat<T> delete(@PathVariable String id);
 
 	@PostMapping("/load")
 	public abstract Stat<T> load(@RequestBody Workload workload);

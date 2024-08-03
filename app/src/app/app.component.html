@@ -1,5 +1,13 @@
 <div fxFlex fxLayout="column">
-  <mat-toolbar>MongoDB Developer Handbook</mat-toolbar>
+  <mat-toolbar>
+    <span>MongoDB Developer Handbook</span>
+    <span fxFlex="1 1">&nbsp;</span>
+    <mat-select [value]="UtilityService.implementation">
+      @for (impl of Implementation | keyvalue; track impl) {
+      <mat-option [value]="impl.value" [disabled]="impl.value==Implementation.PYTHON||impl.value==Implementation.NODEJS">{{impl.value}}</mat-option>
+      }
+  </mat-select>
+  </mat-toolbar>
 
   <mat-sidenav-container fxFlex>
     <mat-sidenav #sidenav mode="side" opened [fixedInViewport]="false">

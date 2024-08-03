@@ -1,8 +1,10 @@
 
 export enum Implementation {
-    REPO = "Spring Data repositiory",
-    SPRING = "Spring Data Mongo",
-    DRIVER = "MongoDB native driver"
+    REPO = "Java - Spring Data repositiory",
+    SPRING = "Java - Spring Data Mongo",
+    DRIVER = "MongoDB java sync driver",
+    NODEJS = "node.js",
+    PYTHON = "Python"
 }
 export enum WorkloadType {
     READ = "Read",

@@ -9,9 +9,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.util.StopWatch;
 
 import com.mongodb.javabasic.model.Stat;
@@ -22,17 +20,17 @@ public abstract class GenericService<T> {
     @Autowired
     private AsyncService<T> asyncService;
 
-    public abstract Page<T> search(String query, Pageable pageable);
+    public abstract Stat<Page<T>> search(String query, Pageable pageable);
 
     public abstract Stat<Page<T>> list(Workload workload, Pageable pageable);
 
-    public abstract T get(String id);
+    public abstract Stat<T> get(String id);
 
-    public abstract T create(T entity);
+    public abstract Stat<T> create(T entity);
 
-    public abstract void delete(String id);
+    public abstract Stat<User> delete(String id);
 
-    public abstract T update(T entity);
+    public abstract Stat<T> update(T entity);
 
     public abstract Stat<T> _load(List<T> entities, Workload workload);
 
