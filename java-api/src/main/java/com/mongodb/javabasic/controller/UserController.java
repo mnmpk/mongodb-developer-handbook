@@ -1,11 +1,13 @@
 package com.mongodb.javabasic.controller;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.jeasy.random.EasyRandom;
+import org.jeasy.random.EasyRandomParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +57,8 @@ public class UserController extends GenericController<User> {
 
 	@Override
 	public Stat<User> load(Workload workload) {
-		EasyRandom generator = new EasyRandom();
+		EasyRandom generator = new EasyRandom(new EasyRandomParameters()
+				.seed(new Date().getTime()));
 		List<User> users = new ArrayList<>();
 		switch (workload.getOperationType()) {
 			case INSERT:
