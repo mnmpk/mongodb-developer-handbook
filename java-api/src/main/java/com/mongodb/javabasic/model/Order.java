@@ -62,4 +62,5 @@ public class Order {
 	@JsonIgnore
 	private List<ObjectId> orderById;
 
+	private int version;
 }
