@@ -2,7 +2,7 @@
   <mat-toolbar>
     <span>MongoDB Developer Handbook</span>
     <span fxFlex="1 1">&nbsp;</span>
-    <mat-select [value]="UtilityService.implementation">
+    <mat-select #impl [value]="UtilityService.implementation" (selectionChange)="UtilityService.implementation=impl.value">
       @for (impl of Implementation | keyvalue; track impl) {
       <mat-option [value]="impl.value" [disabled]="impl.value==Implementation.PYTHON||impl.value==Implementation.NODEJS">{{impl.value}}</mat-option>
       }

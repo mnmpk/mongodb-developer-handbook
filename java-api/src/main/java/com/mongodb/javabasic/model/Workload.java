@@ -1,5 +1,7 @@
 package com.mongodb.javabasic.model;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
@@ -52,4 +54,6 @@ public class Workload {
     @JsonProperty("w")
     private WriteConcern writeConcern;
     private boolean bulk;
+    private String query;
+    private List<String> ids;
 }

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { EventEmitter, Injectable } from '@angular/core';
 import { Implementation } from './models/workload';
 
 @Injectable({
@@ -11,6 +11,4 @@ export class UtilityService {
 	enumValueToKey(e: any, value: any) {
 		return Object.keys(e)[Object.values(e).indexOf(value)];
 	}
-
-
 }

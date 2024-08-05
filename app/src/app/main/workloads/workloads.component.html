@@ -52,9 +52,6 @@
                     <button type="button" mat-raised-button (click)="update$.emit()">
                         <mat-icon>refresh</mat-icon>Refresh
                     </button>
-                    <button type="button" mat-raised-button (click)="create()">
-                        <mat-icon>add</mat-icon>New {{form.get('entity')?.value}}
-                    </button>
                 </div>
                 <mat-form-field>
                     <mat-label>Search</mat-label>
@@ -99,8 +96,8 @@
                                 <button type="button" mat-button
                                     [matMenuTriggerFor]="menu"><mat-icon>more_vert</mat-icon></button>
                                 <mat-menu #menu="matMenu">
-                                    <button type="button" mat-menu-item (click)="edit()">Edit</button>
-                                    <button type="button" mat-menu-item (click)="delete(row)">Delete</button>
+                                    <!--button type="button" mat-menu-item (click)="edit()">Edit</button>
+                                    <button type="button" mat-menu-item (click)="delete(row)">Delete</button-->
                                 </mat-menu>
                             </td>
                             <td mat-footer-cell *matFooterCellDef aria-label="row">&nbsp;</td>
@@ -117,11 +114,10 @@
                     </table>
                 </div>
 
-                <mat-paginator [length]="page && page.totalElements" [pageSizeOptions]="[25, 50, 100]"></mat-paginator>
+                <mat-paginator [length]="page && page.page.totalElements" [pageSizeOptions]="[25, 50, 100, 500, 1000, 10000]"></mat-paginator>
             </div>
-            Aggregation?
         </div>
-        <div *ngIf="form.get('type')?.value==WorkloadType.WRITE">
+        <div>
             <h2>Write workload</h2>
             <mat-form-field>
                 <mat-label>Type</mat-label>
@@ -135,7 +131,7 @@
                 <mat-label>No. of Workers</mat-label>
                 <input matInput type="number" formControlName="numWorkers">
             </mat-form-field>
-            <mat-form-field>
+            <mat-form-field *ngIf="form.get('opType')?.value==OperationType.INSERT">
                 <mat-label>Quantity</mat-label>
                 <input matInput type="number" formControlName="qty">
             </mat-form-field>
@@ -156,7 +152,6 @@
                         operations"}}</mat-radio-button>
                 </mat-radio-group>
             </div>
-            Aggregation?
         </div>
         <div fxFlex fxLayoutAlign="end">
             <button type="button" mat-flat-button [disabled]="form.invalid || loading"

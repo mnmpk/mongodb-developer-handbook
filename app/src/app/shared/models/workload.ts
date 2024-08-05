@@ -17,12 +17,12 @@ export enum OperationType {
     REPLACE = "Replace"
 }
 export enum WriteConcern {
-    ACKNOWLEDGED = "Acknowledge", 
-    W1 = "1", 
-    W2 = "2", 
-    W3 = "3", 
-    UNACKNOWLEDGED = "Unacknowledge", 
-    JOURNALED = "Journaled", 
+    ACKNOWLEDGED = "Acknowledge",
+    W1 = "1",
+    W2 = "2",
+    W3 = "3",
+    UNACKNOWLEDGED = "Unacknowledge",
+    JOURNALED = "Journaled",
     MAJORITY = "Majority"
 }
 export enum Converter {
@@ -45,4 +45,6 @@ export class Workload {
     w!: WriteConcern;
     bulk!: boolean;
 
+    ids: string[] = [];
+    query!: string
 }

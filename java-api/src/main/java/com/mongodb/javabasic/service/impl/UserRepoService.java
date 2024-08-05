@@ -1,7 +1,6 @@
 package com.mongodb.javabasic.service.impl;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -10,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StopWatch;
 
 import com.mongodb.javabasic.model.Stat;
 import com.mongodb.javabasic.model.User;
@@ -42,52 +40,20 @@ public class UserRepoService extends UserService {
     }
 
     @Override
-    public Stat<User> get(String id) {
-        Stat<User> stat = new Stat<>(User.class);
-        time(stat, null, (v) -> {
-            stat.setData(List.of(repository.findById(id).get()));
-            return null;
-        });
-        return stat;
-    }
-
-    @Override
-    public Stat<User> create(User entity) {
-        Stat<User> stat = new Stat<>(User.class);
-        time(stat, null, (v) -> {
-            stat.setData(List.of(repository.save(entity)));
-            return null;
-        });
-        return stat;
-    }
-
-    @Override
-    public Stat<User> delete(String id) {
-        Stat<User> stat = new Stat<>(User.class);
-        time(stat, null, (v) -> {
-            repository.deleteById(id);
-            stat.setData(List.of());
-            return null;
-        });
-        return stat;
-    }
-
-    @Override
-    public Stat<User> update(User entity) {
-        Stat<User> stat = new Stat<>(User.class);
-        time(stat, null, (v) -> {
-            stat.setData(List.of(repository.save(entity)));
-            return null;
-        });
-        return stat;
-    }
-
-    @Override
     public Stat<User> _load(List<User> entities, Workload workload) {
         Stat<User> stat = new Stat<>(User.class);
         if (workload.isBulk()) {
             time(stat, workload, (v) -> {
-                stat.setData(repository.saveAll(entities));
+                switch (workload.getOperationType()) {
+                    case DELETE:
+                        repository.deleteAll(entities);
+                        break;
+                    case INSERT:
+                    case REPLACE:
+                    case UPDATE:
+                        stat.setData(repository.saveAll(entities));
+                        break;
+                }
                 return null;
             });
         } else {
@@ -95,7 +61,16 @@ public class UserRepoService extends UserService {
             for (User e : entities) {
 
                 time(stat, workload, (v) -> {
-                    newEntities.add(repository.save(e));
+                    switch (workload.getOperationType()) {
+                        case DELETE:
+                            repository.delete(e);
+                            break;
+                        case INSERT:
+                        case REPLACE:
+                        case UPDATE:
+                            newEntities.add(repository.save(e));
+                            break;
+                    }
                     return null;
                 });
             }

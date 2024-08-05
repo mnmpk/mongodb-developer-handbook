@@ -1,9 +1,9 @@
 package com.mongodb.javabasic.service.impl;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
+import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,11 +16,13 @@ import org.springframework.data.mongodb.core.BulkOperations.BulkMode;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.data.mongodb.core.query.UpdateDefinition;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StopWatch;
 
 import com.mongodb.bulk.BulkWriteInsert;
 import com.mongodb.bulk.BulkWriteUpsert;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Updates;
 import com.mongodb.javabasic.model.Stat;
 import com.mongodb.javabasic.model.User;
 import com.mongodb.javabasic.model.Workload;
@@ -50,26 +52,6 @@ public class SpringUserService extends UserService {
             return null;
         });
         return stat;
-    }
-
-    @Override
-    public Stat<User> get(String id) {
-        return null;
-    }
-
-    @Override
-    public Stat<User> create(User entity) {
-        return null;
-    }
-
-    @Override
-    public Stat<User> delete(String id) {
-        return null;
-    }
-
-    @Override
-    public Stat<User> update(User entity) {
-        return null;
     }
 
     @Override
@@ -110,7 +92,7 @@ public class SpringUserService extends UserService {
                         BulkOperations bulkUpdates = template.bulkOps(BulkMode.ORDERED, User.class);
                         entities.stream().forEach(e -> {
                             bulkUpdates.updateOne(new Query(Criteria.where("_id").is(e.getId())),
-                                    new Update().inc("v", 1));
+                                    new Update().inc("version", 1));
                         });
                         List<BulkWriteUpsert> upserts = bulkUpdates.execute().getUpserts();
                         for (int i = 0; i < upserts.size(); i++) {
@@ -125,7 +107,25 @@ public class SpringUserService extends UserService {
             List<User> newEntities = new ArrayList<>();
             for (User e : entities) {
                 time(stat, workload, (v) -> {
-                    newEntities.add(template.insert(e));
+                    switch (workload.getOperationType()) {
+                        case INSERT:
+                            template.insert(e);
+                            break;
+                        case DELETE:
+                            template.remove(e);
+                            break;
+                        case REPLACE:
+                            template.update(User.class).matching(new Query(Criteria.where("_id").is(e.getId())))
+                                    .replaceWith(e);
+                            break;
+                        case UPDATE:
+                            Update update = new Update();
+                            update.inc("version");
+                            template.update(User.class).matching(new Query(Criteria.where("_id").is(e.getId())))
+                                    .apply(update);
+                            break;
+                    }
+                    newEntities.add(e);
                     return null;
                 });
             }

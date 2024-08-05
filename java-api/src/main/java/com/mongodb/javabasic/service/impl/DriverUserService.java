@@ -97,37 +97,15 @@ public class DriverUserService extends UserService {
                 list = s.map(d -> pojoCodecRegistry.get(User.class).decode(d.toBsonDocument().asBsonReader(), dc))
                         .toList();
             }
-
-            stat.setData(List.of(new PageImpl<>(list, pageable,
-                    result.getList("meta", Document.class).get(0).getInteger("count"))));
-
+            if (list.size() > 0)
+                stat.setData(List.of(new PageImpl<>(list, pageable,
+                        result.getList("meta", Document.class).get(0).getInteger("count"))));
+            else
+                stat.setData(List.of(new PageImpl<>(List.of(), pageable,
+                        0)));
             return null;
         });
         return stat;
-    }
-
-    @Override
-    public Stat<User> get(String id) {
-        Stat<User> stat = new Stat<>(User.class);
-        time(stat, null, (v) -> {
-            return null;
-        });
-        return stat;
-    }
-
-    @Override
-    public Stat<User> create(User entity) {
-        return null;
-    }
-
-    @Override
-    public Stat<User> delete(String id) {
-        return null;
-    }
-
-    @Override
-    public Stat<User> update(User entity) {
-        return null;
     }
 
     @Override
@@ -137,7 +115,6 @@ public class DriverUserService extends UserService {
                 .withWriteConcern(WriteConcern.valueOf(workload.getWriteConcern().name()))
                 .withDocumentClass(User.class);
         if (workload.isBulk()) {
-
             time(stat, workload, (v) -> {
                 switch (workload.getOperationType()) {
                     case DELETE:
@@ -171,7 +148,7 @@ public class DriverUserService extends UserService {
                                         entities.stream()
                                                 .map(e -> new UpdateOneModel<User>(
                                                         Filters.eq("_id", new ObjectId(e.getId())),
-                                                        Updates.combine(Updates.inc("v", 1)),
+                                                        Updates.combine(Updates.inc("version", 1)),
                                                         new UpdateOptions().upsert(true)))
                                                 .toList())
                                 .getUpserts();
@@ -187,8 +164,20 @@ public class DriverUserService extends UserService {
             List<User> newEntities = new ArrayList<>();
             for (User e : entities) {
                 time(stat, workload, (v) -> {
-                    // TODO:update, replace, delete
-                    e.setId(collection.insertOne(e).getInsertedId().asObjectId().getValue().toHexString());
+                    switch (workload.getOperationType()) {
+                        case INSERT:
+                            e.setId(collection.insertOne(e).getInsertedId().asObjectId().getValue().toHexString());
+                            break;
+                        case DELETE:
+                            collection.deleteOne(Filters.eq("_id", new ObjectId(e.getId())));
+                            break;
+                        case REPLACE:
+                            collection.replaceOne(Filters.eq("_id", new ObjectId(e.getId())), e);
+                            break;
+                        case UPDATE:
+                            collection.updateOne(Filters.eq("_id", new ObjectId(e.getId())), Updates.inc("version", 1));
+                            break;
+                    }
                     newEntities.add(e);
                     return null;
                 });

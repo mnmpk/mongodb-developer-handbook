@@ -1,9 +1,10 @@
 package com.mongodb.javabasic.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
-import org.bson.types.ObjectId;
 import org.jeasy.random.EasyRandom;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,8 +36,8 @@ public class UserController extends GenericController<User> {
 	UserService springService;
 
 	@Override
-	public Stat<Page<User>> search(String query, Pageable pageable) {
-		return repoService.search(query, pageable);
+	public Stat<Page<User>> search(Workload workload, Pageable pageable) {
+		return repoService.search(workload.getQuery(), pageable);
 	}
 
 	@Override
@@ -53,43 +54,35 @@ public class UserController extends GenericController<User> {
 	}
 
 	@Override
-	public Stat<User> get(String id) {
-		return repoService.get(id);
-	}
-
-	@Override
-	public Stat<User> create(User entity) {
-		return repoService.create(entity);
-	}
-
-	@Override
-	public Stat<User> update(String id, User entity) {
-		return repoService.update(entity);
-	}
-
-	@Override
-	public Stat<User> delete(String id) {
-		return repoService.delete(id);
-	}
-
-	@Override
 	public Stat<User> load(Workload workload) {
 		EasyRandom generator = new EasyRandom();
-		List<User> users = generator.objects(User.class, workload.getQuantity()).map(u -> {
-			switch (workload.getOperationType()) {
-				case INSERT:
+		List<User> users = new ArrayList<>();
+		switch (workload.getOperationType()) {
+			case INSERT:
+				users = generator.objects(User.class, workload.getQuantity()).map(u -> {
 					u.setId(null);
-					//TODO: add seq id for targeting
-				case DELETE:
-				case REPLACE:
-				case UPDATE:
-					//TODO: target doc by seq id
-					u.setId(new ObjectId().toHexString());
-					break;
-			}
-			return u;
-		})
-				.collect(Collectors.toList());
+					u.setVersion(1);
+					return u;
+				}).collect(Collectors.toList());
+				break;
+			case DELETE:
+				users = IntStream.range(0, workload.getIds().size()).mapToObj(i -> {
+					User u = User.builder().id(workload.getIds().get(i)).build();
+					return u;
+				}).collect(Collectors.toList());
+				break;
+			case REPLACE:
+			case UPDATE:
+				var temp = generator.objects(User.class, workload.getIds().size()).collect(Collectors.toList());
+				users = IntStream.range(0, workload.getIds().size()).mapToObj(i -> {
+					User u = temp.get(i);
+					u.setId(workload.getIds().get(i));
+					u.setVersion(1);
+					return u;
+				}).collect(Collectors.toList());
+				break;
+		}
+
 		switch ((workload.getImplementation())) {
 			case DRIVER:
 				return driverService.load(users, workload);

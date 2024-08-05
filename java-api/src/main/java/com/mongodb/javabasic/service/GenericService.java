@@ -13,7 +13,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.util.StopWatch;
 
 import com.mongodb.javabasic.model.Stat;
-import com.mongodb.javabasic.model.User;
 import com.mongodb.javabasic.model.Workload;
 
 public abstract class GenericService<T> {
@@ -23,14 +22,6 @@ public abstract class GenericService<T> {
     public abstract Stat<Page<T>> search(String query, Pageable pageable);
 
     public abstract Stat<Page<T>> list(Workload workload, Pageable pageable);
-
-    public abstract Stat<T> get(String id);
-
-    public abstract Stat<T> create(T entity);
-
-    public abstract Stat<User> delete(String id);
-
-    public abstract Stat<T> update(T entity);
 
     public abstract Stat<T> _load(List<T> entities, Workload workload);
 
@@ -80,10 +71,10 @@ public abstract class GenericService<T> {
     }
 
     public void time(Stat<?> stat, Workload workload, Function<Void, Void> function) {
-        stat.setWorkload(Workload.builder().implementation(workload.getImplementation())
+        stat.setWorkload(Workload.builder().implementation(workload.getImplementation()).type(workload.getType())
                 .converter(workload.getConverter()).bulk(workload.isBulk()).writeConcern(workload.getWriteConcern())
                 .operationType(workload.getOperationType())
-                .collection(workload.getCollection()).noOfWorkers(1)
+                .collection(workload.getCollection()).noOfWorkers(workload.getType()==Workload.Type.READ?1:workload.getNoOfWorkers())
                 .quantity(workload.getQuantity()).build());
         stat.setStartAt(new Date());
         StopWatch sw = new StopWatch();

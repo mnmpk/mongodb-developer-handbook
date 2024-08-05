@@ -40,7 +40,7 @@ export class WorkloadsComponent {
   loading = false;
   searchValue: string = "";
 
-  constructor(private formBuilder: FormBuilder, private ultityService: UtilityService, private service: WorkloadsService, private metricsService: MetricsService) {
+  constructor(private formBuilder: FormBuilder, private utilityService: UtilityService, private service: WorkloadsService, private metricsService: MetricsService) {
 
   }
 
@@ -81,26 +81,21 @@ export class WorkloadsComponent {
   search(event: Event) {
 
   }
-  create() {
-
-  }
-  edit() {
-
-  }
-  delete(row: any) {
-
-  }
   getFields() {
     return this.stat?.fields;
   }
 
   getFormValue(type: WorkloadType) {
     let formValue = {...this.form.value};
-    formValue.impl = this.ultityService.enumValueToKey(Implementation, UtilityService.implementation);
-    formValue.type = this.ultityService.enumValueToKey(WorkloadType, type);
-    formValue.converter = this.ultityService.enumValueToKey(Converter, formValue.converter);
-    formValue.opType = this.ultityService.enumValueToKey(OperationType, formValue.opType);
-    formValue.w = this.ultityService.enumValueToKey(WriteConcern, formValue.w);
+    formValue.impl = this.utilityService.enumValueToKey(Implementation, UtilityService.implementation);
+    formValue.type = this.utilityService.enumValueToKey(WorkloadType, type);
+    formValue.converter = this.utilityService.enumValueToKey(Converter, formValue.converter);
+    formValue.opType = this.utilityService.enumValueToKey(OperationType, formValue.opType);
+    formValue.w = this.utilityService.enumValueToKey(WriteConcern, formValue.w);
+    if(this.page){
+      formValue.ids = this.page.content.map(i=>i.id);
+      if(formValue.opType!=this.utilityService.enumValueToKey(OperationType, OperationType.INSERT)) formValue.qty = this.page.page.size;
+    }
     return formValue;
   }
 
@@ -113,6 +108,7 @@ export class WorkloadsComponent {
           this.form.enable();
           this.loading = false;
           this.metricsService.addResult(stat);
+          this.update$.emit();
         },
         error: (err: any) => {
           alert(err.message);
