@@ -10,16 +10,26 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.util.StopWatch;
 
+import com.mongodb.client.model.Aggregates;
 import com.mongodb.javabasic.model.Stat;
 import com.mongodb.javabasic.model.Workload;
 
 public abstract class GenericService<T> {
     @Autowired
     private AsyncService<T> asyncService;
+    @Autowired
+    private MongoTemplate mongoTemplate;
 
     public abstract Stat<Page<T>> search(String query, Pageable pageable);
+
+    public T sample(Class<T> clazz) {
+        return mongoTemplate
+                .getCollection(mongoTemplate.getCollectionName(clazz)).withDocumentClass(clazz)
+                .aggregate(List.of(Aggregates.sample(1))).first();
+    }
 
     public abstract Stat<Page<T>> list(Workload workload, Pageable pageable);
 
@@ -74,7 +84,8 @@ public abstract class GenericService<T> {
         stat.setWorkload(Workload.builder().implementation(workload.getImplementation()).type(workload.getType())
                 .converter(workload.getConverter()).bulk(workload.isBulk()).writeConcern(workload.getWriteConcern())
                 .operationType(workload.getOperationType())
-                .collection(workload.getCollection()).noOfWorkers(workload.getType()==Workload.Type.READ?1:workload.getNoOfWorkers())
+                .collection(workload.getCollection())
+                .noOfWorkers(workload.getType() == Workload.Type.READ ? 1 : workload.getNoOfWorkers())
                 .quantity(workload.getQuantity()).build());
         stat.setStartAt(new Date());
         StopWatch sw = new StopWatch();

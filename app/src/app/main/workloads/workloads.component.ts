@@ -65,7 +65,7 @@ export class WorkloadsComponent {
     merge(this.update$, this.sort.sortChange, this.paginator.page).pipe(
       startWith({}),
       switchMap(() => {
-        let formValue = {...this.getFormValue(WorkloadType.READ), qty:this.paginator.pageSize};
+        let formValue = { ...this.getFormValue(WorkloadType.READ), qty: this.paginator.pageSize };
         return this.service.list(formValue, this.paginator.pageIndex, this.paginator.pageSize, this.sort.active, this.sort.direction)
       }),
       map((stat: Stat<Page<any>>) => {
@@ -86,15 +86,15 @@ export class WorkloadsComponent {
   }
 
   getFormValue(type: WorkloadType) {
-    let formValue = {...this.form.value};
+    let formValue = { ...this.form.value };
     formValue.impl = this.utilityService.enumValueToKey(Implementation, UtilityService.implementation);
     formValue.type = this.utilityService.enumValueToKey(WorkloadType, type);
     formValue.converter = this.utilityService.enumValueToKey(Converter, formValue.converter);
     formValue.opType = this.utilityService.enumValueToKey(OperationType, formValue.opType);
     formValue.w = this.utilityService.enumValueToKey(WriteConcern, formValue.w);
-    if(this.page){
-      formValue.ids = this.page.content.map(i=>i.id);
-      if(formValue.opType!=this.utilityService.enumValueToKey(OperationType, OperationType.INSERT)) formValue.qty = this.page.page.size;
+    if (this.page) {
+      formValue.ids = this.page.content.map(i => i.id);
+      if (formValue.opType != this.utilityService.enumValueToKey(OperationType, OperationType.INSERT)) formValue.qty = this.page.page.size;
     }
     return formValue;
   }
@@ -155,5 +155,14 @@ export class WorkloadsComponent {
       this.paginator.firstPage();
     }
   }
-
+  getValue(row: any, field: string) {
+    if (row[field]) {
+      if (typeof row[field] == 'object') {
+        return row[field];
+      } else {
+        return row[field];
+      }
+    }
+    return "";
+  }
 }

@@ -28,11 +28,13 @@ public class Product {
 
 	@Field("uPrice")
 	@BsonProperty("uPrice")
-	@JsonProperty("uPrice")
+	@JsonProperty("unitPrice")
     private double unitPrice;
 
 	@Field("soh")
 	@BsonProperty("soh")
-	@JsonProperty("soh")
+	@JsonProperty("stockOnHand")
     private int stockOnHand;
+
+	private int version;
 }

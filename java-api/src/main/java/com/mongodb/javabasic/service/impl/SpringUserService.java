@@ -3,7 +3,6 @@ package com.mongodb.javabasic.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,13 +15,10 @@ import org.springframework.data.mongodb.core.BulkOperations.BulkMode;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
-import org.springframework.data.mongodb.core.query.UpdateDefinition;
 import org.springframework.stereotype.Service;
 
 import com.mongodb.bulk.BulkWriteInsert;
 import com.mongodb.bulk.BulkWriteUpsert;
-import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.Updates;
 import com.mongodb.javabasic.model.Stat;
 import com.mongodb.javabasic.model.User;
 import com.mongodb.javabasic.model.Workload;

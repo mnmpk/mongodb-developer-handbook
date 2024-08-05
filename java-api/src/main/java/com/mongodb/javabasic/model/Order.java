@@ -14,7 +14,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.DocumentReference;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
@@ -33,7 +32,7 @@ public class Order {
 	private String id;
     
 	@Field("oAt")
-	@JsonProperty("oAt")
+	@JsonProperty("orderAt")
 	@BsonProperty("oAt")
     private Date orderAt;
 
@@ -49,17 +48,17 @@ public class Order {
 	private List<Product> items;
 	@Transient
 	@BsonProperty("items")
-	@JsonIgnore
+	@JsonProperty("itemIds")
 	private List<ObjectId> itemIds;
 
 	@Field("oBy")
 	@DocumentReference
 	@BsonIgnore
-	@JsonProperty("oBy")
+	@JsonProperty("orderBy")
 	private User orderBy;
 	@Transient
 	@BsonProperty("oBy")
-	@JsonIgnore
+	@JsonProperty("orderById")
 	private List<ObjectId> orderById;
 
 	private int version;
