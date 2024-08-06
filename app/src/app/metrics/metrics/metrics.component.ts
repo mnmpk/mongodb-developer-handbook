@@ -112,6 +112,9 @@ export class MetricsComponent {
           {
             data: this.metricsService.getResults().map((s, i) => { return { name: "" + i + 1, value: [i, s.avg, s.min, s.avg, s.max, this.utilityService.enumValueToKey(WorkloadType, WorkloadType.WRITE) == s.workload.type ? s.workload.opType : this.utilityService.enumValueToKey(WorkloadType, WorkloadType.READ), s.startAt, s.endAt, s.duration, s.workload.impl, s.workload.qty, s.workload.numWorkers] } })
           },
+          {
+            data: this.metricsService.getResults().map((s, i) => { return { name: "" + i + 1, value: [i, s.avg, s.min, s.avg, s.max, this.utilityService.enumValueToKey(WorkloadType, WorkloadType.WRITE) == s.workload.type ? s.workload.opType : this.utilityService.enumValueToKey(WorkloadType, WorkloadType.READ), s.startAt, s.endAt, s.duration, s.workload.impl, s.workload.qty, s.workload.numWorkers] } })
+          },
         ],
       };
     });
