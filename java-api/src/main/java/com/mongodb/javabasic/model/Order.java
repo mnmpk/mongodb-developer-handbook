@@ -59,7 +59,7 @@ public class Order {
 	@Transient
 	@BsonProperty("oBy")
 	@JsonProperty("orderById")
-	private List<ObjectId> orderById;
+	private ObjectId orderById;
 
 	private int version;
 }

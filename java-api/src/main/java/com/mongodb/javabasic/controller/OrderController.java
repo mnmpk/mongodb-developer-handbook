@@ -73,8 +73,8 @@ public class OrderController extends GenericController<Order> {
 					o.setId(null);
 					o.setVersion(1);
 					if(p!=null){
-						o.getItems().add(p);
-						o.getItemIds().add(new ObjectId(p.getId()));
+						o.setItems(List.of(p));
+						o.setItemIds(List.of(new ObjectId(p.getId())));
 					}
 					return o;
 				}).collect(Collectors.toList());
@@ -93,8 +93,8 @@ public class OrderController extends GenericController<Order> {
 					o.setId(workload.getIds().get(i));
 					o.setVersion(1);
 					if(p!=null){
-						o.getItems().add(p);
-						o.getItemIds().add(new ObjectId(p.getId()));
+						o.setItems(List.of(p));
+						o.setItemIds(List.of(new ObjectId(p.getId())));
 					}
 					return o;
 				}).collect(Collectors.toList());

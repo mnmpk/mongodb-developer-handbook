@@ -53,7 +53,7 @@ export class WorkloadsComponent {
       schema: [],
       converter: [Converter.MONGODB],
       opType: [OperationType.INSERT, Validators.required],
-      numWorkers: [1, [Validators.required, Validators.min(1), Validators.max(100)]],
+      numWorkers: [10, [Validators.required, Validators.min(1), Validators.max(100)]],
       qty: [1000, Validators.required],
       w: [WriteConcern.MAJORITY],
       bulk: [false, Validators.required]
@@ -158,7 +158,9 @@ export class WorkloadsComponent {
   getValue(row: any, field: string) {
     if (row[field]) {
       if (typeof row[field] == 'object') {
-        return row[field];
+        if(Array.isArray(row[field]))
+          return row[field].map((i:any)=>JSON.stringify(i)).join(",");
+        return JSON.stringify(row[field]);
       } else {
         return row[field];
       }
