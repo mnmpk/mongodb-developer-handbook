@@ -21,9 +21,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.mongodb.javabasic.model.Order;
 import com.mongodb.javabasic.model.Product;
 import com.mongodb.javabasic.model.Stat;
+import com.mongodb.javabasic.model.User;
 import com.mongodb.javabasic.model.Workload;
 import com.mongodb.javabasic.service.OrderService;
 import com.mongodb.javabasic.service.ProductService;
+import com.mongodb.javabasic.service.UserService;
 
 @RestController
 @RequestMapping(path = "/orders")
@@ -42,6 +44,8 @@ public class OrderController extends GenericController<Order> {
 
 	@Autowired
 	ProductService productService;
+	@Autowired
+	UserService userService;
 
 	@Override
 	public Stat<Page<Order>> search(Workload workload, Pageable pageable) {
@@ -64,23 +68,34 @@ public class OrderController extends GenericController<Order> {
 	@Override
 	public Stat<Order> load(Workload workload) {
 		Product p = productService.sample(Product.class);
+		User u = userService.sample(User.class);
 		EasyRandom generator = new EasyRandom(new EasyRandomParameters()
 				.seed(new Date().getTime()));
 		List<Order> orders = new ArrayList<>();
 		switch (workload.getOperationType()) {
 			case INSERT:
-			orders = generator.objects(Order.class, workload.getQuantity()).map(o -> {
+				orders = generator.objects(Order.class, workload.getQuantity()).map(o -> {
 					o.setId(null);
 					o.setVersion(1);
-					if(p!=null){
+					if (p != null) {
 						o.setItems(List.of(p));
 						o.setItemIds(List.of(new ObjectId(p.getId())));
+					} else {
+						o.setItems(List.of());
+						o.setItemIds(List.of());
+					}
+					if (u != null) {
+						o.setOrderBy(u);
+						o.setOrderById(new ObjectId(p.getId()));
+					} else {
+						o.setOrderBy(null);
+						o.setOrderById(null);
 					}
 					return o;
 				}).collect(Collectors.toList());
 				break;
 			case DELETE:
-			orders = IntStream.range(0, workload.getIds().size()).mapToObj(i -> {
+				orders = IntStream.range(0, workload.getIds().size()).mapToObj(i -> {
 					Order o = Order.builder().id(workload.getIds().get(i)).build();
 					return o;
 				}).collect(Collectors.toList());
@@ -92,9 +107,19 @@ public class OrderController extends GenericController<Order> {
 					Order o = temp.get(i);
 					o.setId(workload.getIds().get(i));
 					o.setVersion(1);
-					if(p!=null){
+					if (p != null) {
 						o.setItems(List.of(p));
 						o.setItemIds(List.of(new ObjectId(p.getId())));
+					} else {
+						o.setItems(List.of());
+						o.setItemIds(List.of());
+					}
+					if (u != null) {
+						o.setOrderBy(u);
+						o.setOrderById(new ObjectId(p.getId()));
+					} else {
+						o.setOrderBy(null);
+						o.setOrderById(null);
 					}
 					return o;
 				}).collect(Collectors.toList());
