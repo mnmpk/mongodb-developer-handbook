@@ -1,12 +1,14 @@
 <div fxFlex fxLayout="column">
   <mat-toolbar>
-    <span>MongoDB Developer Handbook</span>
+    <a href="dashboard">MongoDB Developer Handbook</a>
     <span fxFlex="1 1">&nbsp;</span>
-    <mat-select #impl [value]="UtilityService.implementation" (selectionChange)="UtilityService.implementation=impl.value">
+    <mat-select #impl [value]="UtilityService.implementation"
+      (selectionChange)="UtilityService.implementation=impl.value">
       @for (impl of Implementation | keyvalue; track impl) {
-      <mat-option [value]="impl.value" [disabled]="impl.value==Implementation.PYTHON||impl.value==Implementation.NODEJS">{{impl.value}}</mat-option>
+      <mat-option [value]="impl.value"
+        [disabled]="impl.value==Implementation.PYTHON||impl.value==Implementation.NODEJS">{{impl.value}}</mat-option>
       }
-  </mat-select>
+    </mat-select>
   </mat-toolbar>
 
   <mat-sidenav-container fxFlex>
