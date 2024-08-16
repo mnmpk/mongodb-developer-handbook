@@ -38,8 +38,8 @@ public class Workload {
     @JsonProperty("impl")
     private Implementation implementation;
     private Type type;
-    @JsonProperty("coll")
-    private String collection;
+    @JsonProperty("docSize")
+    private int documentSize;
     private String schema;
     private Converter converter;
     // TODO:Read options?

@@ -11,27 +11,27 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.mongodb.javabasic.model.Stat;
-import com.mongodb.javabasic.model.User;
+import com.mongodb.javabasic.model.CustomEntity;
 import com.mongodb.javabasic.model.Workload;
-import com.mongodb.javabasic.repositories.UserRepository;
-import com.mongodb.javabasic.service.UserService;
+import com.mongodb.javabasic.repositories.CustomEntityRepository;
+import com.mongodb.javabasic.service.CustomEntityService;
 
-@Service("userRepoService")
-public class UserRepoService extends UserService {
+@Service("customEntityRepoService")
+public class RepoCustomEntityService extends CustomEntityService {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
-    private UserRepository repository;
+    private CustomEntityRepository repository;
 
     @Override
-    public Stat<Page<User>> search(String query, Pageable pageable) {
+    public Stat<Page<CustomEntity>> search(String query, Pageable pageable) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'search'");
     }
 
     @Override
-    public Stat<Page<User>> list(Workload workload, Pageable pageable) {
-        Stat<Page<User>> stat = new Stat<>(User.class);
+    public Stat<Page<CustomEntity>> list(Workload workload, Pageable pageable) {
+        Stat<Page<CustomEntity>> stat = new Stat<>(CustomEntity.class);
         time(stat, workload, (v) -> {
             stat.setData(List.of(repository.findAll(pageable)));
             return null;
@@ -40,8 +40,8 @@ public class UserRepoService extends UserService {
     }
 
     @Override
-    public Stat<User> _load(List<User> entities, Workload workload) {
-        Stat<User> stat = new Stat<>(User.class);
+    public Stat<CustomEntity> _load(List<CustomEntity> entities, Workload workload) {
+        Stat<CustomEntity> stat = new Stat<>(CustomEntity.class);
         if (workload.isBulk()) {
             time(stat, workload, (v) -> {
                 switch (workload.getOperationType()) {
@@ -57,8 +57,8 @@ public class UserRepoService extends UserService {
                 return null;
             });
         } else {
-            List<User> newEntities = new ArrayList<>();
-            for (User e : entities) {
+            List<CustomEntity> newEntities = new ArrayList<>();
+            for (CustomEntity e : entities) {
 
                 time(stat, workload, (v) -> {
                     switch (workload.getOperationType()) {

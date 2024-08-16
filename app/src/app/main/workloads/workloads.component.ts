@@ -49,7 +49,7 @@ export class WorkloadsComponent {
     this.form = this.formBuilder.group({
       type: [WorkloadType.WRITE, Validators.required],
       entity: ["users"],
-      coll: ["test", Validators.required],
+      docSize: [5120],
       schema: [],
       converter: [Converter.MONGODB],
       opType: [OperationType.INSERT, Validators.required],

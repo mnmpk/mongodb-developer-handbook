@@ -84,7 +84,6 @@ public abstract class GenericService<T> {
         stat.setWorkload(Workload.builder().implementation(workload.getImplementation()).type(workload.getType())
                 .converter(workload.getConverter()).bulk(workload.isBulk()).writeConcern(workload.getWriteConcern())
                 .operationType(workload.getOperationType())
-                .collection(workload.getCollection())
                 .noOfWorkers(workload.getType() == Workload.Type.READ ? 1 : workload.getNoOfWorkers())
                 .quantity(workload.getQuantity()).build());
         stat.setStartAt(new Date());

@@ -17,7 +17,7 @@ import com.mongodb.javabasic.repositories.OrderRepository;
 import com.mongodb.javabasic.service.OrderService;
 
 @Service("orderRepoService")
-public class OrderRepoService extends OrderService {
+public class RepoOrderService extends OrderService {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired

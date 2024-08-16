@@ -11,27 +11,27 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.mongodb.javabasic.model.Stat;
-import com.mongodb.javabasic.model.Product;
+import com.mongodb.javabasic.model.User;
 import com.mongodb.javabasic.model.Workload;
-import com.mongodb.javabasic.repositories.ProductRepository;
-import com.mongodb.javabasic.service.ProductService;
+import com.mongodb.javabasic.repositories.UserRepository;
+import com.mongodb.javabasic.service.UserService;
 
-@Service("productRepoService")
-public class ProductRepoService extends ProductService {
+@Service("userRepoService")
+public class RepoUserService extends UserService {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
-    private ProductRepository repository;
+    private UserRepository repository;
 
     @Override
-    public Stat<Page<Product>> search(String query, Pageable pageable) {
+    public Stat<Page<User>> search(String query, Pageable pageable) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'search'");
     }
 
     @Override
-    public Stat<Page<Product>> list(Workload workload, Pageable pageable) {
-        Stat<Page<Product>> stat = new Stat<>(Product.class);
+    public Stat<Page<User>> list(Workload workload, Pageable pageable) {
+        Stat<Page<User>> stat = new Stat<>(User.class);
         time(stat, workload, (v) -> {
             stat.setData(List.of(repository.findAll(pageable)));
             return null;
@@ -40,8 +40,8 @@ public class ProductRepoService extends ProductService {
     }
 
     @Override
-    public Stat<Product> _load(List<Product> entities, Workload workload) {
-        Stat<Product> stat = new Stat<>(Product.class);
+    public Stat<User> _load(List<User> entities, Workload workload) {
+        Stat<User> stat = new Stat<>(User.class);
         if (workload.isBulk()) {
             time(stat, workload, (v) -> {
                 switch (workload.getOperationType()) {
@@ -57,8 +57,8 @@ public class ProductRepoService extends ProductService {
                 return null;
             });
         } else {
-            List<Product> newEntities = new ArrayList<>();
-            for (Product e : entities) {
+            List<User> newEntities = new ArrayList<>();
+            for (User e : entities) {
 
                 time(stat, workload, (v) -> {
                     switch (workload.getOperationType()) {
