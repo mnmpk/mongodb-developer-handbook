@@ -71,8 +71,8 @@ public class CustomEntityController extends GenericController<CustomEntity> {
 			case INSERT:
 				customEntities = generator.objects(CustomEntity.class, workload.getQuantity()).map(e -> {
 					e.setId(null);
-					e.setData(new LinkedHashMap<>(Map.of("text", new String(dummyData))));
-					e.setDocument(new Document("text", new String(dummyData)));
+					e.setData(new LinkedHashMap<>(Map.of("bin", dummyData)));
+					e.setDocument(new Document("bin", dummyData));
 					e.setVersion(1);
 					return e;
 				}).collect(Collectors.toList());

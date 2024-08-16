@@ -22,7 +22,6 @@ export class LoaderService {
 		this.maxNoOfTask++;
 		this.message = message;
 		this.mode = this.maxNoOfTask > 1 ? "determinate" : "indeterminate";
-		console.log(this.mode);
 		this.progress = this.getProgress();
 		this.isLoading.next(this.progress);
 	}

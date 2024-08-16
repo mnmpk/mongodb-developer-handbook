@@ -10,6 +10,7 @@
       }
     </mat-select>
   </mat-toolbar>
+  <app-loader></app-loader>
 
   <mat-sidenav-container fxFlex>
     <mat-sidenav #sidenav mode="side" opened [fixedInViewport]="false">
@@ -23,7 +24,6 @@
     </mat-sidenav>
 
     <mat-sidenav-content fxLayout="column" fxLayoutAlign="start" fxLayoutGap="0.5%">
-      <app-loader></app-loader>
       <div fxFlex class="content">
         <router-outlet></router-outlet>
       </div>
