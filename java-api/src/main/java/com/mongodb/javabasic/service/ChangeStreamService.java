@@ -19,6 +19,10 @@ public class ChangeStreamService<T> {
     private ChangeStreamProcess<T> earilest = null;
     private ChangeStreamProcess<T> latest = null;
 
+    public void run(Function<ChangeStreamProcessConfig<T>, ChangeStreamProcess<T>> initProcess, boolean resume)
+            throws Exception {
+        this.run(1, initProcess, resume);
+    }
     @SuppressWarnings("unchecked")
     public void run(int noOfChangeStream,
             Function<ChangeStreamProcessConfig<T>, ChangeStreamProcess<T>> initProcess, boolean resume)
