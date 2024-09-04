@@ -1,13 +1,10 @@
 package com.mongodb.javabasic.controller;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.jeasy.random.EasyRandom;
-import org.jeasy.random.EasyRandomParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.mongodb.javabasic.model.Stat;
 import com.mongodb.javabasic.model.User;
 import com.mongodb.javabasic.model.Workload;
+import com.mongodb.javabasic.service.GenerativeService;
 import com.mongodb.javabasic.service.UserService;
 
 @RestController
@@ -27,6 +25,8 @@ import com.mongodb.javabasic.service.UserService;
 public class UserController extends GenericController<User> {
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
+	@Autowired
+	GenerativeService<User> generativeService;
 	@Autowired
 	@Qualifier("userService")
 	UserService driverService;
@@ -57,12 +57,10 @@ public class UserController extends GenericController<User> {
 
 	@Override
 	public Stat<User> load(Workload workload) {
-		EasyRandom generator = new EasyRandom(new EasyRandomParameters()
-				.seed(new Date().getTime()));
 		List<User> users = new ArrayList<>();
 		switch (workload.getOperationType()) {
 			case INSERT:
-				users = generator.objects(User.class, workload.getQuantity()).map(u -> {
+				users = generativeService.generateRandom(User.class, workload.getQuantity()).map(u -> {
 					u.setId(null);
 					u.setVersion(1);
 					return u;
@@ -76,7 +74,7 @@ public class UserController extends GenericController<User> {
 				break;
 			case REPLACE:
 			case UPDATE:
-				var temp = generator.objects(User.class, workload.getIds().size()).collect(Collectors.toList());
+				var temp = generativeService.generateRandom(User.class, workload.getIds().size()).collect(Collectors.toList());
 				users = IntStream.range(0, workload.getIds().size()).mapToObj(i -> {
 					User u = temp.get(i);
 					u.setId(workload.getIds().get(i));
