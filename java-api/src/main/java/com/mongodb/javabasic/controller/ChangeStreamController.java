@@ -21,15 +21,12 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.changestream.FullDocument;
 import com.mongodb.javabasic.model.ChangeStreamProcess;
 import com.mongodb.javabasic.model.ChangeStreamProcessConfig;
-import com.mongodb.javabasic.service.ChangeStreamService;
+import com.mongodb.javabasic.model.ChangeStream;
 
 @RestController
 @RequestMapping(path = "/watch")
 public class ChangeStreamController {
     private Logger logger = LoggerFactory.getLogger(getClass());
-
-    @Autowired
-    private ChangeStreamService<Document> changeStreamService;
 
     @Autowired
     private MongoTemplate mongoTemplate;
@@ -43,7 +40,7 @@ public class ChangeStreamController {
             @RequestParam(required = false) long lastEventTime,
             @RequestParam(required = false, defaultValue = "1") int noOfChangeStream,
             @RequestParam(required = false, defaultValue = "false") boolean fullDocument) throws Exception {
-        changeStreamService.run(noOfChangeStream, (ChangeStreamProcessConfig<Document> config) -> {
+        new ChangeStream<Document>().run(noOfChangeStream, (ChangeStreamProcessConfig<Document> config) -> {
             List<Bson> pipeline = (List.of(Aggregates.match(
                     Filters.in("ns.coll", List.of(collection)))));
             if (startAt > 0)

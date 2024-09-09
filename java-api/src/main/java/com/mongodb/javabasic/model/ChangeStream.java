@@ -1,17 +1,15 @@
-package com.mongodb.javabasic.service;
+package com.mongodb.javabasic.model;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
-import com.mongodb.javabasic.model.ChangeStreamProcess;
-import com.mongodb.javabasic.model.ChangeStreamProcessConfig;
+import lombok.Data;
 
-@Service
-public class ChangeStreamService<T> {
+@Data
+public class ChangeStream<T> {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     private List<ChangeStreamProcess<T>> changeStreams = new ArrayList<>();
