@@ -2,6 +2,7 @@ spring:
   data:
     mongodb:
       uri: "mongodb+srv://admin:admin12345@demo.uskpz.mongodb.net/mongodb-developer"
+      #?w=4&readConcernLevel=majority&readPreference=primary
 logging:
   level:
     org:
