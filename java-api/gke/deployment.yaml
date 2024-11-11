@@ -17,14 +17,6 @@ spec:
       - name: ${APP_NAME}
         image: gcr.io/${PROJECT_ID}/${REPO_NAME}:${TAG_NAME}
         imagePullPolicy: Always
-        env:
-        - name: SPRING_PROFILES_ACTIVE
-          value: "${ACTIVE_PROFILE}"
-        - name: DATABASE_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: "mysogno-${ACTIVE_PROFILE}"
-              key: db
         ports:
         - containerPort: 8080
         - containerPort: 8081
