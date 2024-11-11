@@ -28,7 +28,7 @@ public class ApplicationController {
 		return "OK";
 	}
 
-    @GetMapping("/test")
+    /*@GetMapping("/test")
     public String test() {
 
     logger.info(mongoTemplate.getDb().getReadConcern().toString());
@@ -44,7 +44,7 @@ public class ApplicationController {
     repository.save(e);
     logger.info(repository.findById("1234").toString());
         return "OK";
-    }
+    }*/
 
     //spring vs mongodb driver:
     //spring data repo/spring helper/mongodb driver
