@@ -6,7 +6,7 @@ import { Page } from '../shared/models/page';
 import { Stat } from '../shared/models/stats';
 import { Workload } from '../shared/models/workload';
 
-const baseURL = environment.apiUrl;
+const baseURL = environment.japiUrl;
 @Injectable({
 	providedIn: 'root'
 })
