@@ -1,0 +1,21 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: ${APP_NAME}
+  labels:
+    app: ${APP_NAME}
+spec:
+  namespaceSelector:
+    any: true
+  selector:
+    matchLabels:
+      app: ${APP_NAME}
+  podMetricsEndpoints:
+  - targetPort: 8081
+    path: /actuator/prometheus
+    interval: 15s
+    relabelings:
+    - action: replace
+      sourceLabels:
+      - __meta_kubernetes_pod_name
+      targetLabel: instance

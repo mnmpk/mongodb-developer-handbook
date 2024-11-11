@@ -9,6 +9,11 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class GenerativeService<T> {
+	public T generateRandom(Class<T> clazz) {
+		EasyRandom generator = new EasyRandom(new EasyRandomParameters()
+				.seed(new Date().getTime()));
+		return generator.nextObject(clazz);
+	}
 	public Stream<T> generateRandom(Class<T> clazz, int noOfObjects) {
 		EasyRandom generator = new EasyRandom(new EasyRandomParameters()
 				.seed(new Date().getTime()));

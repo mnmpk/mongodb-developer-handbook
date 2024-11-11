@@ -1,0 +1,71 @@
+package com.mongodb.javabasic.model;
+
+import java.util.Date;
+
+import lombok.Data;
+
+@Data
+public class Location {
+    private Integer locnId;
+    private String locnCode;
+    private String locnName;
+    private String locnType;
+    private Integer deptId;
+    private Integer areaId;
+    private Integer masterLocnId;
+    private Integer chipReqLocnId;
+    private Integer lastOpenRatingPlayerId;
+    private String ratingType;
+    private String mfr;
+    private String mfrModel;
+    private String typeDesc;
+    private Integer serialNum;
+    private String machStand;
+    private Integer cncySerialNum;
+    private String govtSeal;
+    private Integer locnInfo1;
+    private Integer locnInfo2;
+    private Integer locnInfo3;
+    private Integer locnInfo4;
+    private Integer minBet;
+    private Integer maxBet;
+    private Boolean isAutoSetup;
+    private Boolean isOpen;
+    private Boolean isAutoClose;
+    private Integer autoCloseAfterHours;
+    private Integer lastPlayerID;
+    private Boolean isSignon;
+    private Boolean isSubLocn;
+    private Boolean isAux1;
+    private Boolean isAux2;
+    private Boolean isMasterGamingReportLocn;
+    private Boolean isOpenRating;
+    private Boolean isMarkerTransferDestination;
+    private Boolean isBankLocn;
+    private Boolean isEPrinter;
+    private Boolean isPPEnabled;
+    private Integer chipBank;
+    private Integer trackInvStatus;
+    private Boolean isInactive;
+    private Integer createdBy;
+    private Integer modifiedBy;
+    private String interfaceName;
+    private Integer seats;
+    private Integer totalSeatRows;
+    private Date currentLocnGamingDt;
+    private Integer currentLocnShift;
+    private String rowSeatQuantity;
+    private Integer modeOfOperation;
+    private Boolean isMultipleJunketTable;
+    private Date setupDtm;
+    private Date createdDtm;
+    private Date modifiedDtm;
+    private Date lastCloseDtm;
+    private Date lastOpenDtm;
+    private Integer dataRowVersion;
+    private Integer customSeatNumbers;
+    private Boolean isInsurance;
+    private Integer maxAvgBet;
+    private Integer casinoId;
+    private String localLocnCode;
+}

@@ -1,0 +1,21 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: ${APP_NAME}
+  labels:
+    app: ${APP_NAME}
+spec:
+  endpoints:
+  - interval: 30s
+    port: management
+    path: /actuator/prometheus
+    relabelings:
+    - action: replace
+      sourceLabels:
+      - __meta_kubernetes_service_name
+      targetLabel: instance
+  namespaceSelector:
+    any: true
+  selector:
+    matchLabels:
+      app: ${APP_NAME}

@@ -16,3 +16,7 @@ settings:
   corePoolsize: 10 
   maxPoolSize: 30
   queueSize: 100000
+  changeStream:
+    batchSize: 10000
+    maxAwaitTime: 800
+    watchColls: tTableRating,tLocn,tArea

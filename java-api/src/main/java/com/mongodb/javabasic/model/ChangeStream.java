@@ -14,13 +14,14 @@ public class ChangeStream<T> {
 
     private List<ChangeStreamProcess<T>> changeStreams = new ArrayList<>();
 
-    private ChangeStreamProcess<T> earilest = null;
-    private ChangeStreamProcess<T> latest = null;
+    private ChangeStreamProcess<T> earilest;
+    private ChangeStreamProcess<T> latest;
 
     public void run(Function<ChangeStreamProcessConfig<T>, ChangeStreamProcess<T>> initProcess, boolean resume)
             throws Exception {
         this.run(1, initProcess, resume);
     }
+
     @SuppressWarnings("unchecked")
     public void run(int noOfChangeStream,
             Function<ChangeStreamProcessConfig<T>, ChangeStreamProcess<T>> initProcess, boolean resume)
