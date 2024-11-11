@@ -26,7 +26,7 @@ steps:
     - "CLOUDSDK_COMPUTE_ZONE=${_ZONE}"
     - "CLOUDSDK_CONTAINER_CLUSTER=${_CLUSTER}"
   - name: "gcr.io/cloud-builders/kubectl"
-    args: ["set", "image", "deployment", "${REPO_NAME}-java", "${REPO_NAME}-java=gcr.io/$PROJECT_ID/${REPO_NAME}:${COMMIT_SHA}"]
+    args: ["set", "image", "deployment", "${REPO_NAME}-java", "${REPO_NAME}-java=gcr.io/$PROJECT_ID/${REPO_NAME}-java:${COMMIT_SHA}"]
     dir: "java-api"
     env:
     - "CLOUDSDK_COMPUTE_ZONE=${_ZONE}"
