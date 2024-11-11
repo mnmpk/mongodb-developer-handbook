@@ -8,10 +8,10 @@ steps:
   # build the container image
   - name: 'gcr.io/cloud-builders/docker'
     entrypoint: 'bash'
-    args: ["-c", 'docker pull gcr.io/$PROJECT_ID/$REPO_NAME:$COMMIT_SHA || exit 0']
+    args: ["-c", 'docker pull gcr.io/$PROJECT_ID/$REPO_NAME-java:$COMMIT_SHA || exit 0']
     dir: "java-api"
   - name: gcr.io/cloud-builders/docker
-    args: ["build", "--build-arg=JAR_FILE=target/*.jar", "-t", "gcr.io/$PROJECT_ID/$REPO_NAME:$COMMIT_SHA", "."]
+    args: ["build", "--build-arg=JAR_FILE=target/*.jar", "-t", "gcr.io/$PROJECT_ID/$REPO_NAME-java:$COMMIT_SHA", "."]
     dir: "java-api"
   - name: "gcr.io/cloud-builders/kubectl"
     entrypoint: bash
