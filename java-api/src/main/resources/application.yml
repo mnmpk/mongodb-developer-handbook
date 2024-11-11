@@ -1,3 +1,18 @@
+management:
+  server:
+    port: 8081
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+    jmx: 
+      exposure:
+        exclude: "*"
+  health:
+    mail:
+      enabled: false
+    rabbit:
+      enabled: false
 spring:
   data:
     mongodb:
