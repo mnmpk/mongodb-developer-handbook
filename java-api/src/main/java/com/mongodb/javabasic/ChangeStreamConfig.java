@@ -35,13 +35,13 @@ import jakarta.annotation.PostConstruct;
 @Configuration
 public class ChangeStreamConfig {
 
-        @Value("${app.changeStream.batchSize}")
+        @Value("${settings.changeStream.batchSize}")
         private int batchSize;
 
-        @Value("${app.changeStream.maxAwaitTime}")
+        @Value("${settings.changeStream.maxAwaitTime}")
         private int maxAwaitTime;
 
-        @Value("${app.changeStream.watchColls}")
+        @Value("${settings.changeStream.watchColls}")
         private String[] watchColls;
 
         private Logger logger = LoggerFactory.getLogger(getClass());
