@@ -1,5 +1,5 @@
 
-const japiUrl = "//handbook-japi.mongodb.mzinx.com:8080";
+const japiUrl = "//handbook-japi.mongodb.mzinx.com";
 export const environment = {
     production: true,
 	japiUrl: japiUrl,
