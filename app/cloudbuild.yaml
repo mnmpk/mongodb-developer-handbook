@@ -3,8 +3,10 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     entrypoint: 'bash'
     args: ["-c", 'docker pull gcr.io/$PROJECT_ID/$REPO_NAME:$COMMIT_SHA || exit 0']
+    dir: "app"
   - name: gcr.io/cloud-builders/docker
     args: ["build", "-t", "gcr.io/$PROJECT_ID/$REPO_NAME:$COMMIT_SHA", "."]
+    dir: "app"
   - name: "gcr.io/cloud-builders/kubectl"
     entrypoint: bash
     args: 
@@ -13,11 +15,13 @@ steps:
       sed -i -e 's/$${PROJECT_ID}/$PROJECT_ID/g' -e 's/$${REPO_NAME}/$REPO_NAME/g' -e 's/$${APP_NAME}/${REPO_NAME}/g' -e 's/$${TAG_NAME}/$COMMIT_SHA/g' -e 's/$${MIN_REPLICAS}/${_MIN_REPLICAS}/g' -e 's/$${MAX_REPLICAS}/${_MAX_REPLICAS}/g' gke/*.yaml
       gcloud container clusters get-credentials --project="$PROJECT_ID" --zone="${_ZONE}" "${_CLUSTER}"
       kubectl apply -f gke/
+    dir: "app"
     env:
     - "CLOUDSDK_COMPUTE_ZONE=${_ZONE}"
     - "CLOUDSDK_CONTAINER_CLUSTER=${_CLUSTER}"
   - name: "gcr.io/cloud-builders/kubectl"
     args: ["set", "image", "deployment", "${REPO_NAME}", "${REPO_NAME}=gcr.io/$PROJECT_ID/$REPO_NAME:$COMMIT_SHA"]
+    dir: "app"
     env:
     - "CLOUDSDK_COMPUTE_ZONE=${_ZONE}"
     - "CLOUDSDK_CONTAINER_CLUSTER=${_CLUSTER}"
