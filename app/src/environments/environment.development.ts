@@ -1,7 +1,7 @@
 
-const apiUrl = "//localhost:8080";
+const japiUrl = "//localhost:8080";
 export const environment = {
     production: false,
-	apiUrl: apiUrl,
+	japiUrl: japiUrl,
 	defaultPageSize: 50,
 };
