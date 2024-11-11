@@ -18,7 +18,7 @@ steps:
     args: 
     - '-c'
     - |
-      sed -i -e 's/$${PROJECT_ID}/$PROJECT_ID/g' -e 's/$${REPO_NAME}/${REPO_NAME}/g' -e 's/$${APP_NAME}/${REPO_NAME}/g' -e 's/$${TAG_NAME}/${COMMIT_SHA}/g' -e 's/$${MIN_REPLICAS}/${_MIN_REPLICAS}/g' -e 's/$${MAX_REPLICAS}/${_MAX_REPLICAS}/g' gke/*.yaml
+      sed -i -e 's/$${PROJECT_ID}/$PROJECT_ID/g' -e 's/$${REPO_NAME}/${REPO_NAME}/g' -e 's/$${APP_NAME}/${REPO_NAME}-java/g' -e 's/$${TAG_NAME}/${COMMIT_SHA}/g' -e 's/$${MIN_REPLICAS}/${_MIN_REPLICAS}/g' -e 's/$${MAX_REPLICAS}/${_MAX_REPLICAS}/g' gke/*.yaml
       gcloud container clusters get-credentials --project="$PROJECT_ID" --zone="${_ZONE}" "${_CLUSTER}"
       kubectl apply -f gke/
     dir: "java-api"
@@ -26,7 +26,7 @@ steps:
     - "CLOUDSDK_COMPUTE_ZONE=${_ZONE}"
     - "CLOUDSDK_CONTAINER_CLUSTER=${_CLUSTER}"
   - name: "gcr.io/cloud-builders/kubectl"
-    args: ["set", "image", "deployment", "${REPO_NAME}", "${REPO_NAME}=gcr.io/$PROJECT_ID/${REPO_NAME}:${COMMIT_SHA}"]
+    args: ["set", "image", "deployment", "${REPO_NAME}-java", "${REPO_NAME}-java=gcr.io/$PROJECT_ID/${REPO_NAME}:${COMMIT_SHA}"]
     dir: "java-api"
     env:
     - "CLOUDSDK_COMPUTE_ZONE=${_ZONE}"

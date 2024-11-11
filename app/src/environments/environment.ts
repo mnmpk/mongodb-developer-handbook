@@ -1,5 +1,5 @@
 
-const apiUrl = "//localhost:8080";
+const apiUrl = "//handbook.mongodb.mzinx.com:8080";
 export const environment = {
     production: true,
 	apiUrl: apiUrl,

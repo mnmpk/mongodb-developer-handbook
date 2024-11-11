@@ -3,7 +3,8 @@ WORKDIR /app
 COPY package*.json /app/
 RUN npm install
 COPY ./ /app/
-RUN npm run build -- --output-path=./dist/out
+ARG CONFIG
+RUN npm run build -- --output-path=./dist/out --configuration $CONFIG
 
 
 FROM nginx:1.15
