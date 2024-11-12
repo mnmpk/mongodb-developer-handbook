@@ -25,7 +25,6 @@ import com.mongodb.client.model.UpdateOneModel;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.model.Updates;
 import com.mongodb.client.model.changestream.FullDocument;
-import com.mongodb.client.model.changestream.OperationType;
 import com.mongodb.javabasic.model.ChangeStream;
 import com.mongodb.javabasic.model.ChangeStreamProcess;
 import com.mongodb.javabasic.model.ChangeStreamProcessConfig;
@@ -294,77 +293,6 @@ public class ChangeStreamConfig {
 
                         };
                 }, true);
-
-                ChangeStream<Document> changeStream2 = new ChangeStream<>();
-                changeStream2.run((ChangeStreamProcessConfig<Document> config) -> {
-                        return new ChangeStreamProcess<Document>(config,
-                                        (e) -> {
-                                                if (OperationType.DELETE != e.getOperationType()) {
-                                                        Document doc = e.getFullDocument();
-                                                        // logger.info(doc.toString());
-
-                                                        /*
-                                                         * 1. Rule1: Sum the bet amount by the acct and areaCode in the
-                                                         * past 15 days
-                                                         * select Acct, GamingDt, CasinoCode, DeptCode, GameCode,
-                                                         * RatingCategory, LocnInfo3, LocnInfo4, AreaCode, sum(bet) as
-                                                         * sum_bet
-                                                         * from Rating // new rating model
-                                                         * where PostDtm > current_date - interval '15' day
-                                                         * group by Acct, GamingDt, CasinoCode, DeptCode, GameCode,
-                                                         * RatingCategory, LocnInfo3, LocnInfo4, AreaCode
-                                                         * 
-                                                         * 
-                                                         * 2. Rule2: Sum the bet amount by the acct and areaCode in the
-                                                         * past 3 minutes
-                                                         * select Acct, GamingDt, CasinoCode, DeptCode, GameCode,
-                                                         * RatingCategory, LocnInfo3, LocnInfo4, AreaCode, sum(bet) as
-                                                         * sum_bet
-                                                         * from Rating
-                                                         * where PostDtm > current_date - interval '3' minutes
-                                                         * group by Acct, GamingDt, CasinoCode, DeptCode, GameCode,
-                                                         * RatingCategory, LocnInfo3, LocnInfo4, AreaCode
-                                                         * 
-                                                         * 
-                                                         * 3. Rule3: Sum the CasinoWin by the acct, casinoCode and
-                                                         * areaCode in every day
-                                                         * select Acct, GamingDt, CasinoCode, AreaCode, sum(CasinoWin)
-                                                         * as sum_casinoWin
-                                                         * from Rating
-                                                         * group by Acct, GamingDt, CasinoCode, AreaCode
-                                                         * 
-                                                         * 
-                                                         * 4. Rule4: Sum the CasinoWin by the acct, casinoCode and
-                                                         * areaCode in the past 3 minutes
-                                                         * select Acct, GamingDt, CasinoCode, AreaCode, sum(CasinoWin)
-                                                         * as sum_casinoWin
-                                                         * from Rating
-                                                         * where PostDtm > current_date - interval '3' minutes
-                                                         * group by Acct, GamingDt, CasinoCode, AreaCode
-                                                         * 
-                                                         * 
-                                                         * 5. Rule5:
-                                                         * Sum the TheorWin by the acct and casinoCode in every day
-                                                         * select Acct, GamingDt, CasinoCode, sum(TheorWin) as
-                                                         * sum_casinoWin
-                                                         * from Rating
-                                                         * group by Acct, GamingDt, CasinoCode
-                                                         */
-                                                }
-                                        }) {
-                                @Override
-                                public ChangeStreamIterable<Document> initChangeStream(List<Bson> p) {
-                                        ChangeStreamIterable<Document> cs = mongoTemplate.getDb()
-                                                        .getCollection("tRatingBucket")
-                                                        .watch(p, Document.class)
-                                                        .batchSize(batchSize)
-                                                        .maxAwaitTime(maxAwaitTime, TimeUnit.MILLISECONDS)
-                                                        .fullDocument(FullDocument.UPDATE_LOOKUP);
-                                        return cs;
-                                }
-
-                        };
-                }, true);
         }
 
         private UpdateOneModel<Document> createPlayerBucketUpdateModel(Document d, String bucketSize, Date bucketDt,
@@ -381,6 +309,7 @@ public class ChangeStreamConfig {
                                 Filters.and(filters),
                                 Updates.combine(
                                                 Updates.combine(updates),
+                                                Updates.set("type", String.join("-", groupBys)),
                                                 Updates.set("bucketDt",
                                                                 bucketDt),
                                                 Updates.set("bucketSize",

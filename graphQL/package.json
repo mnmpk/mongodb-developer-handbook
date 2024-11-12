@@ -1,0 +1,26 @@
+{
+  "name": "dataaccessexpressjs",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node --env-file=.env index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@apollo/server": "^4.10.5",
+    "@graphql-tools/schema": "^10.0.4",
+    "express": "^4.19.2",
+    "graphql": "^16.9.0",
+    "graphql-subscriptions": "^2.0.0",
+    "graphql-tools": "^9.0.1",
+    "graphql-type-decimal": "^1.0.0",
+    "graphql-ws": "^5.16.0",
+    "mongodb": "^6.8.0",
+    "ws": "^8.18.0"
+  }
+}
