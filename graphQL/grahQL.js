@@ -6,14 +6,33 @@ export const typeDefs = `#graphql
   type accountArea {
     _id : String
     type: String
+    acct: String
+    areaCode: String
+    sumBet: Float
+    sumCasinoWin: Float
+    sumTheorWin: Float
+    noOfTxn: Int
   }
   type accountCasinoArea {
     _id : String
     type: String
+    acct: String
+    casinoCode: String
+    areaCode: String
+    sumBet: Float
+    sumCasinoWin: Float
+    sumTheorWin: Float
+    noOfTxn: Int
   }
   type accountCasino {
     _id : String
     type: String
+    acct: String
+    casinoCode: String
+    sumBet: Float
+    sumCasinoWin: Float
+    sumTheorWin: Float
+    noOfTxn: Int
   }
 
   # The "Query" type is special: it lists all of the available queries that

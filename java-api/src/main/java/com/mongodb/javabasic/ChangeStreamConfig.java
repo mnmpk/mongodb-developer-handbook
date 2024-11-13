@@ -300,9 +300,9 @@ public class ChangeStreamConfig {
                 List<Bson> filters = new ArrayList<>();
                 List<Bson> updates = new ArrayList<>();
                 for (String groupBy : groupBys) {
-                        filters.add(Filters.eq(groupBy, d.get(groupBy)));
                         updates.add(Updates.set(groupBy, d.get(groupBy)));
                 }
+                filters.add(Filters.eq("type", String.join("-", groupBys)));
                 filters.add(Filters.eq("bucketSize", bucketSize));
                 filters.add(Filters.eq("bucketDt", bucketDt));
                 return new UpdateOneModel<Document>(
