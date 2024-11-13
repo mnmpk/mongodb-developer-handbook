@@ -4,6 +4,8 @@ metadata:
   name: ${APP_NAME}
   labels:
     app: ${APP_NAME}
+  annotations:
+   cloud.google.com/backend-config: '{"default": "${APP_NAME}-backend-config"}'
 spec:
   type: NodePort
   selector:
