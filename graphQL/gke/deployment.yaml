@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ${APP_NAME}
+  labels:
+    app: ${APP_NAME}
+spec:
+  selector:
+    matchLabels:
+      app: ${APP_NAME}
+  template:
+    metadata:
+      labels:
+        app: ${APP_NAME}
+    spec:
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: ${APP_NAME} 
+      containers:
+      - name: ${APP_NAME}
+        image: gcr.io/${PROJECT_ID}/${REPO_NAME}-graphQL:${TAG_NAME}
+        imagePullPolicy: Always
+#        env: 
+#        - name: SOURCE
+#          value: "${SOURCE}" 
+#        - name: SECRET
+#          value: "${SECRET}"  
+        ports:
+        - containerPort: 4000
+        resources:
+          limits:
+            cpu: 100m
+            memory: 1G
+          requests:
+            cpu: 50m
+            memory: 800m
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 4000
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 4000

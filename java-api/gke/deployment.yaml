@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: ${APP_NAME}
-        image: gcr.io/${PROJECT_ID}/${REPO_NAME}:${TAG_NAME}
+        image: gcr.io/${PROJECT_ID}/${REPO_NAME}-java:${TAG_NAME}
         imagePullPolicy: Always
         ports:
         - containerPort: 8080

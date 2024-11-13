@@ -11,6 +11,7 @@ import { HttpLink, InMemoryCache, split } from '@apollo/client/core';
 import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
 import { getMainDefinition } from '@apollo/client/utilities';
 import { createClient } from 'graphql-ws';
+import { environment } from '../environments/environment';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -27,11 +28,11 @@ export const appConfig: ApplicationConfig = {
           },
           new GraphQLWsLink(
             createClient({
-              url: 'http://localhost:4000/',
+              url: environment.graphQLUrl,
             }),
           ),
           new HttpLink({
-            uri: 'http://localhost:4000/',
+            uri: environment.graphQLUrl,
           }),
         ),
         cache: new InMemoryCache(),
