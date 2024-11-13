@@ -2,17 +2,17 @@ steps:
   # build the container image
   - name: 'gcr.io/cloud-builders/docker'
     entrypoint: 'bash'
-    args: ["-c", 'docker pull gcr.io/$PROJECT_ID/$REPO_NAME-graphQL:$COMMIT_SHA || exit 0']
+    args: ["-c", 'docker pull gcr.io/$PROJECT_ID/$REPO_NAME-graphql:$COMMIT_SHA || exit 0']
     dir: "graphQL"
   - name: gcr.io/cloud-builders/docker
-    args: ["build", "-t", "gcr.io/$PROJECT_ID/$REPO_NAME-graphQL:$COMMIT_SHA", "."]
+    args: ["build", "-t", "gcr.io/$PROJECT_ID/$REPO_NAME-graphql:$COMMIT_SHA", "."]
     dir: "graphQL"
   - name: "gcr.io/cloud-builders/kubectl"
     entrypoint: bash
     args: 
     - '-c'
     - |
-      sed -i -e 's/$${PROJECT_ID}/$PROJECT_ID/g' -e 's/$${REPO_NAME}/$REPO_NAME/g' -e 's/$${APP_NAME}/${REPO_NAME}-graphQL/g' -e 's/$${TAG_NAME}/$COMMIT_SHA/g' -e 's/$${MIN_REPLICAS}/${_MIN_REPLICAS}/g' -e 's/$${MAX_REPLICAS}/${_MAX_REPLICAS}/g' gke/*.yaml
+      sed -i -e 's/$${PROJECT_ID}/$PROJECT_ID/g' -e 's/$${REPO_NAME}/$REPO_NAME/g' -e 's/$${APP_NAME}/${REPO_NAME}-graphql/g' -e 's/$${TAG_NAME}/$COMMIT_SHA/g' -e 's/$${MIN_REPLICAS}/${_MIN_REPLICAS}/g' -e 's/$${MAX_REPLICAS}/${_MAX_REPLICAS}/g' gke/*.yaml
       gcloud container clusters get-credentials --project="$PROJECT_ID" --zone="${_ZONE}" "${_CLUSTER}"
       kubectl apply -f gke/
     dir: "graphQL"
@@ -20,9 +20,9 @@ steps:
     - "CLOUDSDK_COMPUTE_ZONE=${_ZONE}"
     - "CLOUDSDK_CONTAINER_CLUSTER=${_CLUSTER}"
   - name: "gcr.io/cloud-builders/kubectl"
-    args: ["set", "image", "deployment", "${REPO_NAME}-graphQL", "${REPO_NAME}-graphQL=gcr.io/$PROJECT_ID/$REPO_NAME-graphQL:$COMMIT_SHA"]
+    args: ["set", "image", "deployment", "${REPO_NAME}-graphql", "${REPO_NAME}-graphql=gcr.io/$PROJECT_ID/$REPO_NAME-graphql:$COMMIT_SHA"]
     dir: "graphQL"
     env:
     - "CLOUDSDK_COMPUTE_ZONE=${_ZONE}"
     - "CLOUDSDK_CONTAINER_CLUSTER=${_CLUSTER}"
-images: ["gcr.io/$PROJECT_ID/$REPO_NAME-graphQL:$COMMIT_SHA"]
+images: ["gcr.io/$PROJECT_ID/$REPO_NAME-graphql:$COMMIT_SHA"]

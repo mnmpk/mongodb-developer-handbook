@@ -22,7 +22,7 @@ spec:
               app: ${APP_NAME} 
       containers:
       - name: ${APP_NAME}
-        image: gcr.io/${PROJECT_ID}/${REPO_NAME}-graphQL:${TAG_NAME}
+        image: gcr.io/${PROJECT_ID}/${REPO_NAME}-graphql:${TAG_NAME}
         imagePullPolicy: Always
 #        env: 
 #        - name: SOURCE
