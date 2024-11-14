@@ -3,8 +3,10 @@ package com.mongodb.javabasic.schedule;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +22,8 @@ import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.TransactionBody;
 import com.mongodb.client.model.Aggregates;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.result.InsertOneResult;
 import com.mongodb.javabasic.model.Area;
 import com.mongodb.javabasic.model.Award;
 import com.mongodb.javabasic.model.Casino;
@@ -69,25 +73,55 @@ public class DataGeneration {
 
     @PostConstruct
     public void init() throws Exception {
-        if (mongoTemplate.getCollection("tPlayerCard").countDocuments() <= 0) {
-            PlayerCard player = playerCardGenService.generateRandom(PlayerCard.class);
-            mongoTemplate.getCollection("tPlayerCard").withDocumentClass(PlayerCard.class).insertOne(player);
+        long MAX_PLAYER = 10;
+        long MAX_CASINO = 2;
+        long AREA_PER_CASINO = 4;
+        long DEPT_PER_CASINO = 5;
+        long LOCN_PER_CASINO = 100;
+
+        long playerCount = mongoTemplate.getCollection("tPlayerCard").countDocuments();
+        long casinoCount = mongoTemplate.getCollection("tCasino").countDocuments();
+        if (playerCount <= 10) {
+            for (long i = playerCount; i < MAX_PLAYER; i++) {
+                PlayerCard player = playerCardGenService.generateRandom(PlayerCard.class);
+                mongoTemplate.getCollection("tPlayerCard").withDocumentClass(PlayerCard.class).insertOne(player);
+            }
         }
-        if (mongoTemplate.getCollection("tCasino").countDocuments() <= 0) {
-            Casino casino = casinoGenService.generateRandom(Casino.class);
-            mongoTemplate.getCollection("tCasino").withDocumentClass(Casino.class).insertOne(casino);
-        }
-        if (mongoTemplate.getCollection("tDept").countDocuments() <= 0) {
-            Dept dept = deptGenService.generateRandom(Dept.class);
-            mongoTemplate.getCollection("tDept").withDocumentClass(Dept.class).insertOne(dept);
-        }
-        if (mongoTemplate.getCollection("tArea").countDocuments() <= 0) {
-            Area area = areaGenService.generateRandom(Area.class);
-            mongoTemplate.getCollection("tArea").withDocumentClass(Area.class).insertOne(area);
-        }
-        if (mongoTemplate.getCollection("tLocn").countDocuments() <= 0) {
-            Location location = locationGenService.generateRandom(Location.class);
-            mongoTemplate.getCollection("tLocn").withDocumentClass(Location.class).insertOne(location);
+        if (mongoTemplate.getCollection("tCasino").countDocuments() <= MAX_CASINO) {
+            for (long i = casinoCount; i < MAX_CASINO; i++) {
+                Casino casino = casinoGenService.generateRandom(Casino.class);
+                mongoTemplate.getCollection("tCasino").withDocumentClass(Casino.class).insertOne(casino);
+
+                long deptCount = mongoTemplate.getCollection("tDept")
+                        .countDocuments(Filters.eq("casinoId", casino.getCasinoId()));
+                long areaCount = mongoTemplate.getCollection("tArea")
+                        .countDocuments(Filters.eq("casinoId", casino.getCasinoId()));
+
+                        List<Integer> deptList = new ArrayList<>();
+                        List<Integer> areaList = new ArrayList<>();
+                if (deptCount <= DEPT_PER_CASINO) {
+                    for (long j = deptCount; j < DEPT_PER_CASINO; j++) {
+                        Dept dept = deptGenService.generateRandom(Dept.class);
+                        mongoTemplate.getCollection("tDept").withDocumentClass(Dept.class).insertOne(dept);
+                        deptList.add(dept.getDeptId());
+                    }
+                }
+                if (areaCount <= AREA_PER_CASINO) {
+                    for (long j = areaCount; j < AREA_PER_CASINO; j++) {
+                        Area area = areaGenService.generateRandom(Area.class);
+                        mongoTemplate.getCollection("tArea").withDocumentClass(Area.class).insertOne(area);
+                        areaList.add(area.getAreaId());
+                    }
+                }
+
+                long locationCount = mongoTemplate.getCollection("tLocn").countDocuments(Filters.eq("casinoId", casino.getCasinoId()));
+                if (locationCount <= LOCN_PER_CASINO) {
+                    Location location = locationGenService.generateRandom(Location.class);
+                    location.setAreaId(areaList.get(new Random().nextInt(areaList.size())));
+                    location.setDeptId(deptList.get(new Random().nextInt(deptList.size())));
+                    mongoTemplate.getCollection("tLocn").withDocumentClass(Location.class).insertOne(location);
+                }
+            }
         }
     }
 
