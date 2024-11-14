@@ -128,7 +128,7 @@ public class DataGeneration {
         }
     }
 
-    @Scheduled(fixedRate = 10000)
+    @Scheduled(fixedRate = 1000)
     public void game() {
         logger.info("data generated at {}", LocalDateTime.now());
         ClientSession clientSession = mongoClient.startSession();

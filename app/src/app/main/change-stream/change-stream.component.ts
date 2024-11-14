@@ -1,5 +1,5 @@
 import { Component, ViewChild } from '@angular/core';
-import { MatSort } from '@angular/material/sort';
+import { MatSort, Sort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { Apollo, gql } from 'apollo-angular';
 import { map, Observable, Subscription } from 'rxjs';
@@ -201,13 +201,16 @@ export class ChangeStreamComponent {
   public query!: any;
   public queryResult!: Observable<any>;
   subscription!: Subscription;
-  dataSource!: MatTableDataSource<any>;
-  displayedColumns: string[] = ['acct', 'casino', 'area', 'sumBet', 'avgBet'];
+  dataSource: MatTableDataSource<any> = new MatTableDataSource();
+  displayedColumns: string[] = ['acct', 'casinoCode', 'areaCode', 'sumBet', 'avgBet'];
 
   constructor(private readonly apollo: Apollo) { }
 
   ngOnInit() {
     this.change();
+  }
+  ngAfterViewInit(){
+    this.dataSource.sort = this.sort;
   }
   change() {
     if(this.subscription){
@@ -221,11 +224,8 @@ export class ChangeStreamComponent {
         });
       this.queryResult = this.query.valueChanges;
       this.subscription = this.queryResult.subscribe((result) => {
-        this.dataSource = new MatTableDataSource(result.data[Object.keys(result.data)[0]]);
-        this.dataSource.sort = this.sort;
-        console.log(this.dataSource);
+        this.dataSource.data = result.data[Object.keys(result.data)[0]];
       });
-      console.log(this.query);
       this.query.subscribeToMore({
         document: gql[1],
         updateQuery: (prev: any, result: any) => {
