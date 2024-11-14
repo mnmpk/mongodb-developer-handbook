@@ -217,7 +217,7 @@ public class ChangeStreamConfig {
                                                                                 .first();
                                                                 if (d != null) {
                                                                         // logger.info(d.toJson());
-                                                                        MongoCollection<Document> player = mongoTemplate
+                                                                        MongoCollection<Document> tRatingBucket = mongoTemplate
                                                                                         .getDb()
                                                                                         .getCollection("tRatingBucket");
                                                                         logger.info("acct:" + d.getInteger("acct")
@@ -227,26 +227,26 @@ public class ChangeStreamConfig {
                                                                                         + d.getDate("bucketDt1day")
                                                                                         + " bucketDt15days:"
                                                                                         + d.getDate("bucketDt15days"));
-                                                                        BulkWriteResult result = player.bulkWrite(
+                                                                        BulkWriteResult result = tRatingBucket.bulkWrite(
                                                                                         List.of(
                                                                                                         this
                                                                                                                         .createPlayerBucketUpdateModel(
                                                                                                                                         d,
-                                                                                                                                        "15-days",
+                                                                                                                                        "15days",
                                                                                                                                         d.getDate("bucketDt15days"),
                                                                                                                                         "acct",
                                                                                                                                         "areaCode"),
                                                                                                         this
                                                                                                                         .createPlayerBucketUpdateModel(
                                                                                                                                         d,
-                                                                                                                                        "3-mins",
+                                                                                                                                        "3mins",
                                                                                                                                         d.getDate("bucketDt3mins"),
                                                                                                                                         "acct",
                                                                                                                                         "areaCode"),
                                                                                                         this
                                                                                                                         .createPlayerBucketUpdateModel(
                                                                                                                                         d,
-                                                                                                                                        "1-day",
+                                                                                                                                        "1day",
                                                                                                                                         d.getDate("bucketDt1day"),
                                                                                                                                         "acct",
                                                                                                                                         "casinoCode",
@@ -254,7 +254,7 @@ public class ChangeStreamConfig {
                                                                                                         this
                                                                                                                         .createPlayerBucketUpdateModel(
                                                                                                                                         d,
-                                                                                                                                        "3-mins",
+                                                                                                                                        "3mins",
                                                                                                                                         d.getDate("bucketDt3mins"),
                                                                                                                                         "acct",
                                                                                                                                         "casinoCode",
@@ -262,7 +262,7 @@ public class ChangeStreamConfig {
                                                                                                         this
                                                                                                                         .createPlayerBucketUpdateModel(
                                                                                                                                         d,
-                                                                                                                                        "1-day",
+                                                                                                                                        "1day",
                                                                                                                                         d.getDate("bucketDt1day"),
                                                                                                                                         "acct",
                                                                                                                                         "casinoCode")),
@@ -310,7 +310,7 @@ public class ChangeStreamConfig {
                                 Updates.combine(
                                                 Updates.combine(updates),
                                                 Updates.set("type", String.join("-", groupBys)),
-                                                Updates.set("bucketDt",
+                                                Updates.set("bucketDt"+bucketSize,
                                                                 bucketDt),
                                                 Updates.set("bucketSize",
                                                                 bucketSize),
