@@ -1,5 +1,6 @@
 import { PubSub } from 'graphql-subscriptions';
-import { getAccountArea, getAccountCasinoArea, getAccountCasino, watchAccountArea, watchAccountCasinoArea, watchAccountCasino } from './mongoDBOperation.js'
+import { getAccountArea15days, getAccountArea3mins, getAccountCasinoArea1day, getAccountCasinoArea3mins, getAccountCasino1day, 
+  watchAccountArea15days, watchAccountArea3mins, watchAccountCasinoArea1day, watchAccountCasinoArea3mins, watchAccountCasino1day } from './mongoDBOperation.js'
 import GraphQLDecimal from 'graphql-type-decimal';
 
 const pubsub = new PubSub();
@@ -9,52 +10,83 @@ const pubsub = new PubSub();
 export const resolvers = {
   Decimal: GraphQLDecimal,
   Query: {
-    getAccountArea: async ()=> {
-      return await getAccountArea();
+    getAccountArea15days: async ()=> {
+      return await getAccountArea15days();
     },
-    getAccountCasinoArea: async ()=> {
-      return await getAccountCasinoArea();
+    getAccountArea3mins: async ()=> {
+      return await getAccountArea3mins();
     },
-    getAccountCasino: async () => {
-      return await getAccountCasino(); 
+    getAccountCasinoArea1day: async ()=> {
+      return await getAccountCasinoArea1day();
+    },
+    getAccountCasinoArea3mins: async () => {
+      return await getAccountCasinoArea3mins(); 
+    },
+    getAccountCasino1day: async () => {
+      return await getAccountCasino1day(); 
     }
   },
   Subscription: {
-    watchAccountArea: {
+    watchAccountArea15days: {
       subscribe: ()=> {
         const _handler = (theNext)=>{
           
-          pubsub.publish("watchAccountArea", 
+          pubsub.publish("watchAccountArea15days", 
             // theNext
-            {watchAccountArea: theNext}
+            {watchAccountArea15days: theNext}
           );
         }
-        watchAccountArea(_handler);
-        return pubsub.asyncIterator(["watchAccountArea"]);
+        watchAccountArea15days(_handler);
+        return pubsub.asyncIterator(["watchAccountArea15days"]);
       }
     },
-    watchAccountCasinoArea: {
+    watchAccountArea3mins: {
       subscribe: ()=> {
         const _handler = (theNext)=>{
           
-          pubsub.publish("watchAccountCasinoArea", 
-            {watchAccountCasinoArea: theNext}
+          pubsub.publish("watchAccountArea3mins", 
+            // theNext
+            {watchAccountArea3mins: theNext}
           );
         }
-        watchAccountCasinoArea(_handler);
-        return pubsub.asyncIterator(["watchAccountCasinoArea"]);
+        watchAccountArea3mins(_handler);
+        return pubsub.asyncIterator(["watchAccountArea3mins"]);
       }
     },
-    watchAccountCasino: {
+    watchAccountCasinoArea1day: {
       subscribe: ()=> {
         const _handler = (theNext)=>{
           
-          pubsub.publish("watchAccountCasino", 
-            {watchAccountCasino : theNext}
+          pubsub.publish("watchAccountCasinoArea1day", 
+            {watchAccountCasinoArea1day: theNext}
           );
         }
-        watchAccountCasino(_handler);
-        return pubsub.asyncIterator(["watchAccountCasino"]);
+        watchAccountCasinoArea1day(_handler);
+        return pubsub.asyncIterator(["watchAccountCasinoArea1day"]);
+      }
+    },
+    watchAccountCasinoArea3mins: {
+      subscribe: ()=> {
+        const _handler = (theNext)=>{
+          
+          pubsub.publish("watchAccountCasinoArea3mins", 
+            {watchAccountCasinoArea3mins: theNext}
+          );
+        }
+        watchAccountCasinoArea3mins(_handler);
+        return pubsub.asyncIterator(["watchAccountCasinoArea3mins"]);
+      }
+    },
+    watchAccountCasino1day: {
+      subscribe: ()=> {
+        const _handler = (theNext)=>{
+          
+          pubsub.publish("watchAccountCasino1day", 
+            {watchAccountCasino1day : theNext}
+          );
+        }
+        watchAccountCasino1day(_handler);
+        return pubsub.asyncIterator(["watchAccountCasino1day"]);
       }
     }
   }

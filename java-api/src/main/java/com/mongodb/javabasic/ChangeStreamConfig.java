@@ -59,223 +59,229 @@ public class ChangeStreamConfig {
                                         (e) -> {
                                                 // logger.info("Body:" + e.getFullDocument());
                                                 Document doc = e.getFullDocument();
-                                                switch (e.getNamespace().getCollectionName()) {
-                                                        case "tTableRating":
-                                                                MongoCollection<Document> tTableRating = mongoTemplate
-                                                                                .getDb()
-                                                                                .getCollection("tTableRating");
-                                                                logger.info("tranID:" + doc.getLong("tranID"));
-                                                                Document d = tTableRating.aggregate(Arrays.asList(
-                                                                                new Document("$match",
-                                                                                                new Document("tranID",
-                                                                                                                doc.getLong("tranID"))),
-                                                                                new Document("$lookup",
-                                                                                                new Document("from",
-                                                                                                                "tLocn")
-                                                                                                                .append("localField",
-                                                                                                                                "locnID")
-                                                                                                                .append("foreignField",
-                                                                                                                                "locnId")
-                                                                                                                .append("as", "locns")),
-                                                                                new Document("$lookup",
-                                                                                                new Document("from",
-                                                                                                                "tCasino")
-                                                                                                                .append("localField",
-                                                                                                                                "casinoID")
-                                                                                                                .append("foreignField",
-                                                                                                                                "casinoId")
-                                                                                                                .append("as", "casinos")),
-                                                                                new Document("$lookup",
-                                                                                                new Document("from",
-                                                                                                                "tDept")
-                                                                                                                .append("localField",
-                                                                                                                                "deptID")
-                                                                                                                .append("foreignField",
-                                                                                                                                "deptId")
-                                                                                                                .append("as", "deptss")),
-                                                                                new Document("$lookup",
-                                                                                                new Document("from",
-                                                                                                                "tArea")
-                                                                                                                .append("localField",
-                                                                                                                                "areaID")
-                                                                                                                .append("foreignField",
-                                                                                                                                "areaId")
-                                                                                                                .append("as", "areas")),
-                                                                                new Document("$lookup",
-                                                                                                new Document("from",
-                                                                                                                "tGame")
-                                                                                                                .append("localField",
-                                                                                                                                "gameID")
-                                                                                                                .append("foreignField",
-                                                                                                                                "gameId")
-                                                                                                                .append("as", "games")),
-                                                                                new Document("$lookup",
-                                                                                                new Document("from",
-                                                                                                                "tPlayerCard")
-                                                                                                                .append("localField",
-                                                                                                                                "playerId")
-                                                                                                                .append("foreignField",
-                                                                                                                                "playerId")
-                                                                                                                .append("as", "playerCards")),
-                                                                                new Document("$lookup",
-                                                                                                new Document("from",
-                                                                                                                "tAwards")
-                                                                                                                .append("localField",
-                                                                                                                                "tranID")
-                                                                                                                .append("foreignField",
-                                                                                                                                "relatedTranId")
-                                                                                                                .append("pipeline",
-                                                                                                                                Arrays.asList(new Document(
-                                                                                                                                                "$lookup",
-                                                                                                                                                new Document("from",
-                                                                                                                                                                "tPlayerPoints")
-                                                                                                                                                                .append("localField",
-                                                                                                                                                                                "tranId")
-                                                                                                                                                                .append("foreignField",
-                                                                                                                                                                                "tranId")
-                                                                                                                                                                .append("as", "playerPoints")),
-                                                                                                                                                new Document("$lookup",
-                                                                                                                                                                new Document("from",
-                                                                                                                                                                                "tPlayerComps")
-                                                                                                                                                                                .append("localField",
-                                                                                                                                                                                                "tranId")
-                                                                                                                                                                                .append("foreignField",
-                                                                                                                                                                                                "tranId")
-                                                                                                                                                                                .append("as", "playerComps"))))
-                                                                                                                .append("as", "awards")),
-                                                                                new Document("$match",
-                                                                                                new Document("awards",
-                                                                                                                new Document("$ne",
-                                                                                                                                Arrays.asList()))
-                                                                                                                .append("awards.playerPoints",
-                                                                                                                                new Document("$ne",
-                                                                                                                                                Arrays.asList()))
-                                                                                                                .append("awards.playerComps",
-                                                                                                                                new Document("$ne",
-                                                                                                                                                Arrays.asList()))),
-                                                                                new Document("$project",
-                                                                                                new Document("tranID",
-                                                                                                                "$tranID")
-                                                                                                                .append("gamingDt",
-                                                                                                                                "$gamingDt")
-                                                                                                                .append("bucketDt3mins",
-                                                                                                                                new Document("$dateTrunc",
-                                                                                                                                                new Document("date",
-                                                                                                                                                                "$postDtm")
-                                                                                                                                                                .append("binSize",
-                                                                                                                                                                                3)
-                                                                                                                                                                .append("unit", "minute")))
-                                                                                                                .append("bucketDt1day",
-                                                                                                                                new Document("$dateTrunc",
-                                                                                                                                                new Document("date",
-                                                                                                                                                                "$postDtm")
-                                                                                                                                                                .append("binSize",
-                                                                                                                                                                                1)
-                                                                                                                                                                .append("unit", "day")))
-                                                                                                                .append("bucketDt15days",
-                                                                                                                                new Document("$dateTrunc",
-                                                                                                                                                new Document("date",
-                                                                                                                                                                "$postDtm")
-                                                                                                                                                                .append("binSize",
-                                                                                                                                                                                15)
-                                                                                                                                                                .append("unit", "day")))
-                                                                                                                .append("postDtm",
-                                                                                                                                "$postDtm")
-                                                                                                                .append("ratingCategory",
-                                                                                                                                "$ratingCategory")
-                                                                                                                .append("theorWin",
-                                                                                                                                "$theorWin")
-                                                                                                                .append("casinoWin",
-                                                                                                                                "$casinoWin")
-                                                                                                                .append("bet", "$bet")
-                                                                                                                .append("acct",
-                                                                                                                                new Document("$first",
-                                                                                                                                                "$playerCards.acct"))
-                                                                                                                .append("locnCode",
-                                                                                                                                new Document("$first",
-                                                                                                                                                "$locns.locnCode"))
-                                                                                                                .append("areaCode",
-                                                                                                                                new Document("$first",
-                                                                                                                                                "$areas.areaCode"))
-                                                                                                                .append("casinoCode",
-                                                                                                                                new Document("$first",
-                                                                                                                                                "$casinos.casinoCode"))
-                                                                                                                .append("gameCode",
-                                                                                                                                new Document("$first",
-                                                                                                                                                "$games.gameCode"))
-                                                                                                                .append("locnInfo3",
-                                                                                                                                new Document("$first",
-                                                                                                                                                "$locns.locnInfo3"))
-                                                                                                                .append("locnInfo4",
-                                                                                                                                new Document("$first",
-                                                                                                                                                "$locns.locnInfo4"))
-                                                                                                                .append("deptCode",
-                                                                                                                                new Document("$first",
-                                                                                                                                                "$deptss.deptCode")))
-
-                                        ))
-                                                                                .first();
-                                                                if (d != null) {
-                                                                        // logger.info(d.toJson());
-                                                                        MongoCollection<Document> tRatingBucket = mongoTemplate
+                                                if (doc != null) {
+                                                        switch (e.getNamespace().getCollectionName()) {
+                                                                case "tTableRating":
+                                                                        MongoCollection<Document> tTableRating = mongoTemplate
                                                                                         .getDb()
-                                                                                        .getCollection("tRatingBucket");
-                                                                        logger.info("acct:" + d.getInteger("acct")
-                                                                                        + " bucketDt3mins:"
-                                                                                        + d.getDate("bucketDt3mins")
-                                                                                        + " bucketDt1day:"
-                                                                                        + d.getDate("bucketDt1day")
-                                                                                        + " bucketDt15days:"
-                                                                                        + d.getDate("bucketDt15days"));
-                                                                        BulkWriteResult result = tRatingBucket.bulkWrite(
-                                                                                        List.of(
-                                                                                                        this
-                                                                                                                        .createPlayerBucketUpdateModel(
-                                                                                                                                        d,
-                                                                                                                                        "15days",
-                                                                                                                                        d.getDate("bucketDt15days"),
-                                                                                                                                        "acct",
-                                                                                                                                        "areaCode"),
-                                                                                                        this
-                                                                                                                        .createPlayerBucketUpdateModel(
-                                                                                                                                        d,
-                                                                                                                                        "3mins",
-                                                                                                                                        d.getDate("bucketDt3mins"),
-                                                                                                                                        "acct",
-                                                                                                                                        "areaCode"),
-                                                                                                        this
-                                                                                                                        .createPlayerBucketUpdateModel(
-                                                                                                                                        d,
-                                                                                                                                        "1day",
-                                                                                                                                        d.getDate("bucketDt1day"),
-                                                                                                                                        "acct",
-                                                                                                                                        "casinoCode",
-                                                                                                                                        "areaCode"),
-                                                                                                        this
-                                                                                                                        .createPlayerBucketUpdateModel(
-                                                                                                                                        d,
-                                                                                                                                        "3mins",
-                                                                                                                                        d.getDate("bucketDt3mins"),
-                                                                                                                                        "acct",
-                                                                                                                                        "casinoCode",
-                                                                                                                                        "areaCode"),
-                                                                                                        this
-                                                                                                                        .createPlayerBucketUpdateModel(
-                                                                                                                                        d,
-                                                                                                                                        "1day",
-                                                                                                                                        d.getDate("bucketDt1day"),
-                                                                                                                                        "acct",
-                                                                                                                                        "casinoCode")),
-                                                                                        new BulkWriteOptions().ordered(
-                                                                                                        false));
-                                                                        logger.info(result.toString());
-                                                                }
-                                                                break;
+                                                                                        .getCollection("tTableRating");
+                                                                        logger.info("tranID:" + doc.getLong("tranID"));
+                                                                        Document d = tTableRating
+                                                                                        .aggregate(Arrays.asList(
+                                                                                                        new Document("$match",
+                                                                                                                        new Document("tranID",
+                                                                                                                                        doc.getLong("tranID"))),
+                                                                                                        new Document("$lookup",
+                                                                                                                        new Document("from",
+                                                                                                                                        "tLocn")
+                                                                                                                                        .append("localField",
+                                                                                                                                                        "locnID")
+                                                                                                                                        .append("foreignField",
+                                                                                                                                                        "locnId")
+                                                                                                                                        .append("as", "locns")),
+                                                                                                        new Document("$lookup",
+                                                                                                                        new Document("from",
+                                                                                                                                        "tCasino")
+                                                                                                                                        .append("localField",
+                                                                                                                                                        "casinoID")
+                                                                                                                                        .append("foreignField",
+                                                                                                                                                        "casinoId")
+                                                                                                                                        .append("as", "casinos")),
+                                                                                                        new Document("$lookup",
+                                                                                                                        new Document("from",
+                                                                                                                                        "tDept")
+                                                                                                                                        .append("localField",
+                                                                                                                                                        "deptID")
+                                                                                                                                        .append("foreignField",
+                                                                                                                                                        "deptId")
+                                                                                                                                        .append("as", "deptss")),
+                                                                                                        new Document("$lookup",
+                                                                                                                        new Document("from",
+                                                                                                                                        "tArea")
+                                                                                                                                        .append("localField",
+                                                                                                                                                        "areaID")
+                                                                                                                                        .append("foreignField",
+                                                                                                                                                        "areaId")
+                                                                                                                                        .append("as", "areas")),
+                                                                                                        new Document("$lookup",
+                                                                                                                        new Document("from",
+                                                                                                                                        "tGame")
+                                                                                                                                        .append("localField",
+                                                                                                                                                        "gameID")
+                                                                                                                                        .append("foreignField",
+                                                                                                                                                        "gameId")
+                                                                                                                                        .append("as", "games")),
+                                                                                                        new Document("$lookup",
+                                                                                                                        new Document("from",
+                                                                                                                                        "tPlayerCard")
+                                                                                                                                        .append("localField",
+                                                                                                                                                        "playerId")
+                                                                                                                                        .append("foreignField",
+                                                                                                                                                        "playerId")
+                                                                                                                                        .append("as", "playerCards")),
+                                                                                                        new Document("$lookup",
+                                                                                                                        new Document("from",
+                                                                                                                                        "tAwards")
+                                                                                                                                        .append("localField",
+                                                                                                                                                        "tranID")
+                                                                                                                                        .append("foreignField",
+                                                                                                                                                        "relatedTranId")
+                                                                                                                                        .append("pipeline",
+                                                                                                                                                        Arrays.asList(new Document(
+                                                                                                                                                                        "$lookup",
+                                                                                                                                                                        new Document("from",
+                                                                                                                                                                                        "tPlayerPoints")
+                                                                                                                                                                                        .append("localField",
+                                                                                                                                                                                                        "tranId")
+                                                                                                                                                                                        .append("foreignField",
+                                                                                                                                                                                                        "tranId")
+                                                                                                                                                                                        .append("as", "playerPoints")),
+                                                                                                                                                                        new Document("$lookup",
+                                                                                                                                                                                        new Document("from",
+                                                                                                                                                                                                        "tPlayerComps")
+                                                                                                                                                                                                        .append("localField",
+                                                                                                                                                                                                                        "tranId")
+                                                                                                                                                                                                        .append("foreignField",
+                                                                                                                                                                                                                        "tranId")
+                                                                                                                                                                                                        .append("as", "playerComps"))))
+                                                                                                                                        .append("as", "awards")),
+                                                                                                        new Document("$match",
+                                                                                                                        new Document("awards",
+                                                                                                                                        new Document("$ne",
+                                                                                                                                                        Arrays.asList()))
+                                                                                                                                        .append("awards.playerPoints",
+                                                                                                                                                        new Document("$ne",
+                                                                                                                                                                        Arrays.asList()))
+                                                                                                                                        .append("awards.playerComps",
+                                                                                                                                                        new Document("$ne",
+                                                                                                                                                                        Arrays.asList()))),
+                                                                                                        new Document("$project",
+                                                                                                                        new Document("tranID",
+                                                                                                                                        "$tranID")
+                                                                                                                                        .append("gamingDt",
+                                                                                                                                                        "$gamingDt")
+                                                                                                                                        .append("bucketDt3mins",
+                                                                                                                                                        new Document("$dateTrunc",
+                                                                                                                                                                        new Document("date",
+                                                                                                                                                                                        "$postDtm")
+                                                                                                                                                                                        .append("binSize",
+                                                                                                                                                                                                        3)
+                                                                                                                                                                                        .append("unit", "minute")))
+                                                                                                                                        .append("bucketDt1day",
+                                                                                                                                                        new Document("$dateTrunc",
+                                                                                                                                                                        new Document("date",
+                                                                                                                                                                                        "$postDtm")
+                                                                                                                                                                                        .append("binSize",
+                                                                                                                                                                                                        1)
+                                                                                                                                                                                        .append("unit", "day")))
+                                                                                                                                        .append("bucketDt15days",
+                                                                                                                                                        new Document("$dateTrunc",
+                                                                                                                                                                        new Document("date",
+                                                                                                                                                                                        "$postDtm")
+                                                                                                                                                                                        .append("binSize",
+                                                                                                                                                                                                        15)
+                                                                                                                                                                                        .append("unit", "day")))
+                                                                                                                                        .append("postDtm",
+                                                                                                                                                        "$postDtm")
+                                                                                                                                        .append("ratingCategory",
+                                                                                                                                                        "$ratingCategory")
+                                                                                                                                        .append("theorWin",
+                                                                                                                                                        "$theorWin")
+                                                                                                                                        .append("casinoWin",
+                                                                                                                                                        "$casinoWin")
+                                                                                                                                        .append("bet", "$bet")
+                                                                                                                                        .append("acct",
+                                                                                                                                                        new Document("$first",
+                                                                                                                                                                        "$playerCards.acct"))
+                                                                                                                                        .append("locnCode",
+                                                                                                                                                        new Document("$first",
+                                                                                                                                                                        "$locns.locnCode"))
+                                                                                                                                        .append("areaCode",
+                                                                                                                                                        new Document("$first",
+                                                                                                                                                                        "$areas.areaCode"))
+                                                                                                                                        .append("casinoCode",
+                                                                                                                                                        new Document("$first",
+                                                                                                                                                                        "$casinos.casinoCode"))
+                                                                                                                                        .append("gameCode",
+                                                                                                                                                        new Document("$first",
+                                                                                                                                                                        "$games.gameCode"))
+                                                                                                                                        .append("locnInfo3",
+                                                                                                                                                        new Document("$first",
+                                                                                                                                                                        "$locns.locnInfo3"))
+                                                                                                                                        .append("locnInfo4",
+                                                                                                                                                        new Document("$first",
+                                                                                                                                                                        "$locns.locnInfo4"))
+                                                                                                                                        .append("deptCode",
+                                                                                                                                                        new Document("$first",
+                                                                                                                                                                        "$deptss.deptCode")))
 
-                                                        case "tArea":
-                                                                break;
-                                                        case "tLocn":
-                                                                break;
+                                                                                        ))
+                                                                                        .first();
+                                                                        if (d != null) {
+                                                                                // logger.info(d.toJson());
+                                                                                MongoCollection<Document> tRatingBucket = mongoTemplate
+                                                                                                .getDb()
+                                                                                                .getCollection("tRatingBucket");
+                                                                                logger.info("acct:"
+                                                                                                + d.getInteger("acct")
+                                                                                                + " bucketDt3mins:"
+                                                                                                + d.getDate("bucketDt3mins")
+                                                                                                + " bucketDt1day:"
+                                                                                                + d.getDate("bucketDt1day")
+                                                                                                + " bucketDt15days:"
+                                                                                                + d.getDate("bucketDt15days"));
+                                                                                BulkWriteResult result = tRatingBucket
+                                                                                                .bulkWrite(
+                                                                                                                List.of(
+                                                                                                                                this
+                                                                                                                                                .createPlayerBucketUpdateModel(
+                                                                                                                                                                d,
+                                                                                                                                                                "15days",
+                                                                                                                                                                d.getDate("bucketDt15days"),
+                                                                                                                                                                "acct",
+                                                                                                                                                                "areaCode"),
+                                                                                                                                this
+                                                                                                                                                .createPlayerBucketUpdateModel(
+                                                                                                                                                                d,
+                                                                                                                                                                "3mins",
+                                                                                                                                                                d.getDate("bucketDt3mins"),
+                                                                                                                                                                "acct",
+                                                                                                                                                                "areaCode"),
+                                                                                                                                this
+                                                                                                                                                .createPlayerBucketUpdateModel(
+                                                                                                                                                                d,
+                                                                                                                                                                "1day",
+                                                                                                                                                                d.getDate("bucketDt1day"),
+                                                                                                                                                                "acct",
+                                                                                                                                                                "casinoCode",
+                                                                                                                                                                "areaCode"),
+                                                                                                                                this
+                                                                                                                                                .createPlayerBucketUpdateModel(
+                                                                                                                                                                d,
+                                                                                                                                                                "3mins",
+                                                                                                                                                                d.getDate("bucketDt3mins"),
+                                                                                                                                                                "acct",
+                                                                                                                                                                "casinoCode",
+                                                                                                                                                                "areaCode"),
+                                                                                                                                this
+                                                                                                                                                .createPlayerBucketUpdateModel(
+                                                                                                                                                                d,
+                                                                                                                                                                "1day",
+                                                                                                                                                                d.getDate("bucketDt1day"),
+                                                                                                                                                                "acct",
+                                                                                                                                                                "casinoCode")),
+                                                                                                                new BulkWriteOptions()
+                                                                                                                                .ordered(
+                                                                                                                                                false));
+                                                                                logger.info(result.toString());
+                                                                        }
+                                                                        break;
+
+                                                                case "tArea":
+                                                                        break;
+                                                                case "tLocn":
+                                                                        break;
+                                                        }
                                                 }
                                         }) {
                                 @Override
@@ -293,6 +299,85 @@ public class ChangeStreamConfig {
 
                         };
                 }, true);
+
+                ChangeStream<Document> changeStream2 = new ChangeStream<>();
+                changeStream2.run((ChangeStreamProcessConfig<Document> config) -> {
+                        return new ChangeStreamProcess<Document>(config,
+                                        (e) -> {
+                                                mongoTemplate
+                                                                .getDb()
+                                                                .getCollection("tRatingBucket")
+                                                                .aggregate(Arrays.asList(new Document("$addFields",
+                                                                                new Document("noOfTxn",
+                                                                                                new Document("$size",
+                                                                                                                "$trans"))
+                                                                                                .append("avgBet",
+                                                                                                                new Document("$avg",
+                                                                                                                                "$trans.bet"))
+                                                                                                .append("avgCasinoWin",
+                                                                                                                new Document("$avg",
+                                                                                                                                "$trans.casinoWin"))
+                                                                                                .append("avgTheorWin",
+                                                                                                                new Document("$avg",
+                                                                                                                                "$trans.theorWin"))),
+                                                                                new Document("$unset", "trans"),
+                                                                                new Document("$group",
+                                                                                                new Document("_id",
+                                                                                                                new Document("type",
+                                                                                                                                "$type")
+                                                                                                                                .append("bucketSize",
+                                                                                                                                                "$bucketSize"))
+                                                                                                                .append("accts",
+                                                                                                                                new Document("$push",
+                                                                                                                                                new Document("acct",
+                                                                                                                                                                "$acct")
+                                                                                                                                                                .append("casinoCode",
+                                                                                                                                                                                "$casinoCode")
+                                                                                                                                                                .append("areaCode",
+                                                                                                                                                                                "$areaCode")
+                                                                                                                                                                .append("sumBet",
+                                                                                                                                                                                "$sumBet")
+                                                                                                                                                                .append("sumCasinoWin",
+                                                                                                                                                                                "$sumCasinoWin")
+                                                                                                                                                                .append("sumTheorWin",
+                                                                                                                                                                                "$sumTheorWin")
+                                                                                                                                                                .append("noOfTxn",
+                                                                                                                                                                                "$noOfTxn")
+                                                                                                                                                                .append("avgBet",
+                                                                                                                                                                                "$avgBet")
+                                                                                                                                                                .append("avgCasinoWin",
+                                                                                                                                                                                "$avgCasinoWin")
+                                                                                                                                                                .append("avgTheorWin",
+                                                                                                                                                                                "$avgTheorWin")))),
+                                                                                new Document("$project",
+                                                                                                new Document("_id", 0L)
+                                                                                                                .append("type", "$_id.type")
+                                                                                                                .append("bucketSize",
+                                                                                                                                "$_id.bucketSize")
+                                                                                                                .append("accts", "$accts")),
+                                                                                new Document("$merge",
+                                                                                                new Document("into",
+                                                                                                                "tRatingFinal")
+                                                                                                                .append("on", Arrays
+                                                                                                                                .asList("type", "bucketSize"))
+                                                                                                                .append("whenMatched",
+                                                                                                                                "replace")
+                                                                                                                .append("whenNotMatched",
+                                                                                                                                "insert"))));
+                                        }) {
+                                @Override
+                                public ChangeStreamIterable<Document> initChangeStream(List<Bson> p) {
+                                        ChangeStreamIterable<Document> cs = mongoTemplate.getDb()
+                                                        .getCollection("tRatingBucket")
+                                                        .watch(p, Document.class)
+                                                        .batchSize(batchSize)
+                                                        .maxAwaitTime(maxAwaitTime, TimeUnit.MILLISECONDS)
+                                                        .fullDocument(FullDocument.UPDATE_LOOKUP);
+                                        return cs;
+                                }
+
+                        };
+                }, true);
         }
 
         private UpdateOneModel<Document> createPlayerBucketUpdateModel(Document d, String bucketSize, Date bucketDt,
@@ -300,17 +385,19 @@ public class ChangeStreamConfig {
                 List<Bson> filters = new ArrayList<>();
                 List<Bson> updates = new ArrayList<>();
                 for (String groupBy : groupBys) {
+                        filters.add(Filters.eq(groupBy, d.get(groupBy)));
                         updates.add(Updates.set(groupBy, d.get(groupBy)));
                 }
                 filters.add(Filters.eq("type", String.join("-", groupBys)));
                 filters.add(Filters.eq("bucketSize", bucketSize));
-                filters.add(Filters.eq("bucketDt", bucketDt));
+                filters.add(Filters.eq("bucketDt" + bucketSize, bucketDt));
+                logger.info(filters.toString());
                 return new UpdateOneModel<Document>(
                                 Filters.and(filters),
                                 Updates.combine(
                                                 Updates.combine(updates),
                                                 Updates.set("type", String.join("-", groupBys)),
-                                                Updates.set("bucketDt"+bucketSize,
+                                                Updates.set("bucketDt" + bucketSize,
                                                                 bucketDt),
                                                 Updates.set("bucketSize",
                                                                 bucketSize),
