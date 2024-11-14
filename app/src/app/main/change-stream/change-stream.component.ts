@@ -72,9 +72,9 @@ const gqlMap: any = {
           avgTheorWin
         }
       }`],
-    
-        
-      "accountCasinoArea1day": [gql`
+
+
+  "accountCasinoArea1day": [gql`
           query accountCasinoArea1day {
             getAccountCasinoArea1day {
               _id
@@ -111,9 +111,9 @@ const gqlMap: any = {
           }`],
 
 
-    
-        
-      "accountCasinoArea3mins": [gql`
+
+
+  "accountCasinoArea3mins": [gql`
         query accountCasinoArea3mins {
           getAccountCasinoArea3mins {
             _id
@@ -151,8 +151,8 @@ const gqlMap: any = {
 
 
 
-        
-      "accountCasino1day": [gql`
+
+  "accountCasino1day": [gql`
         query accountCasino1day {
           getAccountCasino1day {
             _id
@@ -209,11 +209,11 @@ export class ChangeStreamComponent {
   ngOnInit() {
     this.change();
   }
-  ngAfterViewInit(){
+  ngAfterViewInit() {
     this.dataSource.sort = this.sort;
   }
   change() {
-    if(this.subscription){
+    if (this.subscription) {
       this.subscription.unsubscribe();
     }
     const gql = gqlMap[this.type + this.duration];
@@ -229,6 +229,18 @@ export class ChangeStreamComponent {
       this.query.subscribeToMore({
         document: gql[1],
         updateQuery: (prev: any, result: any) => {
+          if (!result.subscriptionData.data) return prev;
+          const gKey = Object.keys(prev)[0];
+          const wKey = Object.keys(result.subscriptionData.data)[0];
+          const newItem = result.subscriptionData.data[`${wKey}`];
+
+          const res = [...prev[gKey]];
+          const i = prev[gKey].findIndex((v: any) => v._id == newItem._id);
+          if (i === -1) res.push(newItem);
+          else res.splice(i, 1, newItem);
+
+          return {[`${gKey}`]:res};
+
           //console.log(result.subscriptionData.data[Object.keys(result.subscriptionData.data)[0]]);
         },
       });
