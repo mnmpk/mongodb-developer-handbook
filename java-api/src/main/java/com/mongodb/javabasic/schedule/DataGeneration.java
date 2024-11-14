@@ -97,8 +97,8 @@ public class DataGeneration {
                 long areaCount = mongoTemplate.getCollection("tArea")
                         .countDocuments(Filters.eq("casinoId", casino.getCasinoId()));
 
-                        List<Integer> deptList = new ArrayList<>();
-                        List<Integer> areaList = new ArrayList<>();
+                List<Integer> deptList = new ArrayList<>();
+                List<Integer> areaList = new ArrayList<>();
                 if (deptCount <= DEPT_PER_CASINO) {
                     for (long j = deptCount; j < DEPT_PER_CASINO; j++) {
                         Dept dept = deptGenService.generateRandom(Dept.class);
@@ -114,12 +114,15 @@ public class DataGeneration {
                     }
                 }
 
-                long locationCount = mongoTemplate.getCollection("tLocn").countDocuments(Filters.eq("casinoId", casino.getCasinoId()));
+                long locationCount = mongoTemplate.getCollection("tLocn")
+                        .countDocuments(Filters.eq("casinoId", casino.getCasinoId()));
                 if (locationCount <= LOCN_PER_CASINO) {
-                    Location location = locationGenService.generateRandom(Location.class);
-                    location.setAreaId(areaList.get(new Random().nextInt(areaList.size())));
-                    location.setDeptId(deptList.get(new Random().nextInt(deptList.size())));
-                    mongoTemplate.getCollection("tLocn").withDocumentClass(Location.class).insertOne(location);
+                    for (long j = locationCount; j < LOCN_PER_CASINO; j++) {
+                        Location location = locationGenService.generateRandom(Location.class);
+                        location.setAreaId(areaList.get(new Random().nextInt(areaList.size())));
+                        location.setDeptId(deptList.get(new Random().nextInt(deptList.size())));
+                        mongoTemplate.getCollection("tLocn").withDocumentClass(Location.class).insertOne(location);
+                    }
                 }
             }
         }
