@@ -363,7 +363,7 @@ public class ChangeStreamConfig {
                                                                                                                 .append("whenMatched",
                                                                                                                                 "replace")
                                                                                                                 .append("whenNotMatched",
-                                                                                                                                "insert"))));
+                                                                                                                                "insert")))).first();
                                         }) {
                                 @Override
                                 public ChangeStreamIterable<Document> initChangeStream(List<Bson> p) {
