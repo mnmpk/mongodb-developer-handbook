@@ -269,7 +269,13 @@ public class ChangeStreamConfig {
                                                                                                                                                                 "1day",
                                                                                                                                                                 d.getDate("bucketDt1day"),
                                                                                                                                                                 "acct",
-                                                                                                                                                                "casinoCode")),
+                                                                                                                                                                "casinoCode"),
+                                                                                                                                this
+                                                                                                                                                .createPlayerBucketUpdateModel(
+                                                                                                                                                                d,
+                                                                                                                                                                "3mins",
+                                                                                                                                                                d.getDate("bucketDt3mins"),
+                                                                                                                                                                "casinoCode", "areaCode", "locnCode")),
                                                                                                                 new BulkWriteOptions()
                                                                                                                                 .ordered(
                                                                                                                                                 false));
@@ -363,7 +369,8 @@ public class ChangeStreamConfig {
                                                                                                                 .append("whenMatched",
                                                                                                                                 "replace")
                                                                                                                 .append("whenNotMatched",
-                                                                                                                                "insert")))).first();
+                                                                                                                                "insert"))))
+                                                                .first();
                                         }) {
                                 @Override
                                 public ChangeStreamIterable<Document> initChangeStream(List<Bson> p) {
