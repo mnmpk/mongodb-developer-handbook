@@ -1,8 +1,8 @@
 
-const japiUrl = "//handbook-japi.mongodb.mzinx.com";
+const japiUrl = "//mongodb-japi.mzinx.com";
 export const environment = {
     production: true,
 	japiUrl: japiUrl,
-	graphQLUrl: "https://handbook-graphql.mongodb.mzinx.com/graphql",
+	graphQLUrl: "https://mongodb-graphql.mzinx.com/graphql",
 	defaultPageSize: 50,
 };
