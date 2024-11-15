@@ -275,7 +275,9 @@ public class ChangeStreamConfig {
                                                                                                                                                                 d,
                                                                                                                                                                 "3mins",
                                                                                                                                                                 d.getDate("bucketDt3mins"),
-                                                                                                                                                                "casinoCode", "areaCode", "locnCode")),
+                                                                                                                                                                "casinoCode",
+                                                                                                                                                                "areaCode",
+                                                                                                                                                                "locnCode")),
                                                                                                                 new BulkWriteOptions()
                                                                                                                                 .ordered(
                                                                                                                                                 false));
@@ -341,6 +343,8 @@ public class ChangeStreamConfig {
                                                                                                                                                                                 "$casinoCode")
                                                                                                                                                                 .append("areaCode",
                                                                                                                                                                                 "$areaCode")
+                                                                                                                                                                .append("locnCode",
+                                                                                                                                                                                "$locnCode")
                                                                                                                                                                 .append("sumBet",
                                                                                                                                                                                 "$sumBet")
                                                                                                                                                                 .append("sumCasinoWin",
