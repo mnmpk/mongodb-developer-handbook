@@ -315,61 +315,36 @@ public class ChangeStreamConfig {
                                                 mongoTemplate
                                                                 .getDb()
                                                                 .getCollection("tRatingBucket")
-                                                                .aggregate(Arrays.asList(new Document("$addFields",
-                                                                                new Document("noOfTxn",
-                                                                                                new Document("$size",
-                                                                                                                "$trans"))
-                                                                                                .append("avgBet",
-                                                                                                                new Document("$avg",
-                                                                                                                                "$trans.bet"))
-                                                                                                .append("avgCasinoWin",
-                                                                                                                new Document("$avg",
-                                                                                                                                "$trans.casinoWin"))
-                                                                                                .append("avgTheorWin",
-                                                                                                                new Document("$avg",
-                                                                                                                                "$trans.theorWin"))),
-                                                                                new Document("$unset", "trans"),
+                                                                .aggregate(Arrays.asList(new Document("$match",
+                                                                                new Document("type",
+                                                                                                "casinoCode-areaCode-locnCode")
+                                                                                                .append("bucketSize",
+                                                                                                                "1day")),
                                                                                 new Document("$group",
                                                                                                 new Document("_id",
-                                                                                                                new Document("type",
-                                                                                                                                "$type")
-                                                                                                                                .append("bucketSize",
-                                                                                                                                                "$bucketSize"))
-                                                                                                                .append("accts",
-                                                                                                                                new Document("$push",
-                                                                                                                                                new Document("acct",
-                                                                                                                                                                "$acct")
-                                                                                                                                                                .append("casinoCode",
-                                                                                                                                                                                "$casinoCode")
-                                                                                                                                                                .append("areaCode",
-                                                                                                                                                                                "$areaCode")
-                                                                                                                                                                .append("locnCode",
-                                                                                                                                                                                "$locnCode")
-                                                                                                                                                                .append("sumBet",
-                                                                                                                                                                                "$sumBet")
-                                                                                                                                                                .append("sumCasinoWin",
-                                                                                                                                                                                "$sumCasinoWin")
-                                                                                                                                                                .append("sumTheorWin",
-                                                                                                                                                                                "$sumTheorWin")
-                                                                                                                                                                .append("noOfTxn",
-                                                                                                                                                                                "$noOfTxn")
-                                                                                                                                                                .append("avgBet",
-                                                                                                                                                                                "$avgBet")
-                                                                                                                                                                .append("avgCasinoWin",
-                                                                                                                                                                                "$avgCasinoWin")
-                                                                                                                                                                .append("avgTheorWin",
-                                                                                                                                                                                "$avgTheorWin")))),
+                                                                                                                "$locnCode")
+                                                                                                                .append("headCount",
+                                                                                                                                new Document("$sum",
+                                                                                                                                                1L))
+                                                                                                                .append("areaCode",
+                                                                                                                                new Document("$first",
+                                                                                                                                                "$areaCode"))
+                                                                                                                .append("casinoCode",
+                                                                                                                                new Document("$first",
+                                                                                                                                                "$casinoCode"))),
                                                                                 new Document("$project",
-                                                                                                new Document("_id", 0L)
-                                                                                                                .append("type", "$_id.type")
-                                                                                                                .append("bucketSize",
-                                                                                                                                "$_id.bucketSize")
-                                                                                                                .append("accts", "$accts")),
+                                                                                                new Document("locnCode",
+                                                                                                                "$locnCode")
+                                                                                                                .append("headCount",
+                                                                                                                                "$headCount")
+                                                                                                                .append("areaCode",
+                                                                                                                                "$areaCode")
+                                                                                                                .append("casinoCode",
+                                                                                                                                "$casinoCode")),
                                                                                 new Document("$merge",
                                                                                                 new Document("into",
                                                                                                                 "tRatingFinal")
-                                                                                                                .append("on", Arrays
-                                                                                                                                .asList("type", "bucketSize"))
+                                                                                                                .append("on", "locnCode")
                                                                                                                 .append("whenMatched",
                                                                                                                                 "replace")
                                                                                                                 .append("whenNotMatched",

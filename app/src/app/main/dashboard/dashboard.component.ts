@@ -28,15 +28,15 @@ export class DashboardComponent {
   public query!: any;
   public queryResult!: Observable<any>;
   subscription!: Subscription;
-  
-  data:any[]=[];
+
+  data: any[] = [];
   heatMap!: EChartsOption;
   heatMapUpdate!: EChartsOption;
 
   @ViewChild("chart")
   chart!: ElementRef;
 
-  
+
 
   constructor(private readonly apollo: Apollo) { }
   ngOnInit(): void {
@@ -113,9 +113,9 @@ export class DashboardComponent {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
-      this.query = this.apollo
-        .watchQuery({
-          query: gql`
+    this.query = this.apollo
+      .watchQuery({
+        query: gql`
           query casinoAreaLocation1day {
             getCasinoAreaLocation1day {
               _id
@@ -132,14 +132,18 @@ export class DashboardComponent {
               avgTheorWin
             }
           }`,
-        });
-      this.queryResult = this.query.valueChanges;
-      this.subscription = this.queryResult.subscribe((result) => {
-        this.data = result.data[Object.keys(result.data)[0]];
-        console.log(this.data)
       });
-      this.query.subscribeToMore({
-        document: gql`
+    this.queryResult = this.query.valueChanges;
+    this.subscription = this.queryResult.subscribe((result) => {
+      ;
+
+      let data = [];
+      for (let i = 0; i < 12; i++) {
+        data.push([...tables[i], result.data[Object.keys(result.data)[0]][i].heahCount])
+      }
+    });
+    this.query.subscribeToMore({
+      document: gql`
         subscription casinoAreaLocation1day {
           watchCasinoAreaLocation1day {
             _id
@@ -156,25 +160,26 @@ export class DashboardComponent {
             avgTheorWin
           }
         }`,
-        updateQuery: (prev: any, result: any) => {
-          if (!result.subscriptionData.data) return prev;
-          const gKey = "getCasinoAreaLocation1day";
-          const wKey = Object.keys(result.subscriptionData.data)[0];
-          const newItem = result.subscriptionData.data[`${wKey}`];
+      updateQuery: (prev: any, result: any) => {
+        if (!result.subscriptionData.data) return prev;
+        const gKey = "getCasinoAreaLocation1day";
+        const wKey = Object.keys(result.subscriptionData.data)[0];
+        const newItem = result.subscriptionData.data[`${wKey}`];
 
-          let res: any[] = [];
-          if(prev[gKey]){
-            res = [...prev[gKey]];
-          }
-          const i = res.findIndex((v: any) => v._id == newItem._id);
-          if (i === -1) res.push(newItem);
-          else res.splice(i, 1, newItem);
+        let res: any[] = [];
+        if (prev[gKey]) {
+          res = [...prev[gKey]];
+        }
+        const i = res.findIndex((v: any) => v._id == newItem._id);
+        if (i === -1) res.push(newItem);
+        else res.splice(i, 1, newItem);
 
-          return {[`${gKey}`]:res};
+        return { [`${gKey}`]: res };
 
-          //console.log(result.subscriptionData.data[Object.keys(result.subscriptionData.data)[0]]);
-        },
-      });
+        //console.log(result.subscriptionData.data[Object.keys(result.subscriptionData.data)[0]]);
+      },
+      onError: (err: any) => console.error(err)
+    });
   }
 
   ngAfterViewInit() {

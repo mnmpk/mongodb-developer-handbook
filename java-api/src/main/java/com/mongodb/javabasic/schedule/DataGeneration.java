@@ -142,19 +142,13 @@ public class DataGeneration {
 
                 PlayerCard player = mongoTemplate.getCollection("tPlayerCard").withDocumentClass(PlayerCard.class)
                         .aggregate(List.of(Aggregates.sample(1))).first();
-                Casino casino = mongoTemplate.getCollection("tCasino").withDocumentClass(Casino.class)
-                        .aggregate(List.of(Aggregates.sample(1))).first();
-                Dept dept = mongoTemplate.getCollection("tDept").withDocumentClass(Dept.class)
-                        .aggregate(List.of(Aggregates.sample(1))).first();
-                Area area = mongoTemplate.getCollection("tArea").withDocumentClass(Area.class)
-                        .aggregate(List.of(Aggregates.sample(1))).first();
                 Location location = mongoTemplate.getCollection("tLocn").withDocumentClass(Location.class)
                         .aggregate(List.of(Aggregates.sample(1))).first();
 
                 TableRating tr = tableRatingGenService.generateRandom(TableRating.class);
-                tr.setCasinoID(casino.getCasinoId());
-                tr.setDeptID(dept.getDeptId());
-                tr.setAreaID(area.getAreaId());
+                tr.setCasinoID(location.getCasinoId());
+                tr.setDeptID(location.getDeptId());
+                tr.setAreaID(location.getAreaId());
                 tr.setLocnID(location.getLocnId());
                 tr.setPlayerId(player.getPlayerId());
                 tr.setGamingDt(Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()));

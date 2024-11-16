@@ -6,7 +6,6 @@ const mongoDBOperation = {
   tRatingBucket: null,
   connectionString: process.env.MONGODB_CONNECTION_STRING,
   dbName: process.env.MONGODB_DBNAME,
-  tRatingBucketName: process.env.MONGODB_COLNAME,
 }
 
 export const getDBConnection = () => {
@@ -15,7 +14,8 @@ export const getDBConnection = () => {
   if (!mongoDBOperation.mongoDBConn) {
     mongoDBOperation.mongoDBConn = new MongoClient(mongoDBOperation.connectionString);
     mongoDBOperation.db = mongoDBOperation.mongoDBConn.db(mongoDBOperation.db);
-    mongoDBOperation.tRatingBucket = mongoDBOperation.db.collection(mongoDBOperation.tRatingBucketName);
+    mongoDBOperation.tRatingBucket = mongoDBOperation.db.collection(process.env.MONGODB_COLNAME);
+    mongoDBOperation.tRatingFinal = mongoDBOperation.db.collection(process.env.MONGODB_FINAL_COLNAME);
   }
   return mongoDBOperation.mongoDBConn;
 }
@@ -118,22 +118,7 @@ export const getAccountCasino1day = async () => {
   return _result;
 }
 export const getCasinoAreaLocation1day = async () => {
-  const _result = await mongoDBOperation.tRatingBucket.aggregate([{ '$match': { 'type': 'casinoCode-areaCode-locnCode', 'bucketSize': '1day' } }, {
-    '$addFields': {
-      noOfTxn: {
-        $size: "$trans"
-      },
-      avgBet: {
-        $avg: "$trans.bet"
-      },
-      avgCasinoWin: {
-        $avg: "$trans.casinoWin"
-      },
-      avgTheorWin: {
-        $avg: "$trans.theorWin"
-      }
-    }
-  }]).toArray();
+  const _result = await mongoDBOperation.tRatingFinal.find().toArray();
   return _result;
 }
 
@@ -241,22 +226,7 @@ export const watchAccountCasino1day = (theHandler) => {
   });
 }
 export const watchCasinoAreaLocation1day = (theHandler) => {
-  mongoDBOperation.tRatingBucket.watch([{ '$match': { 'fullDocument.type': 'casinoCode-areaCode-locnCode', 'fullDocument.bucketSize': '1day' } }, {
-    '$addFields': {
-      'fullDocument.noOfTxn': {
-        $size: "$fullDocument.trans"
-      },
-      'fullDocument.avgBet': {
-        $avg: "$fullDocument.trans.bet"
-      },
-      'fullDocument.avgCasinoWin': {
-        $avg: "$fullDocument.trans.casinoWin"
-      },
-      'fullDocument.avgTheorWin': {
-        $avg: "$fullDocument.trans.theorWin"
-      }
-    }
-  }], { fullDocument: 'updateLookup' }).on("change", next => {
+  mongoDBOperation.tRatingFinal.watch({}, { fullDocument: 'updateLookup' }).on("change", next => {
     theHandler(next.fullDocument);
   });
 }

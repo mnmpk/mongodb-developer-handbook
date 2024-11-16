@@ -9,6 +9,7 @@ export const typeDefs = `#graphql
     acct: String
     casinoCode: String
     areaCode: String
+    locnCode: String
     sumBet: Float
     sumCasinoWin: Float
     sumTheorWin: Float
@@ -35,6 +36,6 @@ export const typeDefs = `#graphql
     watchAccountCasinoArea1day: stat
     watchAccountCasinoArea3mins: stat
     watchAccountCasino1day: stat
-    watchCasinoAreaLocation1day: [stat]
+    watchCasinoAreaLocation1day: stat
   }
 `;

@@ -246,6 +246,7 @@ export class ChangeStreamComponent {
 
           //console.log(result.subscriptionData.data[Object.keys(result.subscriptionData.data)[0]]);
         },
+        onError: (err: any) => console.error(err)
       });
     }
   }
