@@ -127,10 +127,11 @@ export class DashboardComponent {
       });
     this.queryResult = this.query.valueChanges;
     this.subscription = this.queryResult.subscribe((result) => {
-      let data = [];
-      for (let i = 0; i < 12; i++) {
-        data.push([...tables[i], (result.data[Object.keys(result.data)[0]][i].headCount)*500])
-      }
+      let data: number[][] = [];
+      result.data[Object.keys(result.data)[0]].forEach((item: any) => {
+        const charCode = item.locnCode.charCodeAt(0);
+        data.push([...tables[charCode % 12], (item.headCount) * 500])
+      });
       this.heatMapUpdate = {
         series: [
           {
