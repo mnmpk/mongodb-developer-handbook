@@ -333,8 +333,10 @@ public class ChangeStreamConfig {
                                                                                                                                 new Document("$first",
                                                                                                                                                 "$casinoCode"))),
                                                                                 new Document("$project",
-                                                                                                new Document("locnCode",
-                                                                                                                "$_id")
+                                                                                                new Document("_id",
+                                                                                                                0L)
+                                                                                                                .append("locnCode",
+                                                                                                                                "$_id")
                                                                                                                 .append("headCount",
                                                                                                                                 "$headCount")
                                                                                                                 .append("areaCode",

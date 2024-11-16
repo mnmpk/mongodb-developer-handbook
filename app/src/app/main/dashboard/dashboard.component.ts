@@ -165,7 +165,7 @@ export class DashboardComponent {
         const gKey = "getCasinoAreaLocation1day";
         const wKey = Object.keys(result.subscriptionData.data)[0];
         const newItem = result.subscriptionData.data[`${wKey}`];
-
+console.log(gKey, wKey, newItem);
         let res: any[] = [];
         if (prev[gKey]) {
           res = [...prev[gKey]];

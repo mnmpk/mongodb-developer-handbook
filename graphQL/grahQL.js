@@ -18,6 +18,14 @@ export const typeDefs = `#graphql
     avgCasinoWin: Float
     avgTheorWin: Float
   }
+
+  type summary {
+    locnCode: String
+    headCount: Int
+    areaCode: String
+    casinoCode: String
+  }
+
   # The "Query" type is special: it lists all of the available queries that
   # clients can execute, along with the return type for each. In this
   # case, the "books" query returns an array of zero or more Books (defined above).
@@ -27,7 +35,7 @@ export const typeDefs = `#graphql
     getAccountCasinoArea1day: [stat]
     getAccountCasinoArea3mins: [stat]
     getAccountCasino1day: [stat]
-    getCasinoAreaLocation1day: [stat]
+    getCasinoAreaLocation1day: [summary]
   }
 
   type Subscription {
@@ -36,6 +44,6 @@ export const typeDefs = `#graphql
     watchAccountCasinoArea1day: stat
     watchAccountCasinoArea3mins: stat
     watchAccountCasino1day: stat
-    watchCasinoAreaLocation1day: stat
+    watchCasinoAreaLocation1day: summary
   }
 `;
