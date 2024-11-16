@@ -1,5 +1,7 @@
 import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
+import { Apollo, gql } from 'apollo-angular';
 import { EChartsOption } from 'echarts';
+import { Observable, Subscription } from 'rxjs';
 
 
 const tables = [
@@ -23,14 +25,20 @@ const tables = [
   styleUrl: './dashboard.component.scss'
 })
 export class DashboardComponent {
+  public query!: any;
+  public queryResult!: Observable<any>;
+  subscription!: Subscription;
+  
   data:any[]=[];
   heatMap!: EChartsOption;
   heatMapUpdate!: EChartsOption;
 
   @ViewChild("chart")
   chart!: ElementRef;
-  private timer: any;
 
+  
+
+  constructor(private readonly apollo: Apollo) { }
   ngOnInit(): void {
     let xData: number[] = [];
     let yData: number[] = [];
@@ -84,14 +92,14 @@ export class DashboardComponent {
       series: [
         {
           type: 'effectScatter',
-          data: this.generateData(),
+          data: this.data,
           symbolSize: function (val) {
             return val[2] / 100;
           },
         },
       ],
     };
-    this.timer = setInterval(() => {
+    /*this.timer = setInterval(() => {
       this.heatMapUpdate = {
         series: [
           {
@@ -99,7 +107,74 @@ export class DashboardComponent {
           },
         ],
       };
-    }, 1500);
+    }, 1500);*/
+
+
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+      this.query = this.apollo
+        .watchQuery({
+          query: gql`
+          query casinoAreaLocation1day {
+            getCasinoAreaLocation1day {
+              _id
+              type
+              bucketSize
+              acct
+              areaCode
+              sumBet
+              sumCasinoWin
+              sumTheorWin
+              noOfTxn
+              avgBet
+              avgCasinoWin
+              avgTheorWin
+            }
+          }`,
+        });
+      this.queryResult = this.query.valueChanges;
+      this.subscription = this.queryResult.subscribe((result) => {
+        this.data = result.data[Object.keys(result.data)[0]];
+        console.log(this.data)
+      });
+      this.query.subscribeToMore({
+        document: gql`
+        subscription casinoAreaLocation1day {
+          watchCasinoAreaLocation1day {
+            _id
+            type
+            bucketSize
+            acct
+            areaCode
+            sumBet
+            sumCasinoWin
+            sumTheorWin
+            noOfTxn
+            avgBet
+            avgCasinoWin
+            avgTheorWin
+          }
+        }`,
+        updateQuery: (prev: any, result: any) => {
+          if (!result.subscriptionData.data) return prev;
+          const gKey = "getCasinoAreaLocation1day";
+          const wKey = Object.keys(result.subscriptionData.data)[0];
+          const newItem = result.subscriptionData.data[`${wKey}`];
+
+          let res: any[] = [];
+          if(prev[gKey]){
+            res = [...prev[gKey]];
+          }
+          const i = res.findIndex((v: any) => v._id == newItem._id);
+          if (i === -1) res.push(newItem);
+          else res.splice(i, 1, newItem);
+
+          return {[`${gKey}`]:res};
+
+          //console.log(result.subscriptionData.data[Object.keys(result.subscriptionData.data)[0]]);
+        },
+      });
   }
 
   ngAfterViewInit() {
@@ -131,11 +206,11 @@ export class DashboardComponent {
       }
     }
   }
-  generateData() {
+  /*generateData() {
     let data = [];
     for (let i = 0; i < 12; i++) {
       data.push([...tables[i], (Math.random() * 10000)])
     }
     return data;
-  }
+  }*/
 }

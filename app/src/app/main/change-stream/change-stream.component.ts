@@ -2,7 +2,7 @@ import { Component, ViewChild } from '@angular/core';
 import { MatSort, Sort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { Apollo, gql } from 'apollo-angular';
-import { map, Observable, Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 const gqlMap: any = {
   "accountArea15days": [gql`
     query accountArea15days {
@@ -230,12 +230,15 @@ export class ChangeStreamComponent {
         document: gql[1],
         updateQuery: (prev: any, result: any) => {
           if (!result.subscriptionData.data) return prev;
-          const gKey = Object.keys(prev)[0];
+          const gKey = "get"+String(this.type).charAt(0).toUpperCase() + String(this.type).slice(1)+this.duration;
           const wKey = Object.keys(result.subscriptionData.data)[0];
           const newItem = result.subscriptionData.data[`${wKey}`];
 
-          const res = [...prev[gKey]];
-          const i = prev[gKey].findIndex((v: any) => v._id == newItem._id);
+          let res: any[] = [];
+          if(prev[gKey]){
+            res = [...prev[gKey]];
+          }
+          const i = res.findIndex((v: any) => v._id == newItem._id);
           if (i === -1) res.push(newItem);
           else res.splice(i, 1, newItem);
 

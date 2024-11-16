@@ -273,8 +273,8 @@ public class ChangeStreamConfig {
                                                                                                                                 this
                                                                                                                                                 .createPlayerBucketUpdateModel(
                                                                                                                                                                 d,
-                                                                                                                                                                "3mins",
-                                                                                                                                                                d.getDate("bucketDt3mins"),
+                                                                                                                                                                "1day",
+                                                                                                                                                                d.getDate("bucketDt1day"),
                                                                                                                                                                 "casinoCode",
                                                                                                                                                                 "areaCode",
                                                                                                                                                                 "locnCode")),

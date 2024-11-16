@@ -1,6 +1,6 @@
 import { PubSub } from 'graphql-subscriptions';
-import { getAccountArea15days, getAccountArea3mins, getAccountCasinoArea1day, getAccountCasinoArea3mins, getAccountCasino1day, 
-  watchAccountArea15days, watchAccountArea3mins, watchAccountCasinoArea1day, watchAccountCasinoArea3mins, watchAccountCasino1day } from './mongoDBOperation.js'
+import { getAccountArea15days, getAccountArea3mins, getAccountCasinoArea1day, getAccountCasinoArea3mins, getAccountCasino1day, getCasinoAreaLocation1day,
+  watchAccountArea15days, watchAccountArea3mins, watchAccountCasinoArea1day, watchAccountCasinoArea3mins, watchAccountCasino1day, watchCasinoAreaLocation1day } from './mongoDBOperation.js'
 import GraphQLDecimal from 'graphql-type-decimal';
 
 const pubsub = new PubSub();
@@ -24,6 +24,9 @@ export const resolvers = {
     },
     getAccountCasino1day: async () => {
       return await getAccountCasino1day(); 
+    },
+    getCasinoAreaLocation1day: async () => {
+      return await getCasinoAreaLocation1day(); 
     }
   },
   Subscription: {
@@ -87,6 +90,18 @@ export const resolvers = {
         }
         watchAccountCasino1day(_handler);
         return pubsub.asyncIterator(["watchAccountCasino1day"]);
+      }
+    },
+    watchCasinoAreaLocation1day: {
+      subscribe: ()=> {
+        const _handler = (theNext)=>{
+          
+          pubsub.publish("watchCasinoAreaLocation1day", 
+            {watchCasinoAreaLocation1day : theNext}
+          );
+        }
+        watchCasinoAreaLocation1day(_handler);
+        return pubsub.asyncIterator(["watchCasinoAreaLocation1day"]);
       }
     }
   }

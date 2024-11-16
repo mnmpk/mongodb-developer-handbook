@@ -26,6 +26,7 @@ export const typeDefs = `#graphql
     getAccountCasinoArea1day: [stat]
     getAccountCasinoArea3mins: [stat]
     getAccountCasino1day: [stat]
+    getCasinoAreaLocation1day: [stat]
   }
 
   type Subscription {
@@ -34,5 +35,6 @@ export const typeDefs = `#graphql
     watchAccountCasinoArea1day: stat
     watchAccountCasinoArea3mins: stat
     watchAccountCasino1day: stat
+    watchCasinoAreaLocation1day: [stat]
   }
 `;

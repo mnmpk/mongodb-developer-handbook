@@ -117,6 +117,25 @@ export const getAccountCasino1day = async () => {
   }]).toArray();
   return _result;
 }
+export const getCasinoAreaLocation1day = async () => {
+  const _result = await mongoDBOperation.tRatingBucket.aggregate([{ '$match': { 'type': 'casinoCode-areaCode-locnCode', 'bucketSize': '1day' } }, {
+    '$addFields': {
+      noOfTxn: {
+        $size: "$trans"
+      },
+      avgBet: {
+        $avg: "$trans.bet"
+      },
+      avgCasinoWin: {
+        $avg: "$trans.casinoWin"
+      },
+      avgTheorWin: {
+        $avg: "$trans.theorWin"
+      }
+    }
+  }]).toArray();
+  return _result;
+}
 
 export const watchAccountArea15days = (theHandler) => {
   mongoDBOperation.tRatingBucket.watch([{ '$match': { 'fullDocument.type': 'acct-areaCode', 'fullDocument.bucketSize': '15days' } }, {
@@ -203,6 +222,26 @@ export const watchAccountCasinoArea3mins = (theHandler) => {
 
 export const watchAccountCasino1day = (theHandler) => {
   mongoDBOperation.tRatingBucket.watch([{ '$match': { 'fullDocument.type': 'acct-casinoCode', 'fullDocument.bucketSize': '3mins' } }, {
+    '$addFields': {
+      'fullDocument.noOfTxn': {
+        $size: "$fullDocument.trans"
+      },
+      'fullDocument.avgBet': {
+        $avg: "$fullDocument.trans.bet"
+      },
+      'fullDocument.avgCasinoWin': {
+        $avg: "$fullDocument.trans.casinoWin"
+      },
+      'fullDocument.avgTheorWin': {
+        $avg: "$fullDocument.trans.theorWin"
+      }
+    }
+  }], { fullDocument: 'updateLookup' }).on("change", next => {
+    theHandler(next.fullDocument);
+  });
+}
+export const watchCasinoAreaLocation1day = (theHandler) => {
+  mongoDBOperation.tRatingBucket.watch([{ '$match': { 'fullDocument.type': 'casinoCode-areaCode-locnCode', 'fullDocument.bucketSize': '1day' } }, {
     '$addFields': {
       'fullDocument.noOfTxn': {
         $size: "$fullDocument.trans"
