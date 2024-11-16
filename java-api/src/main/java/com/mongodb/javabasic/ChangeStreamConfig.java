@@ -290,6 +290,47 @@ public class ChangeStreamConfig {
                                                                 case "tLocn":
                                                                         break;
                                                         }
+
+                                                        mongoTemplate
+                                                                        .getDb()
+                                                                        .getCollection("tRatingBucket")
+                                                                        .aggregate(Arrays.asList(new Document("$match",
+                                                                                        new Document("type",
+                                                                                                        "casinoCode-areaCode-locnCode")
+                                                                                                        .append("bucketSize",
+                                                                                                                        "1day")),
+                                                                                        new Document("$group",
+                                                                                                        new Document("_id",
+                                                                                                                        "$locnCode")
+                                                                                                                        .append("headCount",
+                                                                                                                                        new Document("$sum",
+                                                                                                                                                        1L))
+                                                                                                                        .append("areaCode",
+                                                                                                                                        new Document("$first",
+                                                                                                                                                        "$areaCode"))
+                                                                                                                        .append("casinoCode",
+                                                                                                                                        new Document("$first",
+                                                                                                                                                        "$casinoCode"))),
+                                                                                        new Document("$project",
+                                                                                                        new Document("_id",
+                                                                                                                        0L)
+                                                                                                                        .append("locnCode",
+                                                                                                                                        "$_id")
+                                                                                                                        .append("headCount",
+                                                                                                                                        "$headCount")
+                                                                                                                        .append("areaCode",
+                                                                                                                                        "$areaCode")
+                                                                                                                        .append("casinoCode",
+                                                                                                                                        "$casinoCode")),
+                                                                                        new Document("$merge",
+                                                                                                        new Document("into",
+                                                                                                                        "tRatingFinal")
+                                                                                                                        .append("on", "locnCode")
+                                                                                                                        .append("whenMatched",
+                                                                                                                                        "replace")
+                                                                                                                        .append("whenNotMatched",
+                                                                                                                                        "insert"))))
+                                                                        .first();
                                                 }
                                         }) {
                                 @Override
@@ -308,64 +349,27 @@ public class ChangeStreamConfig {
                         };
                 }, true);
 
-                ChangeStream<Document> changeStream2 = new ChangeStream<>();
-                changeStream2.run((ChangeStreamProcessConfig<Document> config) -> {
-                        return new ChangeStreamProcess<Document>(config,
-                                        (e) -> {
-                                                mongoTemplate
-                                                                .getDb()
-                                                                .getCollection("tRatingBucket")
-                                                                .aggregate(Arrays.asList(new Document("$match",
-                                                                                new Document("type",
-                                                                                                "casinoCode-areaCode-locnCode")
-                                                                                                .append("bucketSize",
-                                                                                                                "1day")),
-                                                                                new Document("$group",
-                                                                                                new Document("_id",
-                                                                                                                "$locnCode")
-                                                                                                                .append("headCount",
-                                                                                                                                new Document("$sum",
-                                                                                                                                                1L))
-                                                                                                                .append("areaCode",
-                                                                                                                                new Document("$first",
-                                                                                                                                                "$areaCode"))
-                                                                                                                .append("casinoCode",
-                                                                                                                                new Document("$first",
-                                                                                                                                                "$casinoCode"))),
-                                                                                new Document("$project",
-                                                                                                new Document("_id",
-                                                                                                                0L)
-                                                                                                                .append("locnCode",
-                                                                                                                                "$_id")
-                                                                                                                .append("headCount",
-                                                                                                                                "$headCount")
-                                                                                                                .append("areaCode",
-                                                                                                                                "$areaCode")
-                                                                                                                .append("casinoCode",
-                                                                                                                                "$casinoCode")),
-                                                                                new Document("$merge",
-                                                                                                new Document("into",
-                                                                                                                "tRatingFinal")
-                                                                                                                .append("on", "locnCode")
-                                                                                                                .append("whenMatched",
-                                                                                                                                "replace")
-                                                                                                                .append("whenNotMatched",
-                                                                                                                                "insert"))))
-                                                                .first();
-                                        }) {
-                                @Override
-                                public ChangeStreamIterable<Document> initChangeStream(List<Bson> p) {
-                                        ChangeStreamIterable<Document> cs = mongoTemplate.getDb()
-                                                        .getCollection("tRatingBucket")
-                                                        .watch(p, Document.class)
-                                                        .batchSize(batchSize)
-                                                        .maxAwaitTime(maxAwaitTime, TimeUnit.MILLISECONDS)
-                                                        .fullDocument(FullDocument.UPDATE_LOOKUP);
-                                        return cs;
-                                }
-
-                        };
-                }, true);
+                /*
+                 * ChangeStream<Document> changeStream2 = new ChangeStream<>();
+                 * changeStream2.run((ChangeStreamProcessConfig<Document> config) -> {
+                 * return new ChangeStreamProcess<Document>(config,
+                 * (e) -> {
+                 * }) {
+                 * 
+                 * @Override
+                 * public ChangeStreamIterable<Document> initChangeStream(List<Bson> p) {
+                 * ChangeStreamIterable<Document> cs = mongoTemplate.getDb()
+                 * .getCollection("tRatingBucket")
+                 * .watch(p, Document.class)
+                 * .batchSize(batchSize)
+                 * .maxAwaitTime(maxAwaitTime, TimeUnit.MILLISECONDS)
+                 * .fullDocument(FullDocument.UPDATE_LOOKUP);
+                 * return cs;
+                 * }
+                 * 
+                 * };
+                 * }, true);
+                 */
         }
 
         private UpdateOneModel<Document> createPlayerBucketUpdateModel(Document d, String bucketSize, Date bucketDt,

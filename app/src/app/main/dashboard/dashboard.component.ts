@@ -127,12 +127,17 @@ export class DashboardComponent {
       });
     this.queryResult = this.query.valueChanges;
     this.subscription = this.queryResult.subscribe((result) => {
-      ;
-
       let data = [];
       for (let i = 0; i < 12; i++) {
-        data.push([...tables[i], result.data[Object.keys(result.data)[0]][i].heahCount])
+        data.push([...tables[i], (result.data[Object.keys(result.data)[0]][i].headCount)*500])
       }
+      this.heatMapUpdate = {
+        series: [
+          {
+            data: data,
+          },
+        ],
+      };
     });
     this.query.subscribeToMore({
       document: gql`
@@ -149,7 +154,6 @@ export class DashboardComponent {
         const gKey = "getCasinoAreaLocation1day";
         const wKey = Object.keys(result.subscriptionData.data)[0];
         const newItem = result.subscriptionData.data[`${wKey}`];
-console.log(gKey, wKey, newItem);
         let res: any[] = [];
         if (prev[gKey]) {
           res = [...prev[gKey]];
