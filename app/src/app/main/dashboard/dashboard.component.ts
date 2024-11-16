@@ -118,18 +118,10 @@ export class DashboardComponent {
         query: gql`
           query casinoAreaLocation1day {
             getCasinoAreaLocation1day {
-              _id
-              type
-              bucketSize
-              acct
+              locnCode
               areaCode
-              sumBet
-              sumCasinoWin
-              sumTheorWin
-              noOfTxn
-              avgBet
-              avgCasinoWin
-              avgTheorWin
+              casinoCode
+              headCount
             }
           }`,
       });
@@ -146,18 +138,10 @@ export class DashboardComponent {
       document: gql`
         subscription casinoAreaLocation1day {
           watchCasinoAreaLocation1day {
-            _id
-            type
-            bucketSize
-            acct
-            areaCode
-            sumBet
-            sumCasinoWin
-            sumTheorWin
-            noOfTxn
-            avgBet
-            avgCasinoWin
-            avgTheorWin
+              locnCode
+              areaCode
+              casinoCode
+              headCount
           }
         }`,
       updateQuery: (prev: any, result: any) => {
