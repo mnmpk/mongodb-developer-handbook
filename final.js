@@ -21,7 +21,7 @@
     },
     {
       $project: {
-        locnCode: "$locnCode",
+        locnCode: "$_id",
         headCount: "$headCount",
         areaCode: "$areaCode",
         casinoCode: "$casinoCode"

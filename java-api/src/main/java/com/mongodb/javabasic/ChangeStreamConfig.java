@@ -334,7 +334,7 @@ public class ChangeStreamConfig {
                                                                                                                                                 "$casinoCode"))),
                                                                                 new Document("$project",
                                                                                                 new Document("locnCode",
-                                                                                                                "$locnCode")
+                                                                                                                "$_id")
                                                                                                                 .append("headCount",
                                                                                                                                 "$headCount")
                                                                                                                 .append("areaCode",
