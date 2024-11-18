@@ -36,7 +36,7 @@ export const getAccountArea15days = async () => {
         $avg: "$trans.theorWin"
       }
     }
-  }]).toArray();
+  },{$unset:"trans"}]).toArray();
   return _result;
 }
 export const getAccountArea3mins = async () => {
@@ -55,7 +55,7 @@ export const getAccountArea3mins = async () => {
         $avg: "$trans.theorWin"
       }
     }
-  }]).toArray();
+  },{$unset:"trans"}]).toArray();
   return _result;
 }
 
@@ -75,7 +75,7 @@ export const getAccountCasinoArea1day = async () => {
         $avg: "$trans.theorWin"
       }
     }
-  }]).toArray();
+  },{$unset:"trans"}]).toArray();
   return _result;
 }
 export const getAccountCasinoArea3mins = async () => {
@@ -94,7 +94,7 @@ export const getAccountCasinoArea3mins = async () => {
         $avg: "$trans.theorWin"
       }
     }
-  }]).toArray();
+  },{$unset:"trans"}]).toArray();
   return _result;
 }
 
@@ -114,7 +114,7 @@ export const getAccountCasino1day = async () => {
         $avg: "$trans.theorWin"
       }
     }
-  }]).toArray();
+  },{$unset:"trans"}]).toArray();
   return _result;
 }
 export const getCasinoAreaLocation1day = async () => {
@@ -138,7 +138,7 @@ export const watchAccountArea15days = (theHandler) => {
         $avg: "$fullDocument.trans.theorWin"
       }
     }
-  }], { fullDocument: 'updateLookup' }).on("change", next => {
+  },{$unset:"fullDocument.trans"}], { fullDocument: 'updateLookup' }).on("change", next => {
     theHandler(next.fullDocument);
   });
 }
@@ -159,7 +159,7 @@ export const watchAccountArea3mins = (theHandler) => {
         $avg: "$fullDocument.trans.theorWin"
       }
     }
-  }], { fullDocument: 'updateLookup' }).on("change", next => {
+  },{$unset:"fullDocument.trans"}], { fullDocument: 'updateLookup' }).on("change", next => {
     theHandler(next.fullDocument);
   });
 }
@@ -180,7 +180,7 @@ export const watchAccountCasinoArea1day = (theHandler) => {
         $avg: "$fullDocument.trans.theorWin"
       }
     }
-  }], { fullDocument: 'updateLookup' }).on("change", next => {
+  },{$unset:"fullDocument.trans"}], { fullDocument: 'updateLookup' }).on("change", next => {
     theHandler(next.fullDocument);
   });
 }
@@ -200,7 +200,7 @@ export const watchAccountCasinoArea3mins = (theHandler) => {
         $avg: "$fullDocument.trans.theorWin"
       }
     }
-  }], { fullDocument: 'updateLookup' }).on("change", next => {
+  },{$unset:"fullDocument.trans"}], { fullDocument: 'updateLookup' }).on("change", next => {
     theHandler(next.fullDocument);
   });
 }
@@ -221,7 +221,7 @@ export const watchAccountCasino1day = (theHandler) => {
         $avg: "$fullDocument.trans.theorWin"
       }
     }
-  }], { fullDocument: 'updateLookup' }).on("change", next => {
+  },{$unset:"fullDocument.trans"}], { fullDocument: 'updateLookup' }).on("change", next => {
     theHandler(next.fullDocument);
   });
 }
