@@ -368,7 +368,7 @@ public class ChangeStreamConfig {
                                 @Override
                                 public ChangeStreamIterable<Document> initChangeStream(List<Bson> p) {
                                         p.add(Aggregates.match(Filters.and(
-                                                        Filters.eq("fullDocument.type", "casinoCode-areaCode-locnCode"),
+                                                        Filters.eq("fullDocument.type", "acct-casinoCode-areaCode-locnCode"),
                                                         Filters.eq("fullDocument.bucketSize", "1day"))));
                                         ChangeStreamIterable<Document> cs = mongoTemplate.getDb()
                                                         .getCollection("tRatingBucket")
