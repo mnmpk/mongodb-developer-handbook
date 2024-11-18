@@ -154,7 +154,7 @@
         $first: "$locns.locnInfo4"
       },
       deptCode: {
-        $first: "$deptss.deptCode"
+        $first: "$depts.deptCode"
       },
     }
   }

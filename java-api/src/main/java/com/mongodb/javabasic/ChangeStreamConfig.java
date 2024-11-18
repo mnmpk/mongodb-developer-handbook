@@ -213,7 +213,7 @@ public class ChangeStreamConfig {
                                                                                                                                                                         "$locns.locnInfo4"))
                                                                                                                                         .append("deptCode",
                                                                                                                                                         new Document("$first",
-                                                                                                                                                                        "$deptss.deptCode")))
+                                                                                                                                                                        "$depts.deptCode")))
 
                                                                                         ))
                                                                                         .first();
@@ -222,14 +222,20 @@ public class ChangeStreamConfig {
                                                                                 MongoCollection<Document> tRatingBucket = mongoTemplate
                                                                                                 .getDb()
                                                                                                 .getCollection("tRatingBucket");
-                                                                                logger.info("acct:"
+                                                                                logger.info("*******************acct:"
                                                                                                 + d.getInteger("acct")
                                                                                                 + " bucketDt3mins:"
                                                                                                 + d.getDate("bucketDt3mins")
                                                                                                 + " bucketDt1day:"
                                                                                                 + d.getDate("bucketDt1day")
                                                                                                 + " bucketDt15days:"
-                                                                                                + d.getDate("bucketDt15days"));
+                                                                                                + d.getDate("bucketDt15days")
+                                                                                                + " casinoCode:"
+                                                                                                + d.getString("casinoCode")
+                                                                                                + " areaCode:"
+                                                                                                + d.getString("areaCode")
+                                                                                                + " locnCode:"
+                                                                                                + d.getString("locnCode"));
                                                                                 BulkWriteResult result = tRatingBucket
                                                                                                 .bulkWrite(
                                                                                                                 List.of(

@@ -77,7 +77,7 @@ public class DataGeneration {
         long MAX_CASINO = 2;
         long AREA_PER_CASINO = 4;
         long DEPT_PER_CASINO = 5;
-        long LOCN_PER_CASINO = 100;
+        long LOCN_PER_CASINO = 30;
 
         long playerCount = mongoTemplate.getCollection("tPlayerCard").countDocuments();
         long casinoCount = mongoTemplate.getCollection("tCasino").countDocuments();
@@ -119,6 +119,7 @@ public class DataGeneration {
                 if (locationCount <= LOCN_PER_CASINO) {
                     for (long j = locationCount; j < LOCN_PER_CASINO; j++) {
                         Location location = locationGenService.generateRandom(Location.class);
+                        location.setCasinoId(casino.getCasinoId());
                         location.setAreaId(areaList.get(new Random().nextInt(areaList.size())));
                         location.setDeptId(deptList.get(new Random().nextInt(deptList.size())));
                         mongoTemplate.getCollection("tLocn").withDocumentClass(Location.class).insertOne(location);
