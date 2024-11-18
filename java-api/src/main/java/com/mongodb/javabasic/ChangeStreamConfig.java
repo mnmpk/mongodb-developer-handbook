@@ -281,6 +281,7 @@ public class ChangeStreamConfig {
                                                                                                                                                                 d,
                                                                                                                                                                 "1day",
                                                                                                                                                                 d.getDate("bucketDt1day"),
+                                                                                                                                                                "acct",
                                                                                                                                                                 "casinoCode",
                                                                                                                                                                 "areaCode",
                                                                                                                                                                 "locnCode")),
@@ -324,7 +325,7 @@ public class ChangeStreamConfig {
                                                                 .getCollection("tRatingBucket")
                                                                 .aggregate(Arrays.asList(new Document("$match",
                                                                                 new Document("type",
-                                                                                                "casinoCode-areaCode-locnCode")
+                                                                                                "acct-casinoCode-areaCode-locnCode")
                                                                                                 .append("bucketSize",
                                                                                                                 "1day")
                                                                                                 .append("locnCode",

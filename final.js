@@ -1,7 +1,7 @@
 [
     {
       $match: {
-        type: "casinoCode-areaCode-locnCode",
+        type: "acct-casinoCode-areaCode-locnCode",
         bucketSize: "1day"
       }
     },
