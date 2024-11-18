@@ -1,12 +1,319 @@
 import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
+import { MatSort } from '@angular/material/sort';
+import { MatTableDataSource } from '@angular/material/table';
 import { Apollo, gql } from 'apollo-angular';
 import { EChartsOption } from 'echarts';
 import { Observable, Subscription } from 'rxjs';
 
+const gqlMap: any = {
+  "accountArea15days": [gql`
+    query accountArea15days {
+      getAccountArea15days {
+        _id
+        type
+        bucketSize
+        acct
+        areaCode
+        sumBet
+        sumCasinoWin
+        sumTheorWin
+        noOfTxn
+        avgBet
+        avgCasinoWin
+        avgTheorWin
+      }
+    }`, gql`
+    subscription accountArea15days {
+      watchAccountArea15days {
+        _id
+        type
+        bucketSize
+        acct
+        areaCode
+        sumBet
+        sumCasinoWin
+        sumTheorWin
+        noOfTxn
+        avgBet
+        avgCasinoWin
+        avgTheorWin
+      }
+    }`],
+
+
+  "accountArea3mins": [gql`
+      query accountArea3mins {
+        getAccountArea3mins {
+          _id
+          type
+          bucketSize
+          acct
+          areaCode
+          sumBet
+          sumCasinoWin
+          sumTheorWin
+          noOfTxn
+          avgBet
+          avgCasinoWin
+          avgTheorWin
+        }
+      }`, gql`
+      subscription accountArea3mins {
+        watchAccountArea3mins {
+          _id
+          type
+          bucketSize
+          acct
+          areaCode
+          sumBet
+          sumCasinoWin
+          sumTheorWin
+          noOfTxn
+          avgBet
+          avgCasinoWin
+          avgTheorWin
+        }
+      }`],
+
+
+  "accountCasinoArea1day": [gql`
+          query accountCasinoArea1day {
+            getAccountCasinoArea1day {
+              _id
+              type
+              bucketSize
+              acct
+              casinoCode
+              areaCode
+              sumBet
+              sumCasinoWin
+              sumTheorWin
+              noOfTxn
+              avgBet
+              avgCasinoWin
+              avgTheorWin
+            }
+          }`, gql`
+          subscription accountCasinoArea1day {
+            watchAccountCasinoArea1day {
+              _id
+              type
+              bucketSize
+              acct
+              casinoCode
+              areaCode
+              sumBet
+              sumCasinoWin
+              sumTheorWin
+              noOfTxn
+              avgBet
+              avgCasinoWin
+              avgTheorWin
+            }
+          }`],
+
+
+
+
+  "accountCasinoArea3mins": [gql`
+        query accountCasinoArea3mins {
+          getAccountCasinoArea3mins {
+            _id
+            type
+            bucketSize
+            acct
+            casinoCode
+            areaCode
+            sumBet
+            sumCasinoWin
+            sumTheorWin
+            noOfTxn
+            avgBet
+            avgCasinoWin
+            avgTheorWin
+          }
+        }`, gql`
+        subscription accountCasinoArea3mins {
+          watchAccountCasinoArea3mins {
+            _id
+            type
+            bucketSize
+            acct
+            casinoCode
+            areaCode
+            sumBet
+            sumCasinoWin
+            sumTheorWin
+            noOfTxn
+            avgBet
+            avgCasinoWin
+            avgTheorWin
+          }
+        }`],
+
+
+
+
+  "accountCasino1day": [gql`
+        query accountCasino1day {
+          getAccountCasino1day {
+            _id
+            type
+            bucketSize
+            acct
+            casinoCode
+            sumBet
+            sumCasinoWin
+            sumTheorWin
+            noOfTxn
+            avgBet
+            avgCasinoWin
+            avgTheorWin
+          }
+        }`, gql`
+        subscription accountCasino1day {
+          watchAccountCasino1day {
+            _id
+            type
+            bucketSize
+            acct
+            casinoCode
+            sumBet
+            sumCasinoWin
+            sumTheorWin
+            noOfTxn
+            avgBet
+            avgCasinoWin
+            avgTheorWin
+          }
+        }`]
+}
 
 const tables = [
-  [1080, 1000],
-  [1300, 1000],
+  [1025, 1000],
+  [1055, 960],
+  [1085, 920],
+  [1115, 960],
+  [1145, 1000],
+  [1115, 1040],
+  [1085, 1080],
+  [1055, 1040],
+
+  [1255, 1000],
+  [1285, 960],
+  [1315, 920],
+  [1345, 960],
+  [1375, 1000],
+  [1345, 1040],
+  [1315, 1080],
+  [1285, 1040],
+
+  
+  [1025, 785],
+  [1055, 745],
+  [1085, 705],
+  [1115, 745],
+  [1145, 785],
+  [1115, 825],
+  [1085, 865],
+  [1055, 825],
+
+
+  [1255, 785],
+  [1285, 745],
+  [1315, 705],
+  [1345, 745],
+  [1375, 785],
+  [1345, 825],
+  [1315, 865],
+  [1285, 825],
+
+
+
+  [525, 570],
+  [555, 530],
+  [585, 490],
+  [615, 530],
+  [645, 570],
+  [615, 610],
+  [585, 650],
+  [555, 610],
+
+
+  [755, 570],
+  [785, 530],
+  [815, 490],
+  [845, 510],
+  [875, 570],
+  [845, 610],
+  [815, 650],
+  [785, 610],
+
+
+  [775, 355],
+  [805, 315],
+  [835, 275],
+  [865, 315],
+  [895, 355],
+  [865, 395],
+  [835, 435],
+  [805, 395],
+
+
+  [1005, 355],
+  [1035, 315],
+  [1065, 275],
+  [1095, 315],
+  [1125, 355],
+  [1095, 395],
+  [1065, 435],
+  [1035, 395],
+
+
+
+
+  
+  [1025, 570],
+  [1055, 530],
+  [1085, 490],
+  [1115, 530],
+  [1145, 570],
+  [1115, 610],
+  [1085, 650],
+  [1055, 610],
+
+
+  [1255, 570],
+  [1285, 530],
+  [1315, 490],
+  [1345, 510],
+  [1375, 570],
+  [1345, 610],
+  [1315, 650],
+  [1285, 610],
+
+
+  [1025, 355],
+  [1055, 315],
+  [1085, 275],
+  [1115, 315],
+  [1145, 355],
+  [1115, 395],
+  [1085, 435],
+  [1055, 395],
+
+
+  [1255, 355],
+  [1285, 315],
+  [1315, 275],
+  [1345, 315],
+  [1375, 355],
+  [1345, 395],
+  [1315, 435],
+  [1285, 395],
+
+
+  /*[1300, 1000],
   [1080, 790],
   [1300, 790],
   [640, 580],
@@ -16,7 +323,7 @@ const tables = [
   [640, 370],
   [860, 370],
   [1080, 370],
-  [1300, 370]
+  [1300, 370]*/
 ];
 
 @Component({
@@ -25,9 +332,9 @@ const tables = [
   styleUrl: './dashboard.component.scss'
 })
 export class DashboardComponent {
-  public query!: any;
-  public queryResult!: Observable<any>;
-  subscription!: Subscription;
+  public chartQuery!: any;
+  public chartResult!: Observable<any>;
+  chartSubscription!: Subscription;
 
   data: any[] = [];
   heatMap!: EChartsOption;
@@ -36,6 +343,17 @@ export class DashboardComponent {
   @ViewChild("chart")
   chart!: ElementRef;
 
+
+  @ViewChild(MatSort) sort!: MatSort;
+
+  type = 'accountArea';
+  duration = '15days';
+
+  public query!: any;
+  public queryResult!: Observable<any>;
+  subscription!: Subscription;
+  dataSource: MatTableDataSource<any> = new MatTableDataSource();
+  displayedColumns: string[] = ['acct', 'casinoCode', 'areaCode', 'sumBet', 'avgBet'];
 
 
   constructor(private readonly apollo: Apollo) { }
@@ -94,7 +412,7 @@ export class DashboardComponent {
           type: 'effectScatter',
           data: this.data,
           symbolSize: function (val) {
-            return val[2] / 100;
+            return val[2]*2;
           },
         },
       ],
@@ -110,14 +428,15 @@ export class DashboardComponent {
     }, 1500);*/
 
 
-    if (this.subscription) {
-      this.subscription.unsubscribe();
+    if (this.chartSubscription) {
+      this.chartSubscription.unsubscribe();
     }
-    this.query = this.apollo
+    this.chartQuery = this.apollo
       .watchQuery({
         query: gql`
           query casinoAreaLocation1day {
             getCasinoAreaLocation1day {
+              locnIndex
               locnCode
               areaCode
               casinoCode
@@ -125,12 +444,11 @@ export class DashboardComponent {
             }
           }`,
       });
-    this.queryResult = this.query.valueChanges;
-    this.subscription = this.queryResult.subscribe((result) => {
+    this.chartResult = this.chartQuery.valueChanges;
+    this.chartSubscription = this.chartResult.subscribe((result) => {
       let data: number[][] = [];
       result.data[Object.keys(result.data)[0]].forEach((item: any) => {
-        const charCode = item.locnCode.charCodeAt(0);
-        data.push([...tables[charCode % 12], (item.headCount) * 500])
+        data.push([...tables[item.locnIndex % tables.length], (item.headCount)])
       });
       this.heatMapUpdate = {
         series: [
@@ -140,10 +458,11 @@ export class DashboardComponent {
         ],
       };
     });
-    this.query.subscribeToMore({
+    this.chartQuery.subscribeToMore({
       document: gql`
         subscription casinoAreaLocation1day {
           watchCasinoAreaLocation1day {
+              locnIndex
               locnCode
               areaCode
               casinoCode
@@ -169,9 +488,12 @@ export class DashboardComponent {
       },
       onError: (err: any) => console.error(err)
     });
+
+    this.change();
   }
 
   ngAfterViewInit() {
+    this.dataSource.sort = this.sort;
     setTimeout(() => {
       this.heatMapUpdate = {
         graphic: {
@@ -207,4 +529,43 @@ export class DashboardComponent {
     }
     return data;
   }*/
+
+    change() {
+      if (this.subscription) {
+        this.subscription.unsubscribe();
+      }
+      const gql = gqlMap[this.type + this.duration];
+      if (gql) {
+        this.query = this.apollo
+          .watchQuery({
+            query: gql[0],
+          });
+        this.queryResult = this.query.valueChanges;
+        this.subscription = this.queryResult.subscribe((result) => {
+          this.dataSource.data = result.data[Object.keys(result.data)[0]];
+        });
+        this.query.subscribeToMore({
+          document: gql[1],
+          updateQuery: (prev: any, result: any) => {
+            if (!result.subscriptionData.data) return prev;
+            const gKey = "get"+String(this.type).charAt(0).toUpperCase() + String(this.type).slice(1)+this.duration;
+            const wKey = Object.keys(result.subscriptionData.data)[0];
+            const newItem = result.subscriptionData.data[`${wKey}`];
+  
+            let res: any[] = [];
+            if(prev[gKey]){
+              res = [...prev[gKey]];
+            }
+            const i = res.findIndex((v: any) => v._id == newItem._id);
+            if (i === -1) res.push(newItem);
+            else res.splice(i, 1, newItem);
+  
+            return {[`${gKey}`]:res};
+  
+            //console.log(result.subscriptionData.data[Object.keys(result.subscriptionData.data)[0]]);
+          },
+          onError: (err: any) => console.error(err)
+        });
+      }
+    }
 }

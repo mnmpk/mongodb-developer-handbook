@@ -20,6 +20,7 @@ export const typeDefs = `#graphql
   }
 
   type summary {
+    locnIndex: Int
     locnCode: String
     headCount: Int
     areaCode: String

@@ -73,7 +73,7 @@ public class DataGeneration {
 
     @PostConstruct
     public void init() throws Exception {
-        long MAX_PLAYER = 10;
+        long MAX_PLAYER = 100;
         long MAX_CASINO = 2;
         long AREA_PER_CASINO = 4;
         long DEPT_PER_CASINO = 5;

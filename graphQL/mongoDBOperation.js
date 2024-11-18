@@ -118,7 +118,18 @@ export const getAccountCasino1day = async () => {
   return _result;
 }
 export const getCasinoAreaLocation1day = async () => {
-  const _result = await mongoDBOperation.tRatingFinal.find().toArray();
+  const _result = await mongoDBOperation.tRatingFinal.aggregate([{'$addFields': {
+    locnIndex: {
+      $abs: {
+        $mod: [
+          {
+            $toHashedIndexKey: "$locnCode"
+          },
+          100
+        ]
+      }
+    }
+  }}]).toArray();
   return _result;
 }
 
@@ -226,7 +237,20 @@ export const watchAccountCasino1day = (theHandler) => {
   });
 }
 export const watchCasinoAreaLocation1day = (theHandler) => {
-  mongoDBOperation.tRatingFinal.watch({}, { fullDocument: 'updateLookup' }).on("change", next => {
+  mongoDBOperation.tRatingFinal.watch([{
+    '$addFields': {
+      'fullDocument.locnIndex': {
+        $abs: {
+          $mod: [
+            {
+              $toHashedIndexKey: "$fullDocument.locnCode"
+            },
+            100
+          ]
+        }
+      }
+    }
+  }], { fullDocument: 'updateLookup' }).on("change", next => {
     theHandler(next.fullDocument);
   });
 }
