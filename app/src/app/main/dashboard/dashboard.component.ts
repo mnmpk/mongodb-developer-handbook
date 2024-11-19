@@ -208,7 +208,7 @@ const tables = [
   [1315, 1080],
   [1285, 1040],
 
-  
+
   [1025, 785],
   [1055, 745],
   [1085, 705],
@@ -272,7 +272,7 @@ const tables = [
 
 
 
-  
+
   [1025, 570],
   [1055, 530],
   [1085, 490],
@@ -411,8 +411,8 @@ export class DashboardComponent {
         {
           type: 'effectScatter',
           data: this.data,
-          symbolSize: function (val) {
-            return val[2]*2;
+          symbolSize: function (val) {            
+            return val[2]*0.2;
           },
         },
       ],
@@ -447,8 +447,10 @@ export class DashboardComponent {
     this.chartResult = this.chartQuery.valueChanges;
     this.chartSubscription = this.chartResult.subscribe((result) => {
       let data: number[][] = [];
-      result.data[Object.keys(result.data)[0]].forEach((item: any) => {
-        data.push([...tables[item.locnIndex % tables.length], (item.headCount)])
+      tables.forEach((table, index) => {
+        const counts = result.data[Object.keys(result.data)[0]].filter((i: any) => i.locnIndex == index).map((i: any) => i.headCount);
+        if(counts && counts.length)
+          data.push([...table, counts.reduce((sum: any, num: any) => sum + num)]);
       });
       this.heatMapUpdate = {
         series: [
@@ -530,42 +532,42 @@ export class DashboardComponent {
     return data;
   }*/
 
-    change() {
-      if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
-      const gql = gqlMap[this.type + this.duration];
-      if (gql) {
-        this.query = this.apollo
-          .watchQuery({
-            query: gql[0],
-          });
-        this.queryResult = this.query.valueChanges;
-        this.subscription = this.queryResult.subscribe((result) => {
-          this.dataSource.data = result.data[Object.keys(result.data)[0]];
-        });
-        this.query.subscribeToMore({
-          document: gql[1],
-          updateQuery: (prev: any, result: any) => {
-            if (!result.subscriptionData.data) return prev;
-            const gKey = "get"+String(this.type).charAt(0).toUpperCase() + String(this.type).slice(1)+this.duration;
-            const wKey = Object.keys(result.subscriptionData.data)[0];
-            const newItem = result.subscriptionData.data[`${wKey}`];
-  
-            let res: any[] = [];
-            if(prev[gKey]){
-              res = [...prev[gKey]];
-            }
-            const i = res.findIndex((v: any) => v._id == newItem._id);
-            if (i === -1) res.push(newItem);
-            else res.splice(i, 1, newItem);
-  
-            return {[`${gKey}`]:res};
-  
-            //console.log(result.subscriptionData.data[Object.keys(result.subscriptionData.data)[0]]);
-          },
-          onError: (err: any) => console.error(err)
-        });
-      }
+  change() {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
     }
+    const gql = gqlMap[this.type + this.duration];
+    if (gql) {
+      this.query = this.apollo
+        .watchQuery({
+          query: gql[0],
+        });
+      this.queryResult = this.query.valueChanges;
+      this.subscription = this.queryResult.subscribe((result) => {
+        this.dataSource.data = result.data[Object.keys(result.data)[0]];
+      });
+      this.query.subscribeToMore({
+        document: gql[1],
+        updateQuery: (prev: any, result: any) => {
+          if (!result.subscriptionData.data) return prev;
+          const gKey = "get" + String(this.type).charAt(0).toUpperCase() + String(this.type).slice(1) + this.duration;
+          const wKey = Object.keys(result.subscriptionData.data)[0];
+          const newItem = result.subscriptionData.data[`${wKey}`];
+
+          let res: any[] = [];
+          if (prev[gKey]) {
+            res = [...prev[gKey]];
+          }
+          const i = res.findIndex((v: any) => v._id == newItem._id);
+          if (i === -1) res.push(newItem);
+          else res.splice(i, 1, newItem);
+
+          return { [`${gKey}`]: res };
+
+          //console.log(result.subscriptionData.data[Object.keys(result.subscriptionData.data)[0]]);
+        },
+        onError: (err: any) => console.error(err)
+      });
+    }
+  }
 }
