@@ -6,13 +6,10 @@ import { WorkloadsComponent } from './main/workloads/workloads.component';
 import { DashboardComponent } from './main/dashboard/dashboard.component';
 
 export const routes: Routes = [
-    {
-      path: '',
-      children: []
-    },
     { path: 'dashboard', component: DashboardComponent },
     { path: 'workloads', component: WorkloadsComponent },
     { path: 'transaction', component: TransactionComponent },
     { path: 'change-stream', component: ChangeStreamComponent },
     { path: 'search', component: SearchComponent },
+    { path: '', redirectTo: 'dashboard', pathMatch: 'prefix' },
 ];

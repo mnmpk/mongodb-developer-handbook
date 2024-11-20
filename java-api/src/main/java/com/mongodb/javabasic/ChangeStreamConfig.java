@@ -31,7 +31,7 @@ import com.mongodb.javabasic.model.ChangeStreamProcessConfig;
 
 import jakarta.annotation.PostConstruct;
 
-@Configuration
+//@Configuration
 public class ChangeStreamConfig {
 
         @Value("${settings.changeStream.batchSize}")

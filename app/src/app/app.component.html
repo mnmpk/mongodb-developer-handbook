@@ -1,6 +1,6 @@
 <div fxFlex fxLayout="column">
   <mat-toolbar>
-    <a href="dashboard">MongoDB Developer Handbook</a>
+    <h1>MongoDB Developer Handbook</h1>
     <span fxFlex="1 1">&nbsp;</span>
     <mat-select #impl [value]="UtilityService.implementation"
       (selectionChange)="UtilityService.implementation=impl.value">
@@ -15,10 +15,11 @@
   <mat-sidenav-container fxFlex>
     <mat-sidenav #sidenav mode="side" opened [fixedInViewport]="false">
       <mat-nav-list>
+        <a mat-list-item href="dashboard">Dashboard</a>
         <a mat-list-item href="workloads">Workloads</a>
-        <a mat-list-item href="transaction">Transaction</a>
+        <!--a mat-list-item href="transaction">Transaction</a>
         <a mat-list-item href="change-stream">Change Stream</a>
-        <a mat-list-item href="search">Search</a>
+        <a mat-list-item href="search">Search</a-->
 
       </mat-nav-list>
     </mat-sidenav>
@@ -27,7 +28,7 @@
       <div fxFlex class="content">
         <router-outlet></router-outlet>
       </div>
-      <footer><app-metrics></app-metrics></footer>
+      <footer></footer>
     </mat-sidenav-content>
   </mat-sidenav-container>
 </div>
