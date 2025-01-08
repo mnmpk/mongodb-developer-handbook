@@ -164,15 +164,18 @@ public class DataGeneration {
                 Award a = awardGenService.generateRandom(Award.class);
                 a.setRelatedTranId(tr.getTranID());
                 a.setPlayerId(tr.getPlayerId());
+                a.setGamingDt(tr.getGamingDt());
                 mongoTemplate.getCollection("tAwards").withDocumentClass(Award.class).insertOne(clientSession, a);
                 PlayerPoint point = playerPointGenService.generateRandom(PlayerPoint.class);
                 point.setTranId(a.getTranId());
                 point.setPlayerId(tr.getPlayerId());
+                point.setGamingDt(tr.getGamingDt());
                 mongoTemplate.getCollection("tPlayerPoints").withDocumentClass(PlayerPoint.class)
                         .insertOne(clientSession, point);
                 PlayerComp comp = playerCompGenService.generateRandom(PlayerComp.class);
                 comp.setTranId(a.getTranId());
                 comp.setPlayerId(tr.getPlayerId());
+                comp.setGamingDt(tr.getGamingDt());
                 mongoTemplate.getCollection("tPlayerComps").withDocumentClass(PlayerComp.class).insertOne(clientSession,
                         comp);
                 return null;
