@@ -159,7 +159,7 @@ public class DataGeneration {
 
                 Game g = gameGenService.generateRandom(Game.class);
                 g.setGameId(tr.getGameID());
-                g.setCreatedDtm(Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()));
+                g.setCreatedDtm(new Date());
                 mongoTemplate.getCollection("tGame").withDocumentClass(Game.class).insertOne(clientSession, g);
                 Award a = awardGenService.generateRandom(Award.class);
                 a.setRelatedTranId(tr.getTranID());
