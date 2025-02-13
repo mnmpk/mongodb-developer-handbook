@@ -13,8 +13,14 @@ export const resolvers = {
     getAccountArea15days: async ()=> {
       return await getAccountArea15days();
     },
+    getAccountArea1day: async ()=> {
+      return await getAccountArea1day();
+    },
     getAccountArea3mins: async ()=> {
       return await getAccountArea3mins();
+    },
+    getAccountCasinoArea15days: async ()=> {
+      return await getAccountCasinoArea15days();
     },
     getAccountCasinoArea1day: async ()=> {
       return await getAccountCasinoArea1day();
@@ -22,8 +28,14 @@ export const resolvers = {
     getAccountCasinoArea3mins: async () => {
       return await getAccountCasinoArea3mins(); 
     },
+    getAccountCasino15days: async () => {
+      return await getAccountCasino15days(); 
+    },
     getAccountCasino1day: async () => {
       return await getAccountCasino1day(); 
+    },
+    getAccountCasino3mins: async () => {
+      return await getAccountCasino3mins(); 
     },
     getCasinoAreaLocation1day: async () => {
       return await getCasinoAreaLocation1day(); 
@@ -43,6 +55,19 @@ export const resolvers = {
         return pubsub.asyncIterator(["watchAccountArea15days"]);
       }
     },
+    watchAccountArea1day: {
+      subscribe: ()=> {
+        const _handler = (theNext)=>{
+          
+          pubsub.publish("watchAccountArea1day", 
+            // theNext
+            {watchAccountArea1day: theNext}
+          );
+        }
+        watchAccountArea15days(_handler);
+        return pubsub.asyncIterator(["watchAccountArea1day"]);
+      }
+    },
     watchAccountArea3mins: {
       subscribe: ()=> {
         const _handler = (theNext)=>{
@@ -54,6 +79,18 @@ export const resolvers = {
         }
         watchAccountArea3mins(_handler);
         return pubsub.asyncIterator(["watchAccountArea3mins"]);
+      }
+    },
+    watchAccountCasinoArea15days: {
+      subscribe: ()=> {
+        const _handler = (theNext)=>{
+          
+          pubsub.publish("watchAccountCasinoArea15days", 
+            {watchAccountCasinoArea15days: theNext}
+          );
+        }
+        watchAccountCasinoArea15days(_handler);
+        return pubsub.asyncIterator(["watchAccountCasinoArea15days"]);
       }
     },
     watchAccountCasinoArea1day: {
@@ -80,6 +117,18 @@ export const resolvers = {
         return pubsub.asyncIterator(["watchAccountCasinoArea3mins"]);
       }
     },
+    watchAccountCasino15days: {
+      subscribe: ()=> {
+        const _handler = (theNext)=>{
+          
+          pubsub.publish("watchAccountCasino15days", 
+            {watchAccountCasino15days : theNext}
+          );
+        }
+        watchAccountCasino15days(_handler);
+        return pubsub.asyncIterator(["watchAccountCasino15days"]);
+      }
+    },
     watchAccountCasino1day: {
       subscribe: ()=> {
         const _handler = (theNext)=>{
@@ -90,6 +139,18 @@ export const resolvers = {
         }
         watchAccountCasino1day(_handler);
         return pubsub.asyncIterator(["watchAccountCasino1day"]);
+      }
+    },
+    watchAccountCasino3mins: {
+      subscribe: ()=> {
+        const _handler = (theNext)=>{
+          
+          pubsub.publish("watchAccountCasino3mins", 
+            {watchAccountCasino3mins : theNext}
+          );
+        }
+        watchAccountCasino3mins(_handler);
+        return pubsub.asyncIterator(["watchAccountCasino3mins"]);
       }
     },
     watchCasinoAreaLocation1day: {
