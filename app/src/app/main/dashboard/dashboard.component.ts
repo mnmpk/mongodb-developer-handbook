@@ -40,6 +40,39 @@ const gqlMap: any = {
       }
     }`],
 
+  "accountArea1day": [gql`
+      query accountArea1day {
+        getAccountArea1day {
+          _id
+          type
+          bucketSize
+          acct
+          areaCode
+          sumBet
+          sumCasinoWin
+          sumTheorWin
+          noOfTxn
+          avgBet
+          avgCasinoWin
+          avgTheorWin
+        }
+      }`, gql`
+      subscription accountArea1day {
+        watchAccountArea1day {
+          _id
+          type
+          bucketSize
+          acct
+          areaCode
+          sumBet
+          sumCasinoWin
+          sumTheorWin
+          noOfTxn
+          avgBet
+          avgCasinoWin
+          avgTheorWin
+        }
+      }`],
 
   "accountArea3mins": [gql`
       query accountArea3mins {
@@ -75,6 +108,41 @@ const gqlMap: any = {
         }
       }`],
 
+  "accountCasinoArea15days": [gql`
+        query accountCasinoArea15days {
+          getAccountCasinoArea15days {
+            _id
+            type
+            bucketSize
+            acct
+            casinoCode
+            areaCode
+            sumBet
+            sumCasinoWin
+            sumTheorWin
+            noOfTxn
+            avgBet
+            avgCasinoWin
+            avgTheorWin
+          }
+        }`, gql`
+        subscription accountCasinoArea15days {
+          watchAccountCasinoArea15days {
+            _id
+            type
+            bucketSize
+            acct
+            casinoCode
+            areaCode
+            sumBet
+            sumCasinoWin
+            sumTheorWin
+            noOfTxn
+            avgBet
+            avgCasinoWin
+            avgTheorWin
+          }
+        }`],
 
   "accountCasinoArea1day": [gql`
           query accountCasinoArea1day {
@@ -153,40 +221,104 @@ const gqlMap: any = {
 
 
 
-
+  "accountCasino15days": [gql`
+          query accountCasino15days {
+            getAccountCasino15days {
+              _id
+              type
+              bucketSize
+              acct
+              casinoCode
+              sumBet
+              sumCasinoWin
+              sumTheorWin
+              noOfTxn
+              avgBet
+              avgCasinoWin
+              avgTheorWin
+            }
+          }`, gql`
+          subscription accountCasino15days {
+            watchAccountCasino15days {
+              _id
+              type
+              bucketSize
+              acct
+              casinoCode
+              sumBet
+              sumCasinoWin
+              sumTheorWin
+              noOfTxn
+              avgBet
+              avgCasinoWin
+              avgTheorWin
+            }
+          }`],
   "accountCasino1day": [gql`
-        query accountCasino1day {
-          getAccountCasino1day {
-            _id
-            type
-            bucketSize
-            acct
-            casinoCode
-            sumBet
-            sumCasinoWin
-            sumTheorWin
-            noOfTxn
-            avgBet
-            avgCasinoWin
-            avgTheorWin
-          }
-        }`, gql`
-        subscription accountCasino1day {
-          watchAccountCasino1day {
-            _id
-            type
-            bucketSize
-            acct
-            casinoCode
-            sumBet
-            sumCasinoWin
-            sumTheorWin
-            noOfTxn
-            avgBet
-            avgCasinoWin
-            avgTheorWin
-          }
-        }`]
+          query accountCasino1day {
+            getAccountCasino1day {
+              _id
+              type
+              bucketSize
+              acct
+              casinoCode
+              sumBet
+              sumCasinoWin
+              sumTheorWin
+              noOfTxn
+              avgBet
+              avgCasinoWin
+              avgTheorWin
+            }
+          }`, gql`
+          subscription accountCasino1day {
+            watchAccountCasino1day {
+              _id
+              type
+              bucketSize
+              acct
+              casinoCode
+              sumBet
+              sumCasinoWin
+              sumTheorWin
+              noOfTxn
+              avgBet
+              avgCasinoWin
+              avgTheorWin
+            }
+          }`], "accountCasino3mins": [gql`
+          query accountCasino3mins {
+            getAccountCasino3mins {
+              _id
+              type
+              bucketSize
+              acct
+              casinoCode
+              sumBet
+              sumCasinoWin
+              sumTheorWin
+              noOfTxn
+              avgBet
+              avgCasinoWin
+              avgTheorWin
+            }
+          }`, gql`
+          subscription accountCasino3mins {
+            watchAccountCasino3mins {
+              _id
+              type
+              bucketSize
+              acct
+              casinoCode
+              sumBet
+              sumCasinoWin
+              sumTheorWin
+              noOfTxn
+              avgBet
+              avgCasinoWin
+              avgTheorWin
+            }
+          }`]
 }
 
 const tables = [
@@ -411,8 +543,8 @@ export class DashboardComponent {
         {
           type: 'effectScatter',
           data: this.data,
-          symbolSize: function (val) {            
-            return val[2]*0.2;
+          symbolSize: function (val) {
+            return val[2] * 0.2;
           },
         },
       ],
@@ -449,7 +581,7 @@ export class DashboardComponent {
       let data: number[][] = [];
       tables.forEach((table, index) => {
         const counts = result.data[Object.keys(result.data)[0]].filter((i: any) => i.locnIndex == index).map((i: any) => i.headCount);
-        if(counts && counts.length)
+        if (counts && counts.length)
           data.push([...table, counts.reduce((sum: any, num: any) => sum + num)]);
       });
       this.heatMapUpdate = {

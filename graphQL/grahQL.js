@@ -32,19 +32,27 @@ export const typeDefs = `#graphql
   # case, the "books" query returns an array of zero or more Books (defined above).
   type Query {
     getAccountArea15days: [stat]
+    getAccountArea1day: [stat]
     getAccountArea3mins: [stat]
+    getAccountCasinoArea15days: [stat]
     getAccountCasinoArea1day: [stat]
     getAccountCasinoArea3mins: [stat]
+    getAccountCasino15days: [stat]
     getAccountCasino1day: [stat]
+    getAccountCasino3mins: [stat]
     getCasinoAreaLocation1day: [summary]
   }
 
   type Subscription {
     watchAccountArea15days: stat
+    watchAccountArea1day: stat
     watchAccountArea3mins: stat
+    watchAccountCasinoArea15days: stat
     watchAccountCasinoArea1day: stat
     watchAccountCasinoArea3mins: stat
+    watchAccountCasino15days: stat
     watchAccountCasino1day: stat
+    watchAccountCasino3mins: stat
     watchCasinoAreaLocation1day: summary
   }
 `;
