@@ -151,23 +151,26 @@ public class ChangeStreamConfig {
                                                                                                                                                                         "15days",
                                                                                                                                                                         d.getDate("bucketDt15days"),
                                                                                                                                                                         "acct",
-                                                                                                                                                                        "casinoCode",
-                                                                                                                                                                        "areaCode",
-                                                                                                                                                                        "locnCode"),
+                                                                                                                                                                        "casinoCode"),
                                                                                                                                         this
                                                                                                                                                         .createPlayerBucketUpdateModel(
                                                                                                                                                                         d,
                                                                                                                                                                         "1day",
                                                                                                                                                                         d.getDate("bucketDt1day"),
                                                                                                                                                                         "acct",
-                                                                                                                                                                        "casinoCode",
-                                                                                                                                                                        "areaCode",
-                                                                                                                                                                        "locnCode"),
+                                                                                                                                                                        "casinoCode"),
                                                                                                                                         this
                                                                                                                                                         .createPlayerBucketUpdateModel(
                                                                                                                                                                         d,
                                                                                                                                                                         "3mins",
                                                                                                                                                                         d.getDate("bucketDt3mins"),
+                                                                                                                                                                        "acct",
+                                                                                                                                                                        "casinoCode"),
+                                                                                                                                        this
+                                                                                                                                                        .createPlayerBucketUpdateModel(
+                                                                                                                                                                        d,
+                                                                                                                                                                        "1day",
+                                                                                                                                                                        d.getDate("bucketDt1day"),
                                                                                                                                                                         "acct",
                                                                                                                                                                         "casinoCode",
                                                                                                                                                                         "areaCode",
