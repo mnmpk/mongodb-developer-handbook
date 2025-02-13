@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:mongodb="http://www.liquibase.org/xml/ns/mongodb"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+         http://www.liquibase.org/xml/ns/mongodb
+         http://www.liquibase.org/xml/ns/mongodb/liquibase-mongodb-latest.xsd">
+    <changeSet id="1" author="MMA">
+        <comment>Create tTableRating</comment>
+        <mongodb:createCollection collectionName="tTableRating"/>
+    </changeSet>
+    <changeSet id="2" author="MMA">
+        <comment>Create tTableRating index</comment>
+        <mongodb:createIndex collectionName="tTableRating">
+            <mongodb:keys>
+                { "tranID": -1 }
+            </mongodb:keys>
+            <mongodb:options>
+                { "name": "tranID_-1" }
+            </mongodb:options>
+        </mongodb:createIndex>
+    </changeSet>
+    <changeSet id="3" author="MMA">
+        <comment>Create tTableRating index</comment>
+        <mongodb:createIndex collectionName="tTableRating">
+            <mongodb:keys>
+                { "postDtm": -1 }
+            </mongodb:keys>
+            <mongodb:options>
+                { "expireAfterSeconds": 1296000, "name": "postDtm_-1" }
+            </mongodb:options>
+        </mongodb:createIndex>
+    </changeSet>
+
+    <changeSet id="4" author="MMA">
+        <comment>Create tRatingBucket</comment>
+        <mongodb:createCollection collectionName="tRatingBucket"/>
+    </changeSet>
+    <changeSet id="5" author="MMA">
+        <comment>Create tRatingBucket index</comment>
+        <mongodb:createIndex collectionName="tRatingBucket">
+            <mongodb:keys>
+                { "bucketDt1day": -1 }
+            </mongodb:keys>
+            <mongodb:options>
+                { "name": "bucketDt1day_-1", "expireAfterSeconds": 172800 }
+            </mongodb:options>
+        </mongodb:createIndex>
+    </changeSet>
+    <changeSet id="6" author="MMA">
+        <comment>Create tRatingBucket index</comment>
+        <mongodb:createIndex collectionName="tRatingBucket">
+            <mongodb:keys>
+                { "bucketDt3mins": -1 }
+            </mongodb:keys>
+            <mongodb:options>
+                { "name": "bucketDt3mins_-1", "expireAfterSeconds": 360 }
+            </mongodb:options>
+        </mongodb:createIndex>
+    </changeSet>
+    <changeSet id="7" author="MMA">
+        <comment>Create tRatingBucket index</comment>
+        <mongodb:createIndex collectionName="tRatingBucket">
+            <mongodb:keys>
+                { "bucketDt15days": -1 }
+            </mongodb:keys>
+            <mongodb:options>
+                { "name": "bucketDt15days_-1", "expireAfterSeconds": 2592000 }
+            </mongodb:options>
+        </mongodb:createIndex>
+    </changeSet>
+
+    <changeSet id="8" author="MMA">
+        <comment>Create tRatingFinal</comment>
+        <mongodb:createCollection collectionName="tRatingFinal"/>
+    </changeSet>
+    <changeSet id="9" author="MMA">
+        <comment>Create tRatingFinal</comment>
+        <mongodb:createIndex collectionName="tRatingFinal">
+            <mongodb:keys>
+                { "locnCode": -1 }
+            </mongodb:keys>
+            <mongodb:options>
+                { "unique": true, "name": "locnCode_-1" }
+            </mongodb:options>
+        </mongodb:createIndex>
+    </changeSet>
+
+    <changeSet id="10" author="MMA">
+        <comment>Create tPlayerPoints</comment>
+        <mongodb:createCollection collectionName="tPlayerPoints"/>
+    </changeSet>
+    <changeSet id="11" author="MMA">
+        <comment>Create tPlayerPoints index</comment>
+        <mongodb:createIndex collectionName="tPlayerPoints">
+            <mongodb:keys>
+                { "tranId": -1 }
+            </mongodb:keys>
+            <mongodb:options>
+                { "name": "tranId_-1" }
+            </mongodb:options>
+        </mongodb:createIndex>
+    </changeSet>
+    <changeSet id="12" author="MMA">
+        <comment>Create tPlayerPoints index</comment>
+        <mongodb:createIndex collectionName="tPlayerPoints">
+            <mongodb:keys>
+                { "gamingDt": -1 }
+            </mongodb:keys>
+            <mongodb:options>
+                { "name": "gamingDt_-1", "expireAfterSeconds": 1296000 }
+            </mongodb:options>
+        </mongodb:createIndex>
+    </changeSet>
+
+    <changeSet id="13" author="MMA">
+        <comment>Create tPlayerComps</comment>
+        <mongodb:createCollection collectionName="tPlayerComps"/>
+    </changeSet>
+    <changeSet id="14" author="MMA">
+        <comment>Create tPlayerComps index</comment>
+        <mongodb:createIndex collectionName="tPlayerComps">
+            <mongodb:keys>
+                { "tranId": -1 }
+            </mongodb:keys>
+            <mongodb:options>
+                { "name": "tranId_-1" }
+            </mongodb:options>
+        </mongodb:createIndex>
+    </changeSet>
+    <changeSet id="15" author="MMA">
+        <comment>Create tPlayerComps index</comment>
+        <mongodb:createIndex collectionName="tPlayerComps">
+            <mongodb:keys>
+                { "gamingDt": -1 }
+            </mongodb:keys>
+            <mongodb:options>
+                { "name": "gamingDt_-1", expireAfterSeconds: 1296000 }
+            </mongodb:options>
+        </mongodb:createIndex>
+    </changeSet>
+
+    <changeSet id="16" author="MMA">
+        <comment>Create tGame</comment>
+        <mongodb:createCollection collectionName="tGame"/>
+    </changeSet>
+    <changeSet id="17" author="MMA">
+        <comment>Create tGame index</comment>
+        <mongodb:createIndex collectionName="tGame">
+            <mongodb:keys>
+                { "gameId": 1 }
+            </mongodb:keys>
+            <mongodb:options>
+                { "name": "gameId_1" }
+            </mongodb:options>
+        </mongodb:createIndex>
+    </changeSet>
+    <changeSet id="18" author="MMA">
+        <comment>Create tGame index</comment>
+        <mongodb:createIndex collectionName="tGame">
+            <mongodb:keys>
+                { "createdDtm": -1 }
+            </mongodb:keys>
+            <mongodb:options>
+                { "name": "createdDtm_-1", "expireAfterSeconds": 1296000 }
+            </mongodb:options>
+        </mongodb:createIndex>
+    </changeSet>
+
+    <changeSet id="19" author="MMA">
+        <comment>Create tAwards</comment>
+        <mongodb:createCollection collectionName="tAwards"/>
+    </changeSet>
+    <changeSet id="20" author="MMA">
+        <comment>Create tAwards index</comment>
+        <mongodb:createIndex collectionName="tAwards">
+            <mongodb:keys>
+                { "relatedTranId": -1 }
+            </mongodb:keys>
+            <mongodb:options>
+                { "name": "relatedTranId_-1" }
+            </mongodb:options>
+        </mongodb:createIndex>
+    </changeSet>
+    <changeSet id="21" author="MMA">
+        <comment>Create tAwards index</comment>
+        <mongodb:createIndex collectionName="tAwards">
+            <mongodb:keys>
+                { "gamingDt": -1 }
+            </mongodb:keys>
+            <mongodb:options>
+                { "name": "gamingDt_-1", "expireAfterSeconds": 1296000 }
+            </mongodb:options>
+        </mongodb:createIndex>
+    </changeSet>
+
+    <changeSet id="22" author="MMA">
+        <comment>Create tArea</comment>
+        <mongodb:createCollection collectionName="tArea"/>
+    </changeSet>
+    <changeSet id="23" author="MMA">
+        <comment>Create tArea index</comment>
+        <mongodb:createIndex collectionName="tArea">
+            <mongodb:keys>
+                { "areaId": 1 }
+            </mongodb:keys>
+            <mongodb:options>
+                { "name": "areaId_1" }
+            </mongodb:options>
+        </mongodb:createIndex>
+    </changeSet>
+</databaseChangeLog>

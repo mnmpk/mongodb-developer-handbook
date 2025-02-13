@@ -16,8 +16,12 @@ management:
 spring:
   data:
     mongodb:
-      uri: "mongodb+srv://admin:admin12345@demo.uskpz.mongodb.net/mongodb-developer"
+      uri: "mongodb+srv://admin:admin12345@demo.uskpz.mongodb.net/"
       #?w=4&readConcernLevel=majority&readPreference=primary
+      database: mongodb-developer
+  liquibase:
+    enabled: true
+    change-log: db/changelog/db.changelog-master.yaml
 logging:
   level:
     org:
