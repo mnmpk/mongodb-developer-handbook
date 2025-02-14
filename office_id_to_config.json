@@ -1,0 +1,30 @@
+[
+    {
+      $project:
+        {
+          params: [
+            {
+              key: "office_id",
+              value: "$office_id"
+            },
+            {
+              key: "channel",
+              value: "$channel"
+            }
+          ],
+          values: ["$$ROOT"]
+        }
+    },
+    {
+      $unset:
+        ["_id", "values._id", "values._class"]
+    },
+    {
+      $merge: {
+        into: "config",
+        on: "_id",
+        whenMatched: "replace",
+        whenNotMatched: "insert"
+      }
+    }
+  ]
