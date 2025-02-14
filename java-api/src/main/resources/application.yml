@@ -16,7 +16,7 @@ management:
 spring:
   data:
     mongodb:
-      uri: "mongodb+srv://admin:admin12345@demo.uskpz.mongodb.net/"
+      uri: "mongodb+srv://dev:${DATABASE_PASSWORD}@demo.uskpz.mongodb.net/"
       #?w=4&readConcernLevel=majority&readPreference=primary
       database: mongodb-developer
   liquibase:

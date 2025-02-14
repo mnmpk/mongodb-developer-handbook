@@ -18,7 +18,7 @@ steps:
     args: 
     - '-c'
     - |
-      sed -i -e 's/$${PROJECT_ID}/$PROJECT_ID/g' -e 's/$${REPO_NAME}/${REPO_NAME}/g' -e 's/$${APP_NAME}/${REPO_NAME}-java/g' -e 's/$${TAG_NAME}/${COMMIT_SHA}/g' -e 's/$${MIN_REPLICAS}/${_MIN_REPLICAS}/g' -e 's/$${MAX_REPLICAS}/${_MAX_REPLICAS}/g' gke/*.yaml
+      sed -i -e 's/$${PROJECT_ID}/$PROJECT_ID/g' -e 's/$${REPO_NAME}/${REPO_NAME}/g' -e 's/$${APP_NAME}/${REPO_NAME}-java/g' -e 's/$${TAG_NAME}/${COMMIT_SHA}/g' -e 's/$${MIN_REPLICAS}/${_MIN_REPLICAS}/g' -e 's/$${MAX_REPLICAS}/${_MAX_REPLICAS}/g' -e 's/$${DATABASE_PASSWORD}/${_DATABASE_PASSWORD}/g' gke/*.yaml
       gcloud container clusters get-credentials --project="$PROJECT_ID" --zone="${_ZONE}" "${_CLUSTER}"
       kubectl apply -f gke/
     dir: "java-api"
