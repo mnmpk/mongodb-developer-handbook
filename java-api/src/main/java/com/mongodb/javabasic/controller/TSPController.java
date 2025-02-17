@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -15,6 +16,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.util.StopWatch;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,11 +28,15 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.Indexes;
 import com.mongodb.javabasic.model.TspConfig;
+import com.mongodb.javabasic.model.TspCountryInfo;
 import com.mongodb.javabasic.model.TspIdConfigMapDocumentSuggested;
 import com.mongodb.javabasic.repositories.CustomEntityRepository;
 import com.mongodb.javabasic.repositories.TspConfigRepository;
+import com.mongodb.javabasic.repositories.TspCountryInfoRepository;
 import com.mongodb.javabasic.repositories.TspIdConfigMapDocumentRepository;
 import com.mongodb.javabasic.repositories.TspIdConfigMapDocumentSuggestedRepository;
+import com.mongodb.javabasic.repositories.TspPortInfoRepository;
+import com.mongodb.javabasic.service.AggregationService;
 
 import jakarta.websocket.server.PathParam;
 
@@ -41,10 +48,11 @@ public class TSPController {
     private MongoTemplate mongoTemplate;
     @Autowired
     private CustomEntityRepository repository;
+    @Autowired
+    private AggregationService aggregationService;
 
     @Autowired
     private TspConfigRepository configRepository;
-
 
     @GetMapping("/config")
     public List<TspConfig> config() {
@@ -52,12 +60,39 @@ public class TSPController {
         return configRepository.getConfig(List.of(Map.entry("office_id", "MNLCX08DM"),Map.entry("channel", "MOB")));
     }
 
-// secure_flight??
+    // secure_flight??
 
+    @Autowired 
+    private TspCountryInfoRepository countryInfoRepository;
+    @Autowired
+    private TspPortInfoRepository portInfoRepository;
+
+    @GetMapping("/country/init")
+    public String countryInit() {
+        MongoCollection<Document> coll = mongoTemplate.getCollection("ori_country_info");
+        coll.createIndex(Indexes.ascending("ports.port_code"));
+        coll.createIndex(Indexes.ascending("ports.airports.iata_airport_code"));
+        try {
+            aggregationService.getPipelineResults("ori_country_info", "country_to_port.json", Document.class);
+            coll = mongoTemplate.getCollection("port_info");
+        coll.createIndex(Indexes.ascending("port_code"));
+        coll.createIndex(Indexes.ascending("airports.iata_airport_code"));
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return "";
+    }
     @GetMapping("/country")
     public String country() {
-        //unwind contry_info to port level
-        return "";
+        StopWatch watch = new StopWatch();
+        watch.start("country");
+        countryInfoRepository.findCountriesByAirportCodes(Set.of("ALV","GRG"));
+        watch.stop();
+        watch.start("port");
+        portInfoRepository.findPortsByAirportCodes(Set.of("ALV","GRG"));
+        watch.stop();
+        return watch.prettyPrint();
     }
 
 
