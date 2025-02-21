@@ -88,7 +88,7 @@ public class MongoCache implements Cache {
 
     @Override
     public ValueWrapper get(@NonNull Object key) {
-        final Document doc = this.collection.find(Filters.eq("_id", key.hashCode()))
+        final Document doc = this.collection.find(Filters.eq("_id", key.toString()))
                 .projection(Projections.fields(Projections.excludeId(), Projections.include("v"))).first();
         if (doc != null) {
             try {
@@ -115,10 +115,10 @@ public class MongoCache implements Cache {
     @Override
     public void put(@NonNull Object key, @Nullable Object value) {
         try {
-            Document doc = new Document("_id", key.hashCode()).append("v", serialize(value)).append("cAt", new Date());
+            Document doc = new Document("_id", key.toString()).append("v", serialize(value)).append("cAt", new Date());
             if (!storeBinaryOnly)
                 doc.append("doc", value);
-            this.collection.replaceOne(Filters.eq("_id", key.hashCode()),
+            this.collection.replaceOne(Filters.eq("_id", key.toString()),
                     doc,
                     new ReplaceOptions().upsert(true));
         } catch (IOException e) {
@@ -129,7 +129,7 @@ public class MongoCache implements Cache {
     @Override
     public ValueWrapper putIfAbsent(@NonNull Object key, @Nullable Object value) {
         try {
-            Document doc = new Document("_id", key.hashCode()).append("v", serialize(value)).append("cAt", new Date());
+            Document doc = new Document("_id", key.toString()).append("v", serialize(value)).append("cAt", new Date());
             if (!storeBinaryOnly)
                 doc.append("doc", value);
             this.collection.insertOne(doc);
@@ -145,7 +145,7 @@ public class MongoCache implements Cache {
 
     @Override
     public void evict(@NonNull Object key) {
-        this.collection.deleteOne(Filters.eq("_id", key.hashCode()));
+        this.collection.deleteOne(Filters.eq("_id", key.toString()));
     }
 
     @Override
