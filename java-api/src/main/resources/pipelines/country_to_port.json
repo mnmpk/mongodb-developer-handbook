@@ -1,23 +1,23 @@
 [
     {
-      $unwind: {
-        path: "$ports"
+      "$unwind": {
+        "path": "$ports"
       }
     },
     {
-      $replaceRoot: {
-        newRoot: {
-          $mergeObjects: ["$ports", "$$ROOT"]
+      "$replaceRoot": {
+        "newRoot": {
+          "$mergeObjects": ["$ports", "$$ROOT"]
         }
       }
     },
     {
-      $unset: ["_id", "ports"]
+      "$unset": ["_id", "ports"]
     },
     {
-      $out: {
-        db: "mongodb-developer",
-        coll: "port_info"
+      "$out": {
+        "db": "mongodb-developer",
+        "coll": "tsp_port_info"
       }
     }
   ]

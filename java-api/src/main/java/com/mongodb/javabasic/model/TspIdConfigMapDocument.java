@@ -1,5 +1,6 @@
 package com.mongodb.javabasic.model;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import org.springframework.data.annotation.Id;
@@ -12,7 +13,7 @@ import lombok.Data;
 @Data
 @Builder
 @Document(collection = "ori_tsp_id_config")
-public class TspIdConfigMapDocument {
+public class TspIdConfigMapDocument implements Serializable {
     @Id
     private String id;
     private String channel;

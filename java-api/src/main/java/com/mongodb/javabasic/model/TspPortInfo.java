@@ -7,7 +7,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import lombok.Data;
 
 @Data
-@Document(collection = "port_info")
+@Document(collection = "tsp_port_info")
 public class TspPortInfo {
     //private String country_code;
     private String country_name;

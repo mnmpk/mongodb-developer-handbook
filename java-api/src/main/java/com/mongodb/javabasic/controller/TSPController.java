@@ -15,6 +15,7 @@ import org.jeasy.random.EasyRandomParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.util.StopWatch;
@@ -131,25 +132,58 @@ public class TSPController {
 				}).collect(Collectors.toList());
         return idConfigSuggestedRepository.saveAll(l);
     }
+    @Cacheable("cache")
     @GetMapping("/id_config/{channel}/all")
     public List<TspIdConfigMapDocumentSuggested> idConfigsAll(@PathVariable String channel) {
-        //return idConfigRepository.findByChannel(channel);
-        return idConfigSuggestedRepository.findByChannel(channel);
+        StopWatch watch = new StopWatch();
+        watch.start("old");
+        idConfigRepository.findByChannel(channel);
+        watch.stop();
+        watch.start("new");
+        List<TspIdConfigMapDocumentSuggested> list = idConfigSuggestedRepository.findByChannel(channel);
+        watch.stop();
+        logger.info(watch.prettyPrint());
+        return list;
     }
+    @Cacheable("cache")
     @GetMapping("/id_config/{channel}")
     public List<TspIdConfigMapDocumentSuggested> idConfigs(@PathVariable String channel, @RequestParam("used") boolean used) {
-        //return idConfigRepository.findByChannelAndUsed(channel, used);
-        return idConfigSuggestedRepository.findByChannelAndUsedExists(channel, used);
+        StopWatch watch = new StopWatch();
+        watch.start("old");
+        idConfigRepository.findByChannelAndUsed(channel, used);
+        watch.stop();
+        watch.start("new");
+        List<TspIdConfigMapDocumentSuggested> list = idConfigSuggestedRepository.findByChannelAndUsedExists(channel, used);
+        watch.stop();
+        logger.info(watch.prettyPrint());
+        return list;
     }
+    @Cacheable("cache")
     @GetMapping("/id_config/{channel}/{tspId}")
     public TspIdConfigMapDocumentSuggested idConfig(@PathVariable String channel, @PathVariable String tspId) {
-        //return idConfigRepository.findByChannelAndTspId(channel, tspId);
-        return idConfigSuggestedRepository.findByChannelAndTspId(channel, tspId);
+        StopWatch watch = new StopWatch();
+        watch.start("old");
+        idConfigRepository.findByChannelAndTspId(channel, tspId);
+        watch.stop();
+        watch.start("new");
+        TspIdConfigMapDocumentSuggested doc = idConfigSuggestedRepository.findByChannelAndTspId(channel, tspId);
+        watch.stop();
+        logger.info(watch.prettyPrint());
+        return doc;
     }
+
+    @Cacheable("cache")
     @GetMapping("/id_config/{channel}/count")
     public Long idConfigCount(@PathVariable String channel, @PathParam("used") boolean used) {
-        //return idConfigRepository.countByChannelAndUsed(channel, used);
-        return idConfigSuggestedRepository.countByChannelAndUsedExists(channel, used);
+        StopWatch watch = new StopWatch();
+        watch.start("old");
+        idConfigRepository.countByChannelAndUsed(channel, used);
+        watch.stop();
+        watch.start("new");
+        Long count = idConfigSuggestedRepository.countByChannelAndUsedExists(channel, used);
+        watch.stop();
+        logger.info(watch.prettyPrint());
+        return count;
     }
 
 
