@@ -19,6 +19,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.StopWatch;
 
 import com.mongodb.DuplicateKeyException;
 import com.mongodb.client.MongoCollection;
@@ -88,17 +89,25 @@ public class MongoCache implements Cache {
 
     @Override
     public ValueWrapper get(@NonNull Object key) {
+        StopWatch watch = new StopWatch();
+        watch.start("read cache");
         final Document doc = this.collection.find(Filters.eq("_id", key.toString()))
                 .projection(Projections.fields(Projections.excludeId(), Projections.include("v"))).first();
+        watch.stop();
         if (doc != null) {
             try {
-                return new SimpleValueWrapper(deserialize(doc.get("v", Binary.class).getData()));
+                watch.start("deserialize");
+                SimpleValueWrapper v = new SimpleValueWrapper(deserialize(doc.get("v", Binary.class).getData()));
+                watch.stop();
+                logger.info(watch.prettyPrint());
+                return v;
             } catch (ClassNotFoundException e) {
                 logger.error(e.getMessage(), e);
             } catch (IOException e) {
                 logger.error(e.getMessage(), e);
             }
         }
+        logger.info(watch.prettyPrint());
         return null;
     }
 
@@ -115,12 +124,16 @@ public class MongoCache implements Cache {
     @Override
     public void put(@NonNull Object key, @Nullable Object value) {
         try {
+            StopWatch watch = new StopWatch();
+            watch.start("cache");
             Document doc = new Document("_id", key.toString()).append("v", serialize(value)).append("cAt", new Date());
             if (!storeBinaryOnly)
                 doc.append("doc", value);
             this.collection.replaceOne(Filters.eq("_id", key.toString()),
                     doc,
                     new ReplaceOptions().upsert(true));
+            watch.stop();
+            logger.info(watch.prettyPrint());
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
         }
@@ -132,7 +145,11 @@ public class MongoCache implements Cache {
             Document doc = new Document("_id", key.toString()).append("v", serialize(value)).append("cAt", new Date());
             if (!storeBinaryOnly)
                 doc.append("doc", value);
+            StopWatch watch = new StopWatch();
+            watch.start("cache");
             this.collection.insertOne(doc);
+            watch.stop();
+            logger.info(watch.prettyPrint());
             return new SimpleValueWrapper(value);
         } catch (DuplicateKeyException e) {
             logger.info(String.format("Key: %s already exists in the cache. Element will not be replaced.", key), e);
@@ -145,12 +162,20 @@ public class MongoCache implements Cache {
 
     @Override
     public void evict(@NonNull Object key) {
+        StopWatch watch = new StopWatch();
+        watch.start("evict cache");
         this.collection.deleteOne(Filters.eq("_id", key.toString()));
+        watch.stop();
+        logger.info(watch.prettyPrint());
     }
 
     @Override
     public void clear() {
+        StopWatch watch = new StopWatch();
+        watch.start("clear cache");
         this.collection.drop();
+        watch.stop();
+        logger.info(watch.prettyPrint());
     }
 
     @SuppressWarnings("unchecked")
