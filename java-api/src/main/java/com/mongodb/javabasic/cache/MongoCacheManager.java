@@ -13,18 +13,20 @@ public class MongoCacheManager extends AbstractCacheManager {
     private String collectionName;
     private long ttl;
     private boolean flushOnBoot;
+    private boolean storeBinaryOnly;
 
-    public MongoCacheManager(MongoTemplate mongoTemplate, String collectionName, long ttl, boolean flushOnBoot) {
+    public MongoCacheManager(MongoTemplate mongoTemplate, String collectionName, long ttl, boolean flushOnBoot, boolean storeBinaryOnly) {
         this.mongoTemplate = mongoTemplate;
         this.collectionName = collectionName;
         this.ttl = ttl;
         this.flushOnBoot = flushOnBoot;
+        this.storeBinaryOnly = storeBinaryOnly;
     }
 
     @Override
     protected @NonNull Collection<? extends Cache> loadCaches() {
         final Collection<Cache> caches = new LinkedHashSet<>(16);
-        caches.add(new MongoCache(mongoTemplate, collectionName, ttl, flushOnBoot));
+        caches.add(new MongoCache(mongoTemplate, collectionName, ttl, flushOnBoot, storeBinaryOnly));
         return caches;
     }
 

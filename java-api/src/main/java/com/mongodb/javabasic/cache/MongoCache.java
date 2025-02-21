@@ -39,6 +39,7 @@ public class MongoCache implements Cache {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     private final boolean flushOnBoot;
+    private final boolean storeBinaryOnly;
     private final String collectionName;
     private final MongoTemplate mongoTemplate;
     private final long ttl;
@@ -50,14 +51,15 @@ public class MongoCache implements Cache {
     }
 
     public MongoCache(MongoTemplate mongoTemplate, String collectionName, long ttl) {
-        this(mongoTemplate, collectionName, DEFAULT_TTL, false);
+        this(mongoTemplate, collectionName, DEFAULT_TTL, false, true);
     }
 
     public MongoCache(MongoTemplate mongoTemplate, String collectionName, long ttl,
-            boolean flushOnBoot) {
+            boolean flushOnBoot, boolean storeBinaryOnly) {
         this.mongoTemplate = mongoTemplate;
 
         this.flushOnBoot = flushOnBoot;
+        this.storeBinaryOnly = storeBinaryOnly;
         this.collectionName = collectionName;
         collection = this.mongoTemplate.getCollection(collectionName);
         this.ttl = ttl;
@@ -86,14 +88,15 @@ public class MongoCache implements Cache {
 
     @Override
     public ValueWrapper get(@NonNull Object key) {
-        final Document doc = this.collection.find(Filters.eq("_id", key.hashCode())).projection(Projections.fields(Projections.excludeId(), Projections.include("v"))).first();
+        final Document doc = this.collection.find(Filters.eq("_id", key.hashCode()))
+                .projection(Projections.fields(Projections.excludeId(), Projections.include("v"))).first();
         if (doc != null) {
             try {
                 return new SimpleValueWrapper(deserialize(doc.get("v", Binary.class).getData()));
             } catch (ClassNotFoundException e) {
-                logger.error(e.getMessage(),e);
+                logger.error(e.getMessage(), e);
             } catch (IOException e) {
-                logger.error(e.getMessage(),e);
+                logger.error(e.getMessage(), e);
             }
         }
         return null;
@@ -103,7 +106,7 @@ public class MongoCache implements Cache {
     @Override
     public <T> T get(@NonNull Object key, @Nullable Class<T> type) {
         ValueWrapper wrapper = get(key);
-        if(wrapper == null) {
+        if (wrapper == null) {
             return null;
         }
         return (T) wrapper.get();
@@ -112,25 +115,30 @@ public class MongoCache implements Cache {
     @Override
     public void put(@NonNull Object key, @Nullable Object value) {
         try {
+            Document doc = new Document("_id", key.hashCode()).append("v", serialize(value)).append("cAt", new Date());
+            if (!storeBinaryOnly)
+                doc.append("doc", value);
             this.collection.replaceOne(Filters.eq("_id", key.hashCode()),
-                    new Document("_id", key.hashCode()).append("v", serialize(value)).append("doc", value).append("cAt", new Date()),
+                    doc,
                     new ReplaceOptions().upsert(true));
         } catch (IOException e) {
-            logger.error(e.getMessage(),e);
+            logger.error(e.getMessage(), e);
         }
     }
 
     @Override
     public ValueWrapper putIfAbsent(@NonNull Object key, @Nullable Object value) {
         try {
-            this.collection.insertOne(
-                    new Document("_id", key.hashCode()).append("v", serialize(value)).append("doc", value).append("cAt", new Date()));
+            Document doc = new Document("_id", key.hashCode()).append("v", serialize(value)).append("cAt", new Date());
+            if (!storeBinaryOnly)
+                doc.append("doc", value);
+            this.collection.insertOne(doc);
             return new SimpleValueWrapper(value);
         } catch (DuplicateKeyException e) {
             logger.info(String.format("Key: %s already exists in the cache. Element will not be replaced.", key), e);
             return get(key);
         } catch (IOException e) {
-            logger.error(e.getMessage(),e);
+            logger.error(e.getMessage(), e);
         }
         return null;
     }

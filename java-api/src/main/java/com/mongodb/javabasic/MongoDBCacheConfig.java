@@ -18,6 +18,6 @@ public class MongoDBCacheConfig {
     
     @Bean
     public CacheManager mongoCacheManager() {
-        return new MongoCacheManager(mongoTemplate, "cache", 60, false);
+        return new MongoCacheManager(mongoTemplate, "cache", 60, false, false);
     }
 }
