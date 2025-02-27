@@ -76,4 +76,9 @@ public class ApplicationController {
     // Transaction:
     // Insert+Update/Validate+Update
     // Seach:
+
+    //Cache using MongoDB
+
+    //Search
+    //Create index
 }
