@@ -29,14 +29,15 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.Indexes;
 import com.mongodb.javabasic.model.TspConfig;
-import com.mongodb.javabasic.model.TspCountryInfo;
 import com.mongodb.javabasic.model.TspIdConfigMapDocumentSuggested;
+import com.mongodb.javabasic.model.TspRoute;
 import com.mongodb.javabasic.repositories.CustomEntityRepository;
 import com.mongodb.javabasic.repositories.TspConfigRepository;
 import com.mongodb.javabasic.repositories.TspCountryInfoRepository;
 import com.mongodb.javabasic.repositories.TspIdConfigMapDocumentRepository;
 import com.mongodb.javabasic.repositories.TspIdConfigMapDocumentSuggestedRepository;
 import com.mongodb.javabasic.repositories.TspPortInfoRepository;
+import com.mongodb.javabasic.repositories.TspRouteRepository;
 import com.mongodb.javabasic.service.AggregationService;
 
 import jakarta.websocket.server.PathParam;
@@ -54,6 +55,8 @@ public class TSPController {
 
     @Autowired
     private TspConfigRepository configRepository;
+    @Autowired
+    private TspRouteRepository routeRepository;
 
     @GetMapping("/config")
     public List<TspConfig> config() {
@@ -189,8 +192,8 @@ public class TSPController {
 
 
 
-    @GetMapping("/route")
-    public String route() {
-        return "";
+    @GetMapping(value={"/route/{dep}", "/route/{dep}/{arr}"})
+    public List<TspRoute> route(@PathVariable String dep, @PathVariable(required = false) String arr) {
+        return routeRepository.getRoutes(dep, arr);
     }
 }
