@@ -1,22 +1,74 @@
 const { MongoClient } = require("mongodb");
 const express = require("express");
 const mongoose = require("mongoose");
+const session = require('express-session');
+const MongoDBStore = require('connect-mongodb-session')(session);
+
 const User = require('./user');
+const {init, cache} = require('./middlewares/cache');
 
 const app = express();
 
 app.use(express.json());
 
-const uri = "mongodb://localhost:27017/test";
-
+//const uri = "mongodb://localhost:27017/test";
+const uri = "mongodb+srv://admin:admin12345@demo.uskpz.mongodb.net/mongodb-developer"
 mongoose.connect(uri,
   { serverApi: { version: '1', strict: true } }
 );
 const db = mongoose.connection;
+var client;
 db.on("error", console.error.bind(console, "connection error: "));
 db.once("open", async function () {
+  await init(uri);
   console.log("Connected successfully");
 });
+
+
+var store = new MongoDBStore({
+  uri: uri,
+  collection: 'sessions'
+});
+store.on('error', function (error) {
+  console.log(error);
+});
+
+app.use(session({
+  secret: 'This is a secret',
+  cookie: {
+    maxAge: 1000 * 60 * 60 * 24 * 7 // 1 week
+  },
+  store: store,
+  // Boilerplate options, see:
+  // * https://www.npmjs.com/package/express-session#resave
+  // * https://www.npmjs.com/package/express-session#saveuninitialized
+  resave: true,
+  saveUninitialized: true
+}));
+
+app.use(cache());
+
+app.get('/test-cache', async (req, res) => {
+  res.send("test cache: "+Math.random());
+});
+
+app.get('/test-session', async (req, res) => {
+  if (req.session.views) {
+    req.session.views++;
+    res.status(200);
+    res.setHeader('Content-Type', 'text/html');
+    res.write('<p>views: ' + req.session.views + '</p>');
+    res.write('<p>expires in: ' + (req.session.cookie.maxAge / 1000) + 's</p>');
+    res.end();
+    //res.send("views: " + req.session.views);
+  } else {
+    req.session.views = 1
+    res.status(200);
+    res.end('welcome to the session demo. refresh!');
+  }
+});
+
+
 const saveDate = async (name, date) => {
   let user = new User({
     name: name,
@@ -46,7 +98,7 @@ const updateWithVer = async (id, version, name) => {
 }
 
 app.get('/stable-api', async (req, res) => {
-  const clientOptions=[
+  const clientOptions = [
     { serverApi: { version: '1' } },
     //APIStrictError
     { serverApi: { version: '1', strict: true } },
@@ -57,7 +109,7 @@ app.get('/stable-api', async (req, res) => {
     //InvalidOptions
     { serverApi: { strict: true, deprecationErrors: true } }
   ]
-  clientOptions.forEach(async option=>{
+  clientOptions.forEach(async option => {
     try {
       const c = new MongoClient(uri,
         option
