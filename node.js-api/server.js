@@ -20,7 +20,7 @@ const db = mongoose.connection;
 var client;
 db.on("error", console.error.bind(console, "connection error: "));
 db.once("open", async function () {
-  await init(uri);
+  await init({uri:uri});
   console.log("Connected successfully");
 });
 

@@ -1,15 +1,24 @@
 const { MongoClient } = require("mongodb");
 const hash = require("object-hash");
+
+const DEFAULT_TTL = 30;
+const DEFAULT_COLL = "cache";
+const INDEX_NAME = "_ttl";
 let client, db, coll;
 
-async function init(uri, database, collection = "cache") {
-
+async function init({ uri = "", database = "", collection = DEFAULT_COLL, ttl = DEFAULT_TTL }) {
     if (!client) {
         client = new MongoClient(uri);
     }
     db = database;
     coll = collection;
-    //TODO: expire option and recreate TTL index
+    (await client.db(db).collection(coll).listIndexes().toArray()).forEach(async i => {
+        
+        if (i.name == INDEX_NAME && i.expireAfterSeconds != ttl){
+            await client.db(db).collection(coll).dropIndex(INDEX_NAME);
+        }
+    });
+    await client.db(db).collection(coll).createIndex("cAt", { name: INDEX_NAME, expireAfterSeconds: ttl });
 }
 function requestToKey(req) {
     // build a custom object to use as part of the Redis key
