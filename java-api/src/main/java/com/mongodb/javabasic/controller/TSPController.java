@@ -40,6 +40,7 @@ import com.mongodb.javabasic.repositories.TspPortInfoRepository;
 import com.mongodb.javabasic.repositories.TspRouteRepository;
 import com.mongodb.javabasic.service.AggregationService;
 
+import jakarta.servlet.http.HttpSession;
 import jakarta.websocket.server.PathParam;
 
 @RestController
@@ -58,8 +59,14 @@ public class TSPController {
     @Autowired
     private TspRouteRepository routeRepository;
 
+    @GetMapping("/session")
+    public Object consessionfig(HttpSession session) {
+        Object obj = session.getAttribute("test");
+        session.setAttribute("test", "test"+Math.random());
+        return obj+" . "+session.getAttribute("test");
+    }
     @GetMapping("/config")
-    public List<TspConfig> config() {
+    public List<TspConfig> config(HttpSession session) {
         //Combine config & office_id_config & fare_family_mapping
         return configRepository.getConfig(List.of(Map.entry("office_id", "MNLCX08DM"),Map.entry("channel", "MOB")));
     }

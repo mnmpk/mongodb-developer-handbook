@@ -14,6 +14,11 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -28,6 +33,8 @@ import freemarker.template.TemplateExceptionHandler;
 @EnableMongoRepositories()
 @EnableRetry
 @EnableAsync
+@EnableWebSecurity
+@EnableMethodSecurity(securedEnabled = true, jsr250Enabled = true)
 @EnableSpringDataWebSupport(pageSerializationMode = EnableSpringDataWebSupport.PageSerializationMode.VIA_DTO)
 public class AppConfig {
     @Value("${spring.data.mongodb.uri}")
@@ -90,5 +97,12 @@ public class AppConfig {
       freemarkerConfig.setWrapUncheckedExceptions(true);
       freemarkerConfig.setFallbackOnNullLoopVariable(true);
       return freemarkerConfig;
+    }
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
+        return httpSecurity.csrf(AbstractHttpConfigurer::disable)   // disable CSRF protection
+                .authorizeHttpRequests(httpRequest -> {
+                    httpRequest.requestMatchers("/**").permitAll(); // Allow all endpoints
+        }).build(); // build & return DefaultSecurityFilterChain
     }
 }

@@ -43,7 +43,6 @@ public class MongoCache implements Cache {
     private final boolean storeBinaryOnly;
     private final String collectionName;
     private final MongoTemplate mongoTemplate;
-    private final long ttl;
 
     private MongoCollection<Document> collection;
 
@@ -63,18 +62,17 @@ public class MongoCache implements Cache {
         this.storeBinaryOnly = storeBinaryOnly;
         this.collectionName = collectionName;
         collection = this.mongoTemplate.getCollection(collectionName);
-        this.ttl = ttl;
 
         if (isFlushOnBoot()) {
             clear();
         }
-        collection.createIndex(Indexes.ascending(INDEX_KEY_NAME),
-                new IndexOptions().expireAfter(ttl, TimeUnit.SECONDS).name(INDEX_NAME));
         collection.listIndexes().forEach(index -> {
-            if (index.getString("name").equals(collectionName) && index.getLong("expireAfterSeconds") != ttl) {
+            if (index.getString("name").equals(INDEX_NAME) && index.getInteger("expireAfterSeconds") != ttl) {
                 collection.dropIndex(INDEX_NAME);
             }
         });
+        collection.createIndex(Indexes.ascending(INDEX_KEY_NAME),
+                new IndexOptions().expireAfter(ttl, TimeUnit.SECONDS).name(INDEX_NAME));
     }
 
     @Override
