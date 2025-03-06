@@ -1,24 +1,10 @@
-const { MongoClient } = require("mongodb");
 const hash = require("object-hash");
 
 const DEFAULT_TTL = 30;
 const DEFAULT_COLL = "cache";
-const INDEX_NAME = "_ttl";
-let client;
+const INDEX_NAME = "expires_1";
+let c;
 
-async function init({ uri = "", database = "", collection = DEFAULT_COLL, ttl = DEFAULT_TTL }) {
-    if (!client) {
-        client = new MongoClient(uri);
-    }
-    const coll = await client.db(database).createCollection(collection);
-    (await coll.listIndexes().toArray()).forEach(async i => {
-
-        if (i.name == INDEX_NAME && i.expireAfterSeconds != ttl) {
-            await client.db(database).collection(collection).dropIndex(INDEX_NAME);
-        }
-    });
-    await client.db(database).collection(collection).createIndex({ cAt: -1 }, { name: INDEX_NAME, expireAfterSeconds: ttl });
-}
 function requestToKey(req) {
     // build a custom object to use as part of the Redis key
     const reqDataToHash = {
@@ -32,23 +18,23 @@ function requestToKey(req) {
 }
 
 
-async function writeData(database, collection, key, data) {
+async function writeData(database, collection, key, data, ttl) {
     try {
-        const result = await client.db(database).collection(collection).replaceOne({ _id: key }, { _id: key, v: data, cAt: new Date() }, { upsert: true });
+        const result = await c.db(database).collection(collection).replaceOne({ _id: key }, { _id: key, v: data, expires: new Date(new Date().getTime() + ttl * 1000) }, { upsert: true });
     } catch (e) {
         console.error(`Failed to cache data for key=${key}`, e);
     }
 }
 
-async function readData(database, collection, key) {
-    return await client.db(database).collection(collection).findOne({ _id: key });
+async function readData(database, collection, key, ttl) {
+    return await c.db(database).collection(collection).findOneAndUpdate({ _id: key }, { $set: { expires: new Date(new Date().getTime() + ttl * 1000) } });
 }
 
-function cache({ database = "", collection = DEFAULT_COLL } = { database: "", collection: DEFAULT_COLL }) {
+function init({ database = "", collection = DEFAULT_COLL, ttl = DEFAULT_TTL } = { database: "", collection: DEFAULT_COLL, ttl: DEFAULT_TTL }) {
     return async (req, res, next) => {
         const key = requestToKey(req);
         // if there is some cached data, retrieve it and return it
-        const cachedValue = await readData(database, collection, key);
+        const cachedValue = await readData(database, collection, key, ttl);
         if (cachedValue && cachedValue.v) {
             try {
                 // if it is JSON data, then return it
@@ -66,7 +52,7 @@ function cache({ database = "", collection = DEFAULT_COLL } = { database: "", co
                 res.send = oldSend;
                 // cache the response only if it is successful
                 if (res.statusCode.toString().startsWith("2")) {
-                    writeData(database, collection, key, data).then();
+                    writeData(database, collection, key, data, ttl).then();
                 }
 
                 return res.send(data);
@@ -78,4 +64,10 @@ function cache({ database = "", collection = DEFAULT_COLL } = { database: "", co
     };
 }
 
-module.exports = { init, cache };
+function cache({ client, database = "", collection = DEFAULT_COLL, expireAfterSeconds = DEFAULT_TTL }) {
+    c = client;
+    c.db(database).collection(collection).createIndex({ expires: -1 }, { name: INDEX_NAME, expireAfterSeconds: 0 });
+    return init({ database, collection, ttl: expireAfterSeconds });
+}
+
+module.exports = { cache };

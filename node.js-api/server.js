@@ -17,11 +17,8 @@ mongoose.connect(uri,
   { serverApi: { version: '1', strict: true } }
 );
 const db = mongoose.connection;
-var client;
 db.on("error", console.error.bind(console, "connection error: "));
 db.once("open", async function () {
-  await init({uri:uri});
-  await init({uri:uri, collection:'cache2'});
   console.log("Connected successfully");
 });
 
@@ -46,13 +43,12 @@ app.use(session({
   resave: true,
   saveUninitialized: true
 }));
-
-app.use(cache());
+app.use(cache({client:db.getClient(), expireAfterSeconds:600}));
 
 app.get('/test-cache', async (req, res) => {
   res.send("test cache: "+Math.random());
 });
-app.get('/test-cache2', cache({collection:'cache2'}), async (req, res) => {
+app.get('/test-cache2', cache({client:db.getClient(), collection:'cache2'}), async (req, res) => {
   res.send("test cache: "+Math.random());
 });
 
