@@ -42,7 +42,7 @@ public class MongoCache implements Cache {
     private static final String FIELD_EXPIRED_AT = "expireAt";
     private static final String FIELD_HIT = "hit";
     private static final String FIELD_VALUE = "v";
-    private static final String FIELD_DOC = "v";
+    private static final String FIELD_DOC = "doc";
     private static final String INDEX_KEY = FIELD_EXPIRED_AT;
     private static final String INDEX_NAME = "expireAt";
 
@@ -157,7 +157,7 @@ public class MongoCache implements Cache {
             Date created = Date.from(Instant.now());
             Date expireAt = Date.from(Instant.now().plusSeconds(this.ttl));
             Document doc = new Document("_id", key.toString()).append(FIELD_VALUE, serialize(value)).append(FIELD_CREATED, created)
-                    .append("accessed", created).append(FIELD_HIT, 1)
+                    .append(FIELD_ACCESSED, created).append(FIELD_HIT, 1)
                     .append(FIELD_EXPIRED_AT, expireAt);
             if (!storeBinaryOnly)
                 doc.append(FIELD_DOC, value);
