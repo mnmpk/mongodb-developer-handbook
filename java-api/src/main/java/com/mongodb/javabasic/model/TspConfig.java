@@ -1,5 +1,6 @@
 package com.mongodb.javabasic.model;
 
+import java.io.Serializable;
 import java.util.List;
 
 import org.springframework.data.annotation.Id;
@@ -9,7 +10,7 @@ import lombok.Data;
 
 @Data
 @Document(collection = "tsp_config")
-public class TspConfig {
+public class TspConfig implements Serializable {
 
     @Id
     private String id;

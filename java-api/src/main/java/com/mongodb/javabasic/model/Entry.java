@@ -1,5 +1,6 @@
 package com.mongodb.javabasic.model;
 
+import java.io.Serializable;
 import java.util.Map;
 
 import lombok.AllArgsConstructor;
@@ -9,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Entry implements Map.Entry<String, String> {
+public class Entry implements Map.Entry<String, String>, Serializable {
     private String key;
     private String value;
 

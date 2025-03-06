@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.time.Instant;
 import java.util.Date;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -24,24 +25,33 @@ import org.springframework.util.StopWatch;
 import com.mongodb.DuplicateKeyException;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.FindOneAndUpdateOptions;
 import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.Indexes;
 import com.mongodb.client.model.Projections;
 import com.mongodb.client.model.ReplaceOptions;
+import com.mongodb.client.model.Updates;
 
 import lombok.Data;
 
 @Data
 public class MongoCache implements Cache {
     private static final long DEFAULT_TTL = TimeUnit.DAYS.toSeconds(30);
-    private static final String INDEX_KEY_NAME = "cAt";
-    private static final String INDEX_NAME = "_ttl";
+    private static final String FIELD_CREATED = "created";
+    private static final String FIELD_ACCESSED = "accessed";
+    private static final String FIELD_EXPIRED_AT = "expireAt";
+    private static final String FIELD_HIT = "hit";
+    private static final String FIELD_VALUE = "v";
+    private static final String FIELD_DOC = "v";
+    private static final String INDEX_KEY = FIELD_EXPIRED_AT;
+    private static final String INDEX_NAME = "expireAt";
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     private final boolean flushOnBoot;
     private final boolean storeBinaryOnly;
     private final String collectionName;
+    private final long ttl;
     private final MongoTemplate mongoTemplate;
 
     private MongoCollection<Document> collection;
@@ -61,18 +71,14 @@ public class MongoCache implements Cache {
         this.flushOnBoot = flushOnBoot;
         this.storeBinaryOnly = storeBinaryOnly;
         this.collectionName = collectionName;
+        this.ttl = ttl;
         collection = this.mongoTemplate.getCollection(collectionName);
 
         if (isFlushOnBoot()) {
             clear();
         }
-        collection.listIndexes().forEach(index -> {
-            if (index.getString("name").equals(INDEX_NAME) && index.getInteger("expireAfterSeconds") != ttl) {
-                collection.dropIndex(INDEX_NAME);
-            }
-        });
-        collection.createIndex(Indexes.ascending(INDEX_KEY_NAME),
-                new IndexOptions().expireAfter(ttl, TimeUnit.SECONDS).name(INDEX_NAME));
+        collection.createIndex(Indexes.ascending(INDEX_KEY),
+                new IndexOptions().expireAfter(0l, TimeUnit.SECONDS).name(INDEX_NAME));
     }
 
     @Override
@@ -89,13 +95,17 @@ public class MongoCache implements Cache {
     public ValueWrapper get(@NonNull Object key) {
         StopWatch watch = new StopWatch();
         watch.start("read cache");
-        final Document doc = this.collection.find(Filters.eq("_id", key.toString()))
-                .projection(Projections.fields(Projections.excludeId(), Projections.include("v"))).first();
+        final Document doc = this.collection.findOneAndUpdate(Filters.eq("_id", key.toString()),
+                Updates.combine(Updates.set(FIELD_ACCESSED, Date.from(Instant.now())),
+                Updates.inc(FIELD_HIT, 1),
+                        Updates.set(FIELD_EXPIRED_AT, Date.from(Instant.now().plusSeconds(this.ttl)))),
+                new FindOneAndUpdateOptions()
+                        .projection(Projections.fields(Projections.excludeId(), Projections.include(FIELD_VALUE))));
         watch.stop();
         if (doc != null) {
             try {
                 watch.start("deserialize");
-                SimpleValueWrapper v = new SimpleValueWrapper(deserialize(doc.get("v", Binary.class).getData()));
+                SimpleValueWrapper v = new SimpleValueWrapper(deserialize(doc.get(FIELD_VALUE, Binary.class).getData()));
                 watch.stop();
                 logger.info(watch.prettyPrint());
                 return v;
@@ -124,9 +134,13 @@ public class MongoCache implements Cache {
         try {
             StopWatch watch = new StopWatch();
             watch.start("cache");
-            Document doc = new Document("_id", key.toString()).append("v", serialize(value)).append("cAt", new Date());
+            Date created = Date.from(Instant.now());
+            Date expireAt = Date.from(Instant.now().plusSeconds(this.ttl));
+            Document doc = new Document("_id", key.toString()).append(FIELD_VALUE, serialize(value)).append(FIELD_CREATED, created)
+                    .append(FIELD_ACCESSED, created).append(FIELD_HIT, 1)
+                    .append(FIELD_EXPIRED_AT, expireAt);
             if (!storeBinaryOnly)
-                doc.append("doc", value);
+                doc.append(FIELD_DOC, value);
             this.collection.replaceOne(Filters.eq("_id", key.toString()),
                     doc,
                     new ReplaceOptions().upsert(true));
@@ -140,9 +154,13 @@ public class MongoCache implements Cache {
     @Override
     public ValueWrapper putIfAbsent(@NonNull Object key, @Nullable Object value) {
         try {
-            Document doc = new Document("_id", key.toString()).append("v", serialize(value)).append("cAt", new Date());
+            Date created = Date.from(Instant.now());
+            Date expireAt = Date.from(Instant.now().plusSeconds(this.ttl));
+            Document doc = new Document("_id", key.toString()).append(FIELD_VALUE, serialize(value)).append(FIELD_CREATED, created)
+                    .append("accessed", created).append(FIELD_HIT, 1)
+                    .append(FIELD_EXPIRED_AT, expireAt);
             if (!storeBinaryOnly)
-                doc.append("doc", value);
+                doc.append(FIELD_DOC, value);
             StopWatch watch = new StopWatch();
             watch.start("cache");
             this.collection.insertOne(doc);
