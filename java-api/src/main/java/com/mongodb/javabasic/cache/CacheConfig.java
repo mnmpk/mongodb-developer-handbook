@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class MongoCacheConfig {    
+public class CacheConfig {    
     private String collectionName;
     private long ttl;
     private boolean flushOnBoot;

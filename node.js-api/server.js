@@ -5,7 +5,7 @@ const session = require('express-session');
 const MongoDBStore = require('connect-mongodb-session')(session);
 
 const User = require('./user');
-const {init, cache} = require('./middlewares/cache');
+const {cache} = require('./middlewares/cache');
 
 const app = express();
 

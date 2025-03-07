@@ -50,14 +50,16 @@ public class AggregationService {
 
     private List<BsonDocument> loadPipeline(String pipelineName, Optional<Map<String, Object>> variables) {
         try {
+            String mergedPipeline = FreeMarkerTemplateUtils.processTemplateIntoString(
+                new Template("pipeline", new InputStreamReader(
+                        new ClassPathResource("/pipelines/" + pipelineName)
+                                .getInputStream(),
+                        "UTF-8"), freemarkerConfig),
+                variables.orElse(new HashMap<>()));
+            logger.debug(mergedPipeline);
             return new BsonArrayCodec()
                     .decode(new JsonReader(
-                            FreeMarkerTemplateUtils.processTemplateIntoString(
-                                    new Template("pipeline", new InputStreamReader(
-                                            new ClassPathResource("/pipelines/" + pipelineName)
-                                                    .getInputStream(),
-                                            "UTF-8"), freemarkerConfig),
-                                    variables.orElse(new HashMap<>()))),
+                        mergedPipeline),
                             DecoderContext.builder().build())
                     .stream().map(BsonValue::asDocument)
                     .collect(Collectors.toList());

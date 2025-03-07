@@ -10,9 +10,9 @@ import org.springframework.lang.NonNull;
 
 public class MongoCacheManager extends AbstractCacheManager {
     private MongoTemplate mongoTemplate;
-    private MongoCacheConfig[] configs;
+    private CacheConfig[] configs;
 
-    public MongoCacheManager(MongoTemplate mongoTemplate, MongoCacheConfig... configs) {
+    public MongoCacheManager(MongoTemplate mongoTemplate, CacheConfig... configs) {
         this.mongoTemplate = mongoTemplate;
         this.configs = configs;
     }
@@ -20,7 +20,7 @@ public class MongoCacheManager extends AbstractCacheManager {
     @Override
     protected @NonNull Collection<? extends Cache> loadCaches() {
         final Collection<Cache> caches = new LinkedHashSet<>(16);
-        for (MongoCacheConfig config : configs) {
+        for (CacheConfig config : configs) {
             caches.add(new MongoCache(mongoTemplate, config.getCollectionName(), config.getTtl(), config.isFlushOnBoot(), config.isStoreBinaryOnly()));
         }
         return caches;

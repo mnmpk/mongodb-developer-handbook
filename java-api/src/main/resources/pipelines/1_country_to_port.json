@@ -1,0 +1,24 @@
+[
+  {
+    "$unwind": {
+      "path": "$ports",
+      "preserveNullAndEmptyArrays": true
+    }
+  },
+  {
+    "$replaceRoot": {
+      "newRoot": {
+        "$mergeObjects": ["$ports", "$$ROOT"]
+      }
+    }
+  },
+  {
+    "$unset": ["_id", "ports"]
+  },
+  {
+    "$out": {
+      "db": "mongodb-developer",
+      "coll": "tsp_port_info"
+    }
+  }
+]

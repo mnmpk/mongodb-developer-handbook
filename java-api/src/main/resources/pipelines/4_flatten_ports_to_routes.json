@@ -1,0 +1,138 @@
+[
+  {
+    "$lookup": {
+      "from": "tsp_flatten_ports",
+      "let": {
+        "depCountry": "$country_code",
+        "dep": "$_id"
+      },
+      "pipeline": [
+        {
+          "$match": {
+            "$expr": {
+              "$ne": ["$_id", "$$dep"]
+            }
+          }
+        },
+        {
+          "$lookup": {
+            "from": "tsp_exclude_country",
+            "let": {
+              "depCountry": "$$depCountry",
+              "arrCountry": "$country_code"
+            },
+            "pipeline": [
+              {
+                "$match": {
+                  "$expr": {
+                    "$and": [
+                      {
+                        "$eq": [
+                          "$_id",
+                          "$$depCountry"
+                        ]
+                      },
+                      {
+                        "$eq": [
+                          "$dest",
+                          "$$arrCountry"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }
+            ],
+            "as": "isExclude"
+          }
+        },
+        {
+          "$match": {
+            "$expr": {
+              "$eq": ["$isExclude", []]
+            }
+          }
+        },
+        {
+          "$lookup": {
+            "from": "tsp_uo_redirect",
+            "let": {
+              "dep": "$$dep",
+              "arr": "$_id"
+            },
+            "pipeline": [
+              {
+                "$match": {
+                  "$expr": {
+                    "$and": [
+                      {
+                        "$eq": [
+                          "$RO_DEP_AIRPORT_CODE",
+                          "$$dep"
+                        ]
+                      },
+                      {
+                        "$eq": [
+                          "$RO_ARR_AIRPORT_CODE",
+                          "$$arr"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "$unset": "_id"
+              }
+            ],
+            "as": "UORedirect"
+          }
+        },
+        {
+          "$lookup": {
+            "from": "tsp_uo_direct",
+            "let": {
+              "dep": "$$dep",
+              "arr": "$_id"
+            },
+            "pipeline": [
+              {
+                "$match": {
+                  "$expr": {
+                    "$and": [
+                      {
+                        "$eq": [
+                          "$RO_DEP_AIRPORT_CODE",
+                          "$$dep"
+                        ]
+                      },
+                      {
+                        "$eq": [
+                          "$RO_ARR_AIRPORT_CODE",
+                          "$$arr"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "$unset": "_id"
+              }
+            ],
+            "as": "UODirect"
+          }
+        }
+      ],
+      "as": "destinations"
+    }
+  },
+  {
+    "$merge": {
+      "into": "tsp_routes",
+      "on": "_id",
+      "whenMatched": "replace",
+      "whenNotMatched": "insert"
+    }
+  }
+]
