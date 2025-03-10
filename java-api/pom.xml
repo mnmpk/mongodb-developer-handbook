@@ -92,6 +92,11 @@
 			<artifactId>easy-random-core</artifactId>
 			<version>4.0.0</version>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-rng-simple</artifactId>
+			<version>1.6</version>
+		</dependency>
         <dependency>
             <groupId>org.freemarker</groupId>
             <artifactId>freemarker</artifactId>

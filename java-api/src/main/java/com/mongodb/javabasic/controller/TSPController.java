@@ -7,6 +7,8 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.simple.RandomSource;
 import org.bson.Document;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
@@ -15,6 +17,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.util.StopWatch;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -54,13 +59,45 @@ public class TSPController {
     private TspRouteRepository routeRepository;
 
     @GetMapping("/session")
-    public Object consessionfig(HttpSession session) {
+    public Object session(HttpSession session) {
+        SecurityContext context = (SecurityContext) session
+                .getAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY);
+        Authentication authentication = context.getAuthentication();
+
+        if (authentication.getPrincipal() != null) {
+            // TODO: lookup other channel's session
+        }
+
         Object obj = session.getAttribute("test");
         session.setAttribute("test", countryInfoRepository.findCountriesByAirportCodes(Set.of("ALV", "GRG")));
         return obj + " . " + session.getAttribute("test");
     }
 
-    @Cacheable(value = "cache", key = "'config'")
+    @GetMapping("/cache-1mb")
+    @Cacheable(value = "cache", key = "'1mb'")
+    public Document cache1mb() {
+        return new Document("value", randomString(1024 * 1024));
+    }
+
+    @GetMapping("/cache-5mb")
+    @Cacheable(value = "cache", key = "'5mb'")
+    public Document cache5mb() {
+        return new Document("value", randomString(5 * 1024 * 1024));
+    }
+
+    @GetMapping("/cache-10mb")
+    @Cacheable(value = "cache", key = "'10mb'")
+    public Document cache10mb() {
+        return new Document("value", randomString(10 * 1024 * 1024));
+    }
+
+    private String randomString(int size) {
+        byte[] byteArray = new byte[size];
+        UniformRandomProvider randomProvider = RandomSource.XO_RO_SHI_RO_128_PP.create();
+        randomProvider.nextBytes(byteArray);
+        return new String(byteArray);
+    }
+
     @GetMapping("/config")
     public List<TspConfig> config() {
         // Combine config & office_id_config & fare_family_mapping
@@ -110,24 +147,7 @@ public class TSPController {
 
     @GetMapping("/id_config/init")
     public List<TspIdConfigMapDocumentSuggested> idConfigsInit() {
-        /*
-         * mongoTemplate.getCollection("tsp_id_config").createIndex(Indexes.ascending(
-         * "channel", "tsp_id", "used"));
-         * String[] channels={"MOB","WCMP"};
-         * EasyRandom generator = new EasyRandom(new EasyRandomParameters().seed(new
-         * Date().getTime()).stringLengthRange(5, 5));
-         * List<TspIdConfigMapDocument> l =
-         * generator.objects(TspIdConfigMapDocument.class, 30000).map(e -> {
-         * e.setId(null);
-         * e.setCreateTime(new Date());
-         * e.setUpdateTime(new Date());
-         * e.setUsed(false);
-         * e.setChannel(channels[Math.random() > 0.5 ? 0 : 1]);
-         * return e;
-         * }).collect(Collectors.toList());
-         * return idConfigRepository.saveAll(l);
-         */
-        MongoCollection<Document> coll = mongoTemplate.getCollection("tsp_id_config_new");
+        MongoCollection<Document> coll = mongoTemplate.getCollection("tsp_id_config");
         coll.createIndex(Indexes.ascending("channel", "tsp_id", "used"));
         coll.createIndex(Indexes.ascending("used"), new IndexOptions().expireAfter(10000L, TimeUnit.HOURS));
         String[] channels = { "MOB", "WCMP" };
@@ -159,7 +179,6 @@ public class TSPController {
         return list;
     }
 
-    
     @GetMapping("/id_config/{channel}")
     public List<TspIdConfigMapDocumentSuggested> idConfigs(@PathVariable String channel,
             @RequestParam("used") boolean used) {
