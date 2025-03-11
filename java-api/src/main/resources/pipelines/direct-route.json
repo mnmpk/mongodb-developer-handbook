@@ -1,0 +1,41 @@
+[
+    {
+      "$match": {
+        "stops": "${start}",
+        "stops": "${end}"
+      }
+    },
+    {
+      "$set": {
+        "sI": {
+          "$indexOfArray": [
+            "$stops",
+            "${start}"
+          ]
+        },
+        "eI": {
+          "$indexOfArray": [
+            "$stops",
+            "${end}"
+          ]
+        }
+      }
+    },
+    {
+      "$match": {
+        "$expr": {
+          "$and": [
+            {
+              "$lt": ["$sI", "$eI"]
+            },
+            {
+              "$gte": ["$sI", 0]
+            },
+            {
+              "$gte": ["$eI", 0]
+            }
+          ]
+        }
+      }
+    }
+  ]
