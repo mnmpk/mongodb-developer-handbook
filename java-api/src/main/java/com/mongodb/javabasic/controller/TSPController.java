@@ -1,5 +1,6 @@
 package com.mongodb.javabasic.controller;
 
+import java.security.Principal;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -15,11 +16,20 @@ import org.jeasy.random.EasyRandomParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.servlet.server.Session;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.session.FindByIndexNameSessionRepository;
 import org.springframework.util.StopWatch;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -41,6 +51,8 @@ import com.mongodb.javabasic.repositories.TspPortInfoRepository;
 import com.mongodb.javabasic.repositories.TspRouteRepository;
 import com.mongodb.javabasic.service.AggregationService;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.websocket.server.PathParam;
 
@@ -57,20 +69,34 @@ public class TSPController {
     private TspConfigRepository configRepository;
     @Autowired
     private TspRouteRepository routeRepository;
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @GetMapping("/login")
+    public Authentication login(HttpServletRequest request, HttpServletResponse response, HttpSession session) {
+        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(request.getParameter("uId"),
+                "m0001@12345");
+        Authentication auth = authenticationManager.authenticate(token);
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(auth);
+        SecurityContextHolder.setContext(context);
+        new HttpSessionSecurityContextRepository().saveContext(context, request, response);
+        return auth;
+    }
 
     @GetMapping("/session")
-    public Object session(HttpSession session) {
-        SecurityContext context = (SecurityContext) session
-                .getAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY);
-        Authentication authentication = context.getAuthentication();
-
-        if (authentication.getPrincipal() != null) {
-            // TODO: lookup other channel's session
+    public Object session(HttpSession session) {   
+        //get the principal name from session manually
+        //session.getAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME);     
+        if (SecurityContextHolder.getContext().getAuthentication() != null &&
+                SecurityContextHolder.getContext().getAuthentication().isAuthenticated() &&
+                !(SecurityContextHolder.getContext().getAuthentication() instanceof AnonymousAuthenticationToken)) {
+            logger.info(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString());
+            return SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        } else {
+            logger.info("unauthenticated");
+            return "unauthenticated";
         }
-
-        Object obj = session.getAttribute("test");
-        session.setAttribute("test", countryInfoRepository.findCountriesByAirportCodes(Set.of("ALV", "GRG")));
-        return obj + " . " + session.getAttribute("test");
     }
 
     @GetMapping("/cache-1mb")
