@@ -36,13 +36,7 @@ function init({ database = "", collection = DEFAULT_COLL, ttl = DEFAULT_TTL } = 
         // if there is some cached data, retrieve it and return it
         const cachedValue = await readData(database, collection, key, ttl);
         if (cachedValue && cachedValue.v) {
-            try {
-                // if it is JSON data, then return it
-                return res.json(JSON.parse(cachedValue.v));
-            } catch {
-                // if it is not JSON data, then return it
-                return res.send(cachedValue.v);
-            }
+            return res.send(cachedValue.v);
         } else {
             // override how res.send behaves
             // to introduce the caching logic
