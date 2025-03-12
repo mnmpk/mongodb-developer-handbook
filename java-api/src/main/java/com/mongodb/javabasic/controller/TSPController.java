@@ -131,19 +131,19 @@ public class TSPController {
     @GetMapping("/cache-1mb")
     @Cacheable(value = "cache", key = "'1mb'")
     public Document cache1mb() {
-        return new Document("value", randomString(1 * 1024));
+        return new Document("value", randomString(1 * 1024 * 1024/3));
     }
 
     @GetMapping("/cache-5mb")
     @Cacheable(value = "cache", key = "'5mb'")
     public Document cache5mb() {
-        return new Document("value", randomString(5 * 1024));
+        return new Document("value", randomString(5 * 1024 * 1024/3));
     }
 
     @GetMapping("/cache-10mb")
     @Cacheable(value = "cache", key = "'10mb'")
     public Document cache10mb() {
-        return new Document("value", randomString(10 * 1024));
+        return new Document("value", randomString(10 * 1024 * 1024/3));
     }
 
     private String randomString(int size) {
