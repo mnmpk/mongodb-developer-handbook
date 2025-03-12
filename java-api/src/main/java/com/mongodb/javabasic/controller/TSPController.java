@@ -1,7 +1,9 @@
 package com.mongodb.javabasic.controller;
 
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -38,6 +40,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.Indexes;
 import com.mongodb.javabasic.model.TspConfig;
@@ -71,31 +74,57 @@ public class TSPController {
     private TspRouteRepository routeRepository;
     @Autowired
     private AuthenticationManager authenticationManager;
+    @Autowired
+    private HttpSessionSecurityContextRepository securityContextRepository;
 
     @GetMapping("/login")
     public Authentication login(HttpServletRequest request, HttpServletResponse response, HttpSession session) {
+
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(request.getParameter("uId"),
                 "m0001@12345");
         Authentication auth = authenticationManager.authenticate(token);
         SecurityContext context = SecurityContextHolder.createEmptyContext();
         context.setAuthentication(auth);
         SecurityContextHolder.setContext(context);
-        new HttpSessionSecurityContextRepository().saveContext(context, request, response);
+        Map<String, Object> map = new LinkedHashMap<>();
+        map.putAll(Map.of("search", new ArrayList<>(), "channel", "mob", "views", 1));
+        populateShareData(session, map);
+        session.setAttribute("shareData", map);
+        securityContextRepository.saveContext(context, request, response);
         return auth;
     }
 
     @GetMapping("/session")
-    public Object session(HttpSession session) {   
-        //get the principal name from session manually
-        //session.getAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME);     
+    public Object session(HttpServletRequest request, HttpServletResponse response, HttpSession session,
+            @RequestParam("s") String search) {
+        // get the principal name from session manually
+        // session.getAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME);
         if (SecurityContextHolder.getContext().getAuthentication() != null &&
                 SecurityContextHolder.getContext().getAuthentication().isAuthenticated() &&
                 !(SecurityContextHolder.getContext().getAuthentication() instanceof AnonymousAuthenticationToken)) {
-            logger.info(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString());
-            return SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            Map<String, Object> doc = (LinkedHashMap<String, Object>) session.getAttribute("shareData");
+            if (search != null)
+                ((List) doc.get("search")).add(search);
+            doc.put("views", (int) doc.get("views") + 1);
+            session.setAttribute("shareData", doc);
+            return doc;
         } else {
             logger.info("unauthenticated");
             return "unauthenticated";
+        }
+    }
+
+    private void populateShareData(HttpSession session, Map<String, Object> map) {
+        String name = SecurityContextHolder.getContext().getAuthentication().getName();
+        Document doc = mongoTemplate.getCollection("sessions")
+                .find(Filters.and(Filters.eq("session.principal", name),
+                        Filters.eq("session.shareData.channel", "web")))
+                .first();
+        if (doc != null) {
+            Document shareData = doc.get("session", Document.class).get("shareData", Document.class);
+            ((List<String>) map.get("search")).addAll(
+                    shareData.getList("search", String.class));
+            map.put("views", (int) map.get("views") + shareData.get("views", Integer.class));
         }
     }
 

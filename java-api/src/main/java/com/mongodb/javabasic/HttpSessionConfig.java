@@ -12,13 +12,13 @@ import org.springframework.session.data.mongo.config.annotation.web.http.EnableM
 @EnableMongoHttpSession
 public class HttpSessionConfig {
 
-	@Bean
+	/*@Bean
 	public JdkMongoSessionConverter jdkMongoSessionConverter() {
 		return new JdkMongoSessionConverter(Duration.ofMinutes(30));
-	}
-	/*@Bean
+	}*/
+	@Bean
 	public JacksonMongoSessionConverter jacksonMongoSessionConverter() {
 		return new JacksonMongoSessionConverter();
-	}*/
+	}
 
 }

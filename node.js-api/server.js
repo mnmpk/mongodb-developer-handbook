@@ -5,7 +5,7 @@ const session = require('express-session');
 const MongoDBStore = require('connect-mongodb-session')(session);
 
 const User = require('./user');
-const {cache} = require('./middlewares/cache');
+const { cache } = require('./middlewares/cache');
 
 const app = express();
 
@@ -43,28 +43,45 @@ app.use(session({
   resave: true,
   saveUninitialized: true
 }));
-app.use(cache({client:db.getClient(), expireAfterSeconds:600}));
+app.use(cache({ client: db.getClient(), expireAfterSeconds: 600 }));
 
 app.get('/test-cache', async (req, res) => {
-  res.send("test cache: "+Math.random());
+  res.send("test cache: " + Math.random());
 });
-app.get('/test-cache2', cache({client:db.getClient(), collection:'cache2'}), async (req, res) => {
-  res.send("test cache: "+Math.random());
+app.get('/test-cache2', cache({ client: db.getClient(), collection: 'cache2' }), async (req, res) => {
+  res.send("test cache: " + Math.random());
 });
 
-app.get('/test-session', async (req, res) => {
-  if (req.session.views) {
-    req.session.views++;
+
+
+app.get('/login', async (req, res) => {
+  req.session.principal = req.query['uId'];
+
+  //Populate other channel's data
+  let temp =  { channel: "web", views: 1, search: [] };
+  const coll = db.getClient().db().collection('sessions');
+  const shareData = await coll.findOne({ "principal": req.session.principal, "attrs.shareData.channel": "mob" });
+  temp.search=temp.search.concat(shareData.attrs.shareData.search[1]);
+  temp.views += shareData.attrs.shareData.views;
+  req.session.shareData = temp;
+
+
+  res.status(200);
+  res.end('welcome to the session demo.');
+});
+
+app.get('/session', async (req, res) => {
+  if (req.session.principal) {
+    req.session.shareData.search.push(req.query['s']);
+    req.session.shareData.views++;
     res.status(200);
-    res.setHeader('Content-Type', 'text/html');
-    res.write('<p>views: ' + req.session.views + '</p>');
-    res.write('<p>expires in: ' + (req.session.cookie.maxAge / 1000) + 's</p>');
+    res.write(JSON.stringify(req.session.shareData));
     res.end();
     //res.send("views: " + req.session.views);
   } else {
-    req.session.views = 1
+
     res.status(200);
-    res.end('welcome to the session demo. refresh!');
+    res.end('Please login first');
   }
 });
 

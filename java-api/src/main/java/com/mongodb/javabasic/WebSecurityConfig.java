@@ -33,8 +33,11 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.session.FindByIndexNameSessionRepository;
 import org.springframework.session.Session;
+import org.springframework.session.data.mongo.JacksonMongoSessionConverter;
+import org.springframework.session.data.mongo.config.annotation.web.http.EnableMongoHttpSession;
 import org.springframework.session.security.SpringSessionBackedSessionRegistry;
 
 @Configuration
@@ -63,6 +66,11 @@ public class WebSecurityConfig<S extends Session> {
     }
 
     @Bean
+    public HttpSessionSecurityContextRepository securityContextRepository() {
+        return new HttpSessionSecurityContextRepository();
+    }
+
+    @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
     }
@@ -70,15 +78,17 @@ public class WebSecurityConfig<S extends Session> {
     @Bean
     public UserDetailsService userDetailsService() {
         return new InMemoryUserDetailsManager(User.builder()
-        .username("m0001")
-        .password("{noop}m0001@12345").authorities("test", "all")
-        .build(),User.builder()
-        .username("m0002")
-        .password("{noop}m0001@12345").authorities("test")
-        .build(),User.builder()
-        .username("m0003")
-        .password("{noop}m0001@12345").authorities( "all")
-        .build());
+                .username("m0001")
+                .password("{noop}m0001@12345").authorities("test", "all")
+                .build(),
+                User.builder()
+                        .username("m0002")
+                        .password("{noop}m0001@12345").authorities("test")
+                        .build(),
+                User.builder()
+                        .username("m0003")
+                        .password("{noop}m0001@12345").authorities("all")
+                        .build());
     }
 
 }
