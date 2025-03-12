@@ -45,10 +45,16 @@ app.use(session({
 }));
 app.use(cache({ client: db.getClient(), expireAfterSeconds: 600 }));
 
-app.get('/test-cache', async (req, res) => {
-  res.send("test cache: " + Math.random());
+app.get('/cache-1mb', async (req, res) => {
+  res.send({value:require('node:crypto').randomBytes(1*1024*1024/3).toString()});
 });
-app.get('/test-cache2', cache({ client: db.getClient(), collection: 'cache2' }), async (req, res) => {
+app.get('/cache-5mb', async (req, res) => {
+  res.send({value:require('node:crypto').randomBytes(5*1024*1024/3).toString()});
+});
+app.get('/cache-10mb', async (req, res) => {
+  res.send({value:require('node:crypto').randomBytes(10*1024*1024/3).toString()});
+});
+app.get('/test-cache', cache({ client: db.getClient(), collection: 'cache2' }), async (req, res) => {
   res.send("test cache: " + Math.random());
 });
 
