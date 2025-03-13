@@ -1,11 +1,12 @@
 const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
 
-let poly;
+let polylines = [];
 let map;
-let markersArray = [];
+let markers = [];
 let infoWindow = new google.maps.InfoWindow();
 let start, end;
 let stopId;
+let suggestions;
 
 async function initMap() {
     const { Map } = await google.maps.importLibrary("maps");
@@ -15,25 +16,30 @@ async function initMap() {
         center: { lat: 22.3193, lng: 114.1694 },
         zoom: 11,
     });
-    poly = new google.maps.Polyline({
-        strokeColor: "#000000",
-        strokeOpacity: 1.0,
-        strokeWeight: 3,
-    });
-    poly.setMap(map);
     map.addListener("click", addLatLng);
-    const centerControlDiv = document.createElement("div");
+    /*const centerControlDiv = document.createElement("div");
     centerControlDiv.appendChild(createControl("search", search));
     centerControlDiv.appendChild(createControl("clear", clear));
-    map.controls[google.maps.ControlPosition.TOP_CENTER].push(centerControlDiv);
+    map.controls[google.maps.ControlPosition.TOP_CENTER].push(centerControlDiv);*/
 }
 
 function addLatLng(event) {
-    const path = poly.getPath();
-
-    //path.push(event.latLng);
-    //if (path.length == 1)
-    findStopsNearby(event.latLng);
+    if (start && end) {
+        clear();
+    }
+    if (!start && !end) {
+        clearOverlays();
+        findStopsNearby(event.latLng);
+        findRoutesNearby(event.latLng);
+        setStart(event.latLng);
+    }
+    else if (start && !end) {
+        clearOverlays();
+        findStopsNearby(event.latLng);
+        findRoutesNearby(event.latLng);
+        setEnd(event.latLng);
+        search();
+    }
 }
 
 initMap();
@@ -46,7 +52,6 @@ function findStopsNearby(latLng) {
             lng: latLng.lng()
         },
         success: function (result) {
-            clearOverlays();
             result.forEach(s => {
                 const marker = new AdvancedMarkerElement({
                     position: { lat: s.location.position.values[1], lng: s.location.position.values[0] },
@@ -60,7 +65,7 @@ function findStopsNearby(latLng) {
 
                     infoWindow.close();
                     stopId = marker.title;
-                    let content = s.id+"<br/>"+s.nameTc+"</br>"+s.nameEn;
+                    let content = s.id + "<br/>" + s.nameTc + "</br>" + s.nameEn;
                     if (!start)
                         content += "<br/><a id='start' href='#'>Set as start</a>";
                     if (!end)
@@ -74,44 +79,91 @@ function findStopsNearby(latLng) {
                         $('#clear').click(clear);
                     });
                 });
-                markersArray.push(marker);
+                markers.push(marker);
             });
 
         }
     });
 }
-function setStart() {
+
+function findRoutesNearby(latLng) {
+    $.ajax({
+        url: "http://localhost:8080/ptes/routes",
+        data: {
+            lat: latLng.lat(),
+            lng: latLng.lng()
+        },
+        success: function (result) {
+            suggestions = result;
+            suggestions.forEach(sugg => {
+                let path = [];
+                sugg.stops.forEach(s => {
+                    path.push({ lat: s.location.position.values[1], lng: s.location.position.values[0] });
+                });
+                drawLine(path);
+            });
+            start.addListener("click", ({ domEvent, latLng }) => {
+                const { target } = domEvent;
+                let content = "";
+                suggestions.forEach(sugg => {
+                    content += "Route:" + sugg.route + " " + sugg.bound + " " + sugg.serviceType + "<br/>";
+                });
+
+                infoWindow.close();
+                infoWindow.setContent(content);
+                infoWindow.open(start.map, start);
+            });
+        }
+    });
+}
+function drawLine(path) {
+    polylines.push(new google.maps.Polyline({
+        map: map,
+        path: path,
+        strokeColor: "#000000",
+        strokeOpacity: 0.5,
+        strokeWeight: 1,
+    }));
+}
+function setStart(latLng) {
     if (start) {
         start.setMap(null);
     }
     start = new AdvancedMarkerElement({
-        position: infoWindow.position,
-        title: stopId,
+        position: latLng,
         map: map,
     });
     infoWindow.close();
 }
-function setEnd() {
+function setEnd(latLng) {
     if (end) {
         end.setMap(null);
     }
     end = new AdvancedMarkerElement({
-        position: infoWindow.position,
-        title: stopId,
+        position: latLng,
         map: map,
     });
     infoWindow.close();
 }
 function search() {
-    console.log(start.title, end.title);
     $.ajax({
-        url: "http://localhost:8080/ptes/routes/"+start.title+"/"+end.title,
+        url: "http://localhost:8080/ptes/routes",
+        method: "POST",
+        data: {
+            start: [start.position.lng, start.position.lat],
+            end: [end.position.lng, end.position.lat]
+        },
         success: function (result) {
             clearOverlays();
             result.forEach(s => {
-                console.log(s);
+                s.legs.forEach(l => {
+                    let path = [];
+                    l.stops.forEach(s => {
+                        path.push({ lat: s.location.position.values[1], lng: s.location.position.values[0] });
+                    });
+                    drawLine(path);
+                });
             });
-
         }
     });
 }
@@ -125,7 +177,23 @@ function clear() {
     }
     end = null;
 }
-function createControl(label, fn) {
+function clearOverlays() {
+    for (var i = 0; i < markers.length; i++) {
+        markers[i].setMap(null);
+    }
+    markers.length = 0;
+    for (var i = 0; i < polylines.length; i++) {
+        polylines[i].setMap(null);
+    }
+    polylines.length = 0;
+}
+
+
+
+
+
+
+/*function createControl(label, fn) {
     const controlButton = document.createElement("button");
 
     // Set CSS for the control.
@@ -143,17 +211,11 @@ function createControl(label, fn) {
     controlButton.style.textAlign = "center";
 
     controlButton.textContent = label;
-    controlButton.title = "Click to "+label;
+    controlButton.title = "Click to " + label;
     controlButton.type = "button";
 
     // Setup the click event listeners: simply set the map to Chicago.
     controlButton.addEventListener("click", fn);
 
     return controlButton;
-}
-function clearOverlays() {
-    for (var i = 0; i < markersArray.length; i++) {
-        markersArray[i].setMap(null);
-    }
-    markersArray.length = 0;
-}
+}*/

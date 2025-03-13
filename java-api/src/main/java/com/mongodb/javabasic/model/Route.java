@@ -14,5 +14,5 @@ public class Route {
     private String bound;
     @BsonProperty("service_type")
     private String serviceType;
-    private List<String> stops;
+    private List<Stop> stops;
 }
