@@ -1,5 +1,6 @@
 const { MongoClient } = require("mongodb");
 const express = require("express");
+const compression = require('compression')
 const mongoose = require("mongoose");
 const session = require('express-session');
 const MongoDBStore = require('connect-mongodb-session')(session);
@@ -9,6 +10,7 @@ const { cache } = require('./middlewares/cache');
 
 const app = express();
 
+app.use(compression());
 app.use(express.json());
 
 //const uri = "mongodb://localhost:27017/test";
@@ -67,8 +69,10 @@ app.get('/login', async (req, res) => {
   let temp =  { channel: "web", views: 1, search: [] };
   const coll = db.getClient().db().collection('sessions');
   const shareData = await coll.findOne({ "principal": req.session.principal, "attrs.shareData.channel": "mob" });
-  temp.search=temp.search.concat(shareData.attrs.shareData.search[1]);
-  temp.views += shareData.attrs.shareData.views;
+  if(shareData && shareData.attrs && shareData.attrs.shareData){
+    temp.search=temp.search.concat(shareData.attrs.shareData.search[1]);
+    temp.views += shareData.attrs.shareData.views;
+  }
   req.session.shareData = temp;
 
 
