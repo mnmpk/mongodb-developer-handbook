@@ -6,7 +6,7 @@ let markers = [];
 let infoWindow = new google.maps.InfoWindow();
 let start, end;
 let stopId;
-let suggestions;
+let suggestedRoutes;
 
 async function initMap() {
     const { Map } = await google.maps.importLibrary("maps");
@@ -14,7 +14,8 @@ async function initMap() {
     map = new Map(document.getElementById("map"), {
         mapId: "map",
         center: { lat: 22.3193, lng: 114.1694 },
-        zoom: 11,
+        zoom: 11, 
+        clickableIcons: false 
     });
     map.addListener("click", addLatLng);
     /*const centerControlDiv = document.createElement("div");
@@ -34,9 +35,9 @@ function addLatLng(event) {
         setStart(event.latLng);
     }
     else if (start && !end) {
-        clearOverlays();
-        findStopsNearby(event.latLng);
-        findRoutesNearby(event.latLng);
+        //clearOverlays();
+        //findStopsNearby(event.latLng);
+        //findRoutesNearby(event.latLng);
         setEnd(event.latLng);
         search();
     }
@@ -66,10 +67,6 @@ function findStopsNearby(latLng) {
                     infoWindow.close();
                     stopId = marker.title;
                     let content = s.id + "<br/>" + s.nameTc + "</br>" + s.nameEn;
-                    if (!start)
-                        content += "<br/><a id='start' href='#'>Set as start</a>";
-                    if (!end)
-                        content += "<br/><a id='end' href='#'>Set as end</a>";
                     infoWindow.setContent(content);
                     infoWindow.open(marker.map, marker);
                     infoWindow.addListener('domready', function () {
@@ -94,24 +91,12 @@ function findRoutesNearby(latLng) {
             lng: latLng.lng()
         },
         success: function (result) {
-            suggestions = result;
-            suggestions.forEach(sugg => {
+            result.forEach(r => {
                 let path = [];
-                sugg.stops.forEach(s => {
+                r.stops.forEach(s => {
                     path.push({ lat: s.location.position.values[1], lng: s.location.position.values[0] });
                 });
                 drawLine(path);
-            });
-            start.addListener("click", ({ domEvent, latLng }) => {
-                const { target } = domEvent;
-                let content = "";
-                suggestions.forEach(sugg => {
-                    content += "Route:" + sugg.route + " " + sugg.bound + " " + sugg.serviceType + "<br/>";
-                });
-
-                infoWindow.close();
-                infoWindow.setContent(content);
-                infoWindow.open(start.map, start);
             });
         }
     });
@@ -154,15 +139,42 @@ function search() {
             end: [end.position.lng, end.position.lat]
         },
         success: function (result) {
+            suggestedRoutes = result;
             clearOverlays();
-            result.forEach(s => {
-                s.legs.forEach(l => {
+            let stops={};
+            suggestedRoutes.forEach(r => {
+                r.legs.forEach(l => {
                     let path = [];
                     l.stops.forEach(s => {
                         path.push({ lat: s.location.position.values[1], lng: s.location.position.values[0] });
                     });
                     drawLine(path);
+                    const stop = l.stops[l.stopIndex];
+                    const stopId = stop.id;
+                    if(!stops[stopId])
+                        stops[stopId]= {details:stop, routes:[]};
+                    stops[stopId].routes.push(l.route+" "+l.serviceType);
                 });
+            });
+            Object.keys(stops).forEach(k=>{
+                const marker = new AdvancedMarkerElement({
+                    position: { lat: stops[k].details.location.position.values[1], lng: stops[k].details.location.position.values[0] },
+                    gmpClickable: true,
+                    map: map,
+                });
+                marker.addListener("click", ({ domEvent, latLng }) => {
+                    const { target } = domEvent;
+                    let content = stops[k].details.id + "<br/>" + 
+                    stops[k].details.nameTc + "</br>" + 
+                    stops[k].details.nameEn+"<br/><br/>";
+                    stops[k].routes.forEach(r=>{
+                        content+=r+"<br/>";
+                    });                    
+                    infoWindow.close();
+                    infoWindow.setContent(content);
+                    infoWindow.open(marker.map, marker);
+                });
+                markers.push(marker);
             });
         }
     });

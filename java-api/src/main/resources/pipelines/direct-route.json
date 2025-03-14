@@ -1,41 +1,28 @@
 [
-    {
-      "$match": {
-        "stops": "${start}",
-        "stops": "${end}"
-      }
-    },
-    {
-      "$set": {
-        "sI": {
-          "$indexOfArray": [
-            "$stops",
-            "${start}"
-          ]
-        },
-        "eI": {
-          "$indexOfArray": [
-            "$stops",
-            "${end}"
-          ]
-        }
-      }
-    },
-    {
-      "$match": {
-        "$expr": {
-          "$and": [
-            {
-              "$lt": ["$sI", "$eI"]
-            },
-            {
-              "$gte": ["$sI", 0]
-            },
-            {
-              "$gte": ["$eI", 0]
-            }
-          ]
-        }
+  {
+    "$geoNear": {
+      "key": "stops.location",
+      "near": {
+        "type": "Point",
+        "coordinates": [
+          ${lng}, ${lat}
+        ]
+      },
+      "distanceField": "distance",
+      "maxDistance": 200,
+      "query": {},
+      "includeLocs": "nearestStop",
+      "spherical": true
+    }
+  },
+  {
+    "$set": {
+      "stopIndex": {
+        "$indexOfArray": [
+          "$stops.location",
+          "$nearestStop"
+        ]
       }
     }
-  ]
+  }
+]

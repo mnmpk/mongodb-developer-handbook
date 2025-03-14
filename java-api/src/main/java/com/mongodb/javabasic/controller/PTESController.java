@@ -56,8 +56,9 @@ public class PTESController {
 
     @GetMapping("/routes")
     public List<Route> getRoutes(@RequestParam("lat") double lat, @RequestParam("lng") double lng) {
-        return mongoTemplate.getCollection(mongoTemplate.getCollectionName(Route.class)).withDocumentClass(Route.class)
-                .find(Filters.nearSphere("stops.location", new Point(new Position(lng, lat)), 200d, 0d)).into(new ArrayList<>());
+        return aggregationService.getPipelineResults(mongoTemplate.getCollectionName(Route.class), "direct-route.json", Route.class, Map.of("lat",lat,"lng",lng));
+        //return mongoTemplate.getCollection(mongoTemplate.getCollectionName(Route.class)).withDocumentClass(Route.class)
+        //        .find(Filters.nearSphere("stops.location", new Point(new Position(lng, lat)), 200d, 0d)).into(new ArrayList<>());
     }
 
     @PostMapping("/routes")
@@ -75,9 +76,11 @@ public class PTESController {
         List<Route> list = new ArrayList<>();
         startRoutes.forEach(r->{
             endRoutes.forEach(r2->{
-                if(r.getRoute().equalsIgnoreCase(r2.getRoute()) && r.getBound().equalsIgnoreCase(r2.getBound()) &&
-                r.getServiceType().equalsIgnoreCase(r2.getServiceType())){
-                    list.add(r);
+                if(r.getRoute().equalsIgnoreCase(r2.getRoute()) && 
+                r.getBound().equalsIgnoreCase(r2.getBound()) &&
+                r.getServiceType().equalsIgnoreCase(r2.getServiceType()) &&
+                r.getStopIndex()<r2.getStopIndex()){
+                        list.add(r);
                 }
             });
         });

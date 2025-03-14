@@ -5,6 +5,8 @@ import java.util.List;
 import org.bson.codecs.pojo.annotations.BsonProperty;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.mongodb.client.model.geojson.Point;
+
 import lombok.Data;
 
 @Data
@@ -15,4 +17,9 @@ public class Route {
     @BsonProperty("service_type")
     private String serviceType;
     private List<Stop> stops;
+
+
+    private Point nearestStop;
+    private Integer stopIndex;
+    private Double distance;
 }
