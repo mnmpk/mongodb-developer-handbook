@@ -15,9 +15,9 @@ public interface TspPortInfoRepository extends MongoRepository<TspPortInfo, Stri
     @Query(value = "{'airports.iata_airport_code':{$in: ?0}}", fields = "{'country_code': 1, 'local_currency': 1, '_id': 0}")
     List<TspPortInfo> findPortsByAirportCodes(Set<String> airportCodes);
 
-    @Query(value = "{'ports.port_code': ?0}", fields = "{'country_code': 1, 'local_currency': 1, '_id': 0}")
+    @Query(value = "{'port_code': ?0}", fields = "{'country_code': 1, 'local_currency': 1, '_id': 0}")
     TspPortInfo findPortByPortCode(String portCode);
 
-    @Query(value = "{'ports.port_code': {$in: ?0}}", fields = "{'country_code': 1, 'local_currency': 1, '_id': 0}")
+    @Query(value = "{'port_code': {$in: ?0}}", fields = "{'country_code': 1, 'local_currency': 1, '_id': 0}")
     List<TspPortInfo> findPortsByPortCodes(Set<String> portCodes);
 }
