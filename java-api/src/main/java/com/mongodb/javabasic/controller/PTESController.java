@@ -27,6 +27,7 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.geojson.MultiPoint;
 import com.mongodb.client.model.geojson.Point;
 import com.mongodb.client.model.geojson.Position;
+import com.mongodb.javabasic.KMeans;
 import com.mongodb.javabasic.model.Route;
 
 @RestController
@@ -48,7 +49,7 @@ public class PTESController {
     @GetMapping("/stops")
     public List<Stop> getStops(@RequestParam("lat") double lat, @RequestParam("lng") double lng) {
         return mongoTemplate.getCollection(mongoTemplate.getCollectionName(Stop.class)).withDocumentClass(Stop.class)
-                .find(Filters.nearSphere("location", new Point(new Position(lng, lat)), 100d, 0d))
+                .find(Filters.nearSphere("location", new Point(new Position(lng, lat)), 500d, 0d))
                 .into(new ArrayList<>());
         // return stopRepository.findAll();
     }
@@ -76,26 +77,79 @@ public class PTESController {
         List<Route> endRoutes = this.getRoutes(end[1], end[0]);
         List<Suggestion> suggestions = new ArrayList<>();
 
-        //suggestions.addAll(this.getDirectRoutes(startRoutes, endRoutes));
+        suggestions.addAll(this.getDirectRoutesAnd1T(startRoutes, endRoutes));
 
-        suggestions.addAll(this.get1TRoutes(startRoutes, endRoutes));
+        // suggestions.addAll(this.get1TRoutes(startRoutes, endRoutes));
         suggestions.addAll(this.get2TRoutes());
         return suggestions;
     }
 
-    private List<Suggestion> getDirectRoutes(List<Route> startRoutes, List<Route> endRoutes) {
+    private List<Suggestion> getDirectRoutesAnd1T(List<Route> startRoutes, List<Route> endRoutes) {
+        List<Suggestion> suggestions = new ArrayList<>();
         List<Route> list = new ArrayList<>();
+
+        Set<Position> intersectSet = new HashSet<>();
         startRoutes.forEach(r -> {
+            List<Position> set = new ArrayList<>();
+            r.getStops().stream().forEach(s -> set.add(s.getLocation().getPosition()));
             endRoutes.forEach(r2 -> {
+                // Direct route
                 if (r.getRoute().equalsIgnoreCase(r2.getRoute()) &&
                         r.getBound().equalsIgnoreCase(r2.getBound()) &&
                         r.getServiceType().equalsIgnoreCase(r2.getServiceType()) &&
-                        r.getStopIndex() < r2.getStopIndex()) {
+                        r.getStartIndex() < r2.getStartIndex()) {
+                    r.setEndIndex(r2.getStartIndex());
                     list.add(r);
+                }
+
+                // 1T exact point
+                for (int i = 0; i < r2.getStops().size(); i++) {
+                    Stop s = r2.getStops().get(i);
+                    if (set.contains(s.getLocation().getPosition())) {
+                        suggestions.add(Suggestion.builder().transferStops(List.of(s)).legs(List.of(
+                                Route.builder().route(r.getRoute()).bound(r.getBound()).serviceType(r.getServiceType())
+                                        .stops(r.getStops()).startIndex(r.getStartIndex())
+                                        .endIndex(set.indexOf(s.getLocation().getPosition())).build(),
+                                Route.builder().route(r2.getRoute()).bound(r2.getBound())
+                                        .serviceType(r2.getServiceType()).stops(r2.getStops()).startIndex(r2.getStartIndex())
+                                        .endIndex(i).build()))
+                                .build());
+
+                        // For Kmeans
+                        intersectSet.add(s.getLocation().getPosition());
+                    }
                 }
             });
         });
-        return list.stream().map(r -> Suggestion.builder().legs(List.of(r)).build()).toList();
+
+        // logger.info(""+intersectSet);
+        double[][] d = intersectSet.stream().map(p -> {
+            return p.getValues().stream().mapToDouble(Double::doubleValue).toArray();
+        }).toArray(double[][]::new);
+        if (intersectSet.size() > 5) {
+            int k = intersectSet.size() / 5;
+            KMeans clustering = new KMeans.Builder(k, d)
+                    .iterations(50)
+                    .pp(true)
+                    .epsilon(.001)
+                    .useEpsilon(true)
+                    .build();
+            double[][] centroids = clustering.getCentroids();
+            System.out.println("intersect:" + intersectSet.size() + " k:" + k);
+            List<Stop> stops = new ArrayList<>();
+            for (int i = 0; i < k; i++) {
+                Stop stop = new Stop();
+                stop.setId("S" + i);
+                stop.setLocation(new Point(new Position(centroids[i][0], centroids[i][1])));
+                stops.add(stop);
+            }
+            suggestions.add(Suggestion.builder().transferStops(stops).legs(List.of()).build());
+            System.out.println();
+        }
+
+        suggestions.addAll(list.stream()
+                .map(r -> Suggestion.builder().transferStops(List.of()).legs(List.of(r)).build()).toList());
+        return suggestions;
     }
 
     private List<Suggestion> get1TRoutes(List<Route> startRoutes, List<Route> endRoutes) {
@@ -107,7 +161,8 @@ public class PTESController {
                 }
             });
         });
-        List<Route> intermediateRoute = mongoTemplate.getCollection(mongoTemplate.getCollectionName(Route.class)).withDocumentClass(Route.class)
+        List<Route> intermediateRoute = mongoTemplate.getCollection(mongoTemplate.getCollectionName(Route.class))
+                .withDocumentClass(Route.class)
                 .find(Filters.geoIntersects("stops.location",
                         new MultiPoint(transferStops.stream().collect(Collectors.toList()))))
                 .into(new ArrayList<>());
@@ -118,13 +173,12 @@ public class PTESController {
                 if (r.getRoute().equalsIgnoreCase(r2.getRoute()) &&
                         r.getBound().equalsIgnoreCase(r2.getBound()) &&
                         r.getServiceType().equalsIgnoreCase(r2.getServiceType())
-                        // && r.getStopIndex() < r2.getStopIndex() // Need to find alternative way
-                         ) {
+                // && r.getStopIndex() < r2.getStopIndex() // Need to find alternative way
+                ) {
                     list.add(r);
                 }
             });
         });
-logger.info(list.toString());
         return list.stream().map(r -> Suggestion.builder().legs(List.of(r)).build()).toList();
     }
 

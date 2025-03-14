@@ -7,10 +7,16 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.mongodb.client.model.geojson.Point;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Document("td_routes")
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Route {
     private String route;
     private String bound;
@@ -20,6 +26,7 @@ public class Route {
 
 
     private Point nearestStop;
-    private Integer stopIndex;
+    private Integer startIndex;
+    private Integer endIndex;
     private Double distance;
 }

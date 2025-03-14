@@ -1,4 +1,4 @@
-const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
+const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
 
 let polylines = [];
 let map;
@@ -14,8 +14,8 @@ async function initMap() {
     map = new Map(document.getElementById("map"), {
         mapId: "map",
         center: { lat: 22.3193, lng: 114.1694 },
-        zoom: 11, 
-        clickableIcons: false 
+        zoom: 11,
+        clickableIcons: false
     });
     map.addListener("click", addLatLng);
     /*const centerControlDiv = document.createElement("div");
@@ -96,16 +96,16 @@ function findRoutesNearby(latLng) {
                 r.stops.forEach(s => {
                     path.push({ lat: s.location.position.values[1], lng: s.location.position.values[0] });
                 });
-                drawLine(path);
+                drawLine(path, "#000000");
             });
         }
     });
 }
-function drawLine(path) {
+function drawLine(path, color) {
     polylines.push(new google.maps.Polyline({
         map: map,
         path: path,
-        strokeColor: "#000000",
+        strokeColor: color,
         strokeOpacity: 0.5,
         strokeWeight: 1,
     }));
@@ -141,35 +141,55 @@ function search() {
         success: function (result) {
             suggestedRoutes = result;
             clearOverlays();
-            let stops={};
+            let stops = {};
             suggestedRoutes.forEach(r => {
-                r.legs.forEach(l => {
+                r.legs.forEach((l, i) => {
                     let path = [];
-                    l.stops.forEach(s => {
-                        path.push({ lat: s.location.position.values[1], lng: s.location.position.values[0] });
+                    l.stops.forEach((s, i) => {
+                        if (i >= l.startIndex && i <= l.endIndex)
+                            path.push({ lat: s.location.position.values[1], lng: s.location.position.values[0] });
                     });
-                    drawLine(path);
-                    const stop = l.stops[l.stopIndex];
-                    const stopId = stop.id;
-                    if(!stops[stopId])
-                        stops[stopId]= {details:stop, routes:[]};
-                    stops[stopId].routes.push(l.route+" "+l.serviceType);
+                    drawLine(path, r.legs.length == 1 ? "#000000" : (i == 0 ? "#FF0000" : "#00FF00"));
+                    const startStop = l.stops[l.startIndex];
+                    const endStop = l.stops[l.endIndex];
+                    if (!stops[startStop.id]) {
+                        stops[startStop.id] = { details: startStop, routes: [] };
+                    }
+                    stops[startStop.id].routes.push(l.route + " " + l.serviceType);
+
+                    if (!stops[endStop.id]) {
+                        stops[endStop.id] = { details: endStop, routes: [] };
+                    }
+                    stops[endStop.id].routes.push(l.route + " " + l.serviceType);
                 });
+
+                if (r.transferStops) {
+                    r.transferStops.forEach((s, i) => {
+                        if (!stops[s.id]) {
+                            stops[s.id] = { details: s, routes: [] };
+                        }
+                        if (r.legs[i])
+                            stops[s.id].routes.push(r.legs[i].route + " " + r.legs[i].serviceType + ">" + r.legs[i + 1].route + " " + r.legs[i + 1].serviceType);
+                    });
+                }
             });
-            Object.keys(stops).forEach(k=>{
+            Object.keys(stops).forEach(k => {
                 const marker = new AdvancedMarkerElement({
                     position: { lat: stops[k].details.location.position.values[1], lng: stops[k].details.location.position.values[0] },
+                    content: (stops[k].routes.length == 0) ? new PinElement({
+                        background: "#FBBC04",
+                    }).element : null,
                     gmpClickable: true,
                     map: map,
                 });
                 marker.addListener("click", ({ domEvent, latLng }) => {
                     const { target } = domEvent;
-                    let content = stops[k].details.id + "<br/>" + 
-                    stops[k].details.nameTc + "</br>" + 
-                    stops[k].details.nameEn+"<br/><br/>";
-                    stops[k].routes.forEach(r=>{
-                        content+=r+"<br/>";
-                    });                    
+                    let content = stops[k].details.id + "<br/>" +
+                        stops[k].details.nameTc + "</br>" +
+                        stops[k].details.nameEn + "<br/><br/>";
+                    stops[k].routes.forEach(r => {
+                        content += r + "<br/>";
+                    });
                     infoWindow.close();
                     infoWindow.setContent(content);
                     infoWindow.open(marker.map, marker);
