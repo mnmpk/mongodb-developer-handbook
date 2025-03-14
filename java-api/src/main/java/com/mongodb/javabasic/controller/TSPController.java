@@ -256,7 +256,7 @@ public class TSPController {
         idConfigRepository.findByChannelAndTspId(channel, tspId);
         watch.stop();
         watch.start("new");
-        TspIdConfigMapDocumentSuggested doc = idConfigSuggestedRepository.findByChannelAndTspId(channel, tspId);
+        TspIdConfigMapDocumentSuggested doc = idConfigSuggestedRepository.findByTspId(tspId);
         watch.stop();
         logger.info(watch.prettyPrint());
         return doc;

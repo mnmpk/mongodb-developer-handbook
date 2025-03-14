@@ -11,7 +11,7 @@ public interface TspIdConfigMapDocumentSuggestedRepository extends MongoReposito
 
     List<TspIdConfigMapDocumentSuggested> findByChannel(String channel);
 
-    TspIdConfigMapDocumentSuggested findByChannelAndTspId(String channel, String tspId);
+    TspIdConfigMapDocumentSuggested findByTspId(String tspId);
 
     Long countByChannelAndUsedExists(String channel, boolean used);
 }
