@@ -155,8 +155,8 @@ public class TSPController {
 
     @GetMapping("/config")
     public List<TspConfig> config() {
-        // Combine config & office_id_config & fare_family_mapping
-        return configRepository.getConfig(List.of(Map.entry("office_id", "MNLCX08DM"), Map.entry("channel", "MOB")));
+        // Combine config & fare_family_mapping
+        return configRepository.getConfig(List.of(Map.entry("office_id", List.of("MNLCX08DM")), Map.entry("channel", List.of("MOB"))));
     }
 
     // secure_flight??

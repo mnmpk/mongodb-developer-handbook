@@ -7,5 +7,5 @@ import com.mongodb.javabasic.model.TspConfig;
 
 public interface CustomTspConfigRepository {
 
-    public List<TspConfig> getConfig(List<Entry<String, String>> entries);
+    public List<TspConfig> getConfig(List<Entry<String, List<String>>> entries);
 }

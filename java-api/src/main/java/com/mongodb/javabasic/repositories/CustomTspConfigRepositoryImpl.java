@@ -20,12 +20,12 @@ public class CustomTspConfigRepositoryImpl implements CustomTspConfigRepository 
     private MongoTemplate mongoTemplate;
 
     @Override
-    public List<TspConfig> getConfig(List<Entry<String, String>> entries) {
+    public List<TspConfig> getConfig(List<Entry<String, List<String>>> entries) {
         List<Bson> filters = new ArrayList<>();
-        for (Entry<String, String> entry : entries) {
+        for (Entry<String, List<String>> entry : entries) {
             filters.add(Filters.and(
                     Filters.eq("params.key", entry.getKey()),
-                    Filters.eq("params.value", entry.getValue())));
+                    Filters.in("params.value", entry.getValue())));
         }
         MongoCollection<TspConfig> coll = mongoTemplate.getDb()
                 .getCollection(mongoTemplate.getCollectionName(TspConfig.class), TspConfig.class);
