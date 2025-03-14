@@ -1,5 +1,8 @@
 [
   {
+    "$match":{"_id":"${_id}"}
+  },
+  {
     "$lookup": {
       "from": "tsp_flatten_ports",
       "let": {

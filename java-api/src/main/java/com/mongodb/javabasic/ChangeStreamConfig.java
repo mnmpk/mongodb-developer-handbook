@@ -102,13 +102,14 @@ public class ChangeStreamConfig {
                                                                                 break;
 
                                                                         case "tsp_flatten_ports":
-                                                                        case "tsp_exclude_country":
+                                                                        /*case "tsp_exclude_country":
                                                                         case "tsp_uo_direct":
-                                                                        case "tsp_uo_redirect":
-                                                                                /*aggregationService.getPipelineResults(
+                                                                        case "tsp_uo_redirect":*/
+                                                                                aggregationService.getPipelineResults(
                                                                                                 "tsp_flatten_ports",
                                                                                                 "4_flatten_ports_to_routes.json",
-                                                                                                Document.class);*/
+                                                                                                Document.class, Map.of("_id", doc
+                                                                                                .getString("_id")));
                                                                                 break;
 
                                                                 }
