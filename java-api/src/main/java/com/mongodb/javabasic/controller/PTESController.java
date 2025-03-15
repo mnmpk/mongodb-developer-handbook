@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.geotools.measure.Measure;
+import org.geotools.referencing.GeodeticCalculator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +23,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.mongodb.javabasic.repositories.RouteRepository;
 import com.mongodb.javabasic.repositories.StopRepository;
 import com.mongodb.javabasic.service.AggregationService;
+
+import si.uom.SI;
+
 import com.mongodb.javabasic.model.Stop;
 import com.mongodb.javabasic.model.Suggestion;
 import com.mongodb.client.model.Filters;
@@ -91,7 +96,7 @@ public class PTESController {
         Set<Position> intersectSet = new HashSet<>();
         startRoutes.forEach(r -> {
             List<Position> rStopList = new ArrayList<>();
-            r.getStops().stream().forEach(s -> rStopList.add(s.getLocation().getPosition()));
+            r.getStops().stream().forEach(s -> rStopList.add(s.getLocation().getCoordinates()));
             endRoutes.forEach(r2 -> {
                 // Direct route
                 if (r.getRoute().equalsIgnoreCase(r2.getRoute()) &&
@@ -105,21 +110,26 @@ public class PTESController {
                 // 1T with exact matching stops
                 for (int i = 0; i < r2.getStops().size(); i++) {
                     Stop s = r2.getStops().get(i);
-                    if (rStopList.contains(s.getLocation().getPosition())) {
-                        Route tr1 = Route.builder().route(r.getRoute()).bound(r.getBound()).serviceType(r.getServiceType())
-                        .stops(r.getStops()).startIndex(r.getStartIndex())
-                        .endIndex(rStopList.indexOf(s.getLocation().getPosition())).build();
+                    if (rStopList.stream().anyMatch(ss -> getDistance(ss, s.getLocation().getCoordinates()) < 500)){
+                    //if (rStopList.contains(s.getLocation().getCoordinates())) {
+                        Route tr1 = Route.builder().route(r.getRoute()).bound(r.getBound())
+                                .serviceType(r.getServiceType())
+                                .stops(r.getStops()).startIndex(r.getStartIndex())
+                                .endIndex(rStopList.indexOf(s.getLocation().getCoordinates())).build();
                         Route tr2 = Route.builder().route(r2.getRoute()).bound(r2.getBound())
-                        .serviceType(r2.getServiceType()).stops(r2.getStops()).startIndex(i)
-                        .endIndex(r2.getStartIndex()).build();
-                        if(tr1.getStartIndex()<tr1.getEndIndex() && tr2.getStartIndex()<tr2.getEndIndex()){
-                        suggestions.add(Suggestion.builder().transferStops(List.of(s)).legs(List.of(
-                                tr1,
-                                tr2)).build());
-                        logger.debug(tr1.getRoute()+">"+tr2.getRoute()+" r1 start:"+tr1.getStartIndex()+", transfer: r1-"+rStopList.indexOf(s.getLocation().getPosition())+"|"+tr1.getEndIndex()+" r2-"+i+"|"+tr2.getStartIndex()+ " r2 end:"+tr2.getEndIndex()  );
-                        
-                        // For Kmeans
-                        intersectSet.add(s.getLocation().getPosition());
+                                .serviceType(r2.getServiceType()).stops(r2.getStops()).startIndex(i)
+                                .endIndex(r2.getStartIndex()).build();
+                        if (tr1.getStartIndex() < tr1.getEndIndex() && tr2.getStartIndex() < tr2.getEndIndex()) {
+                            suggestions.add(Suggestion.builder().transferStops(List.of(s)).legs(List.of(
+                                    tr1,
+                                    tr2)).build());
+                            logger.debug(tr1.getRoute() + ">" + tr2.getRoute() + " r1 start:" + tr1.getStartIndex()
+                                    + ", transfer: r1-" + rStopList.indexOf(s.getLocation().getCoordinates()) + "|"
+                                    + tr1.getEndIndex() + " r2-" + i + "|" + tr2.getStartIndex() + " r2 end:"
+                                    + tr2.getEndIndex());
+
+                            // For Kmeans
+                            //intersectSet.add(s.getLocation().getCoordinates());
                         }
                     }
                 }
@@ -127,7 +137,7 @@ public class PTESController {
         });
 
         // logger.info(""+intersectSet);
-        double[][] d = intersectSet.stream().map(p -> {
+        /*double[][] d = intersectSet.stream().map(p -> {
             return p.getValues().stream().mapToDouble(Double::doubleValue).toArray();
         }).toArray(double[][]::new);
         if (intersectSet.size() > CLUSTERING_FACTOR) {
@@ -148,9 +158,21 @@ public class PTESController {
                 stops.add(stop);
             }
             suggestions.add(Suggestion.builder().transferStops(stops).legs(List.of()).build());
-        }
+        }*/
 
         return suggestions;
+    }
+
+    private double getDistance(Position from, Position to) {
+        double distance = 0.0;
+
+        GeodeticCalculator calc = new GeodeticCalculator();
+        calc.setStartingGeographicPoint(from.getValues().get(0), from.getValues().get(1));
+        calc.setDestinationGeographicPoint(to.getValues().get(0), to.getValues().get(1));
+
+        distance = calc.getOrthodromicDistance();
+        double bearing = calc.getAzimuth();
+        return distance;
     }
 
     private List<Suggestion> get1TRoutes(List<Route> startRoutes, List<Route> endRoutes) {
@@ -158,7 +180,7 @@ public class PTESController {
         startRoutes.stream().forEach(r -> {
             r.getStops().forEach(s -> {
                 if (!s.getLocation().equals(r.getNearestStop())) {
-                    transferStops.add(s.getLocation().getPosition());
+                    transferStops.add(s.getLocation().getCoordinates());
                 }
             });
         });
