@@ -110,8 +110,8 @@ public class PTESController {
                 // 1T with exact matching stops
                 for (int i = 0; i < r2.getStops().size(); i++) {
                     Stop s = r2.getStops().get(i);
-                    if (rStopList.stream().anyMatch(ss -> getDistance(ss, s.getLocation().getCoordinates()) < 500)){
-                    //if (rStopList.contains(s.getLocation().getCoordinates())) {
+                    if (rStopList.stream().anyMatch(ss -> getDistance(ss, s.getLocation().getCoordinates()) < 500)) {
+                        // if (rStopList.contains(s.getLocation().getCoordinates())) {
                         Route tr1 = Route.builder().route(r.getRoute()).bound(r.getBound())
                                 .serviceType(r.getServiceType())
                                 .stops(r.getStops()).startIndex(r.getStartIndex())
@@ -119,7 +119,10 @@ public class PTESController {
                         Route tr2 = Route.builder().route(r2.getRoute()).bound(r2.getBound())
                                 .serviceType(r2.getServiceType()).stops(r2.getStops()).startIndex(i)
                                 .endIndex(r2.getStartIndex()).build();
-                        if (tr1.getStartIndex() < tr1.getEndIndex() && tr2.getStartIndex() < tr2.getEndIndex()) {
+                        if (!(tr1.getRoute().equalsIgnoreCase(tr2.getRoute()) &&
+                                !tr1.getBound().equalsIgnoreCase(tr2.getBound()) &&
+                                !tr1.getServiceType().equalsIgnoreCase(tr2.getServiceType())) &&
+                                tr1.getStartIndex() < tr1.getEndIndex() && tr2.getStartIndex() < tr2.getEndIndex()) {
                             suggestions.add(Suggestion.builder().transferStops(List.of(s)).legs(List.of(
                                     tr1,
                                     tr2)).build());
@@ -129,7 +132,7 @@ public class PTESController {
                                     + tr2.getEndIndex());
 
                             // For Kmeans
-                            //intersectSet.add(s.getLocation().getCoordinates());
+                            // intersectSet.add(s.getLocation().getCoordinates());
                         }
                     }
                 }
@@ -137,28 +140,31 @@ public class PTESController {
         });
 
         // logger.info(""+intersectSet);
-        /*double[][] d = intersectSet.stream().map(p -> {
-            return p.getValues().stream().mapToDouble(Double::doubleValue).toArray();
-        }).toArray(double[][]::new);
-        if (intersectSet.size() > CLUSTERING_FACTOR) {
-            int k = intersectSet.size() / CLUSTERING_FACTOR;
-            KMeans clustering = new KMeans.Builder(k, d)
-                    .iterations(10)
-                    .pp(true)
-                    .epsilon(.001)
-                    .useEpsilon(true)
-                    .build();
-            double[][] centroids = clustering.getCentroids();
-            System.out.println("intersect:" + intersectSet.size() + " k:" + k);
-            List<Stop> stops = new ArrayList<>();
-            for (int i = 0; i < k; i++) {
-                Stop stop = new Stop();
-                stop.setId("S" + i);
-                stop.setLocation(new Point(new Position(centroids[i][0], centroids[i][1])));
-                stops.add(stop);
-            }
-            suggestions.add(Suggestion.builder().transferStops(stops).legs(List.of()).build());
-        }*/
+        /*
+         * double[][] d = intersectSet.stream().map(p -> {
+         * return p.getValues().stream().mapToDouble(Double::doubleValue).toArray();
+         * }).toArray(double[][]::new);
+         * if (intersectSet.size() > CLUSTERING_FACTOR) {
+         * int k = intersectSet.size() / CLUSTERING_FACTOR;
+         * KMeans clustering = new KMeans.Builder(k, d)
+         * .iterations(10)
+         * .pp(true)
+         * .epsilon(.001)
+         * .useEpsilon(true)
+         * .build();
+         * double[][] centroids = clustering.getCentroids();
+         * System.out.println("intersect:" + intersectSet.size() + " k:" + k);
+         * List<Stop> stops = new ArrayList<>();
+         * for (int i = 0; i < k; i++) {
+         * Stop stop = new Stop();
+         * stop.setId("S" + i);
+         * stop.setLocation(new Point(new Position(centroids[i][0], centroids[i][1])));
+         * stops.add(stop);
+         * }
+         * suggestions.add(Suggestion.builder().transferStops(stops).legs(List.of()).
+         * build());
+         * }
+         */
 
         return suggestions;
     }
