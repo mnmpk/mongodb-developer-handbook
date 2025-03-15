@@ -34,6 +34,7 @@ import com.mongodb.javabasic.model.Route;
 @RequestMapping(path = "/ptes")
 public class PTESController {
     private final Logger logger = LoggerFactory.getLogger(getClass());
+    private static final int CLUSTERING_FACTOR = 5;
     @Autowired
     private MongoTemplate mongoTemplate;
 
@@ -86,12 +87,11 @@ public class PTESController {
 
     private List<Suggestion> getDirectRoutesAnd1T(List<Route> startRoutes, List<Route> endRoutes) {
         List<Suggestion> suggestions = new ArrayList<>();
-        List<Route> list = new ArrayList<>();
 
         Set<Position> intersectSet = new HashSet<>();
         startRoutes.forEach(r -> {
-            List<Position> set = new ArrayList<>();
-            r.getStops().stream().forEach(s -> set.add(s.getLocation().getPosition()));
+            List<Position> rStopList = new ArrayList<>();
+            r.getStops().stream().forEach(s -> rStopList.add(s.getLocation().getPosition()));
             endRoutes.forEach(r2 -> {
                 // Direct route
                 if (r.getRoute().equalsIgnoreCase(r2.getRoute()) &&
@@ -99,24 +99,28 @@ public class PTESController {
                         r.getServiceType().equalsIgnoreCase(r2.getServiceType()) &&
                         r.getStartIndex() < r2.getStartIndex()) {
                     r.setEndIndex(r2.getStartIndex());
-                    list.add(r);
+                    suggestions.add(Suggestion.builder().transferStops(List.of()).legs(List.of(r)).build());
                 }
 
-                // 1T exact point
+                // 1T with exact matching stops
                 for (int i = 0; i < r2.getStops().size(); i++) {
                     Stop s = r2.getStops().get(i);
-                    if (set.contains(s.getLocation().getPosition())) {
+                    if (rStopList.contains(s.getLocation().getPosition())) {
+                        Route tr1 = Route.builder().route(r.getRoute()).bound(r.getBound()).serviceType(r.getServiceType())
+                        .stops(r.getStops()).startIndex(r.getStartIndex())
+                        .endIndex(rStopList.indexOf(s.getLocation().getPosition())).build();
+                        Route tr2 = Route.builder().route(r2.getRoute()).bound(r2.getBound())
+                        .serviceType(r2.getServiceType()).stops(r2.getStops()).startIndex(i)
+                        .endIndex(r2.getStartIndex()).build();
+                        if(tr1.getStartIndex()<tr1.getEndIndex() && tr2.getStartIndex()<tr2.getEndIndex()){
                         suggestions.add(Suggestion.builder().transferStops(List.of(s)).legs(List.of(
-                                Route.builder().route(r.getRoute()).bound(r.getBound()).serviceType(r.getServiceType())
-                                        .stops(r.getStops()).startIndex(r.getStartIndex())
-                                        .endIndex(set.indexOf(s.getLocation().getPosition())).build(),
-                                Route.builder().route(r2.getRoute()).bound(r2.getBound())
-                                        .serviceType(r2.getServiceType()).stops(r2.getStops()).startIndex(r2.getStartIndex())
-                                        .endIndex(i).build()))
-                                .build());
-
+                                tr1,
+                                tr2)).build());
+                        logger.debug(tr1.getRoute()+">"+tr2.getRoute()+" r1 start:"+tr1.getStartIndex()+", transfer: r1-"+rStopList.indexOf(s.getLocation().getPosition())+"|"+tr1.getEndIndex()+" r2-"+i+"|"+tr2.getStartIndex()+ " r2 end:"+tr2.getEndIndex()  );
+                        
                         // For Kmeans
                         intersectSet.add(s.getLocation().getPosition());
+                        }
                     }
                 }
             });
@@ -126,10 +130,10 @@ public class PTESController {
         double[][] d = intersectSet.stream().map(p -> {
             return p.getValues().stream().mapToDouble(Double::doubleValue).toArray();
         }).toArray(double[][]::new);
-        if (intersectSet.size() > 5) {
-            int k = intersectSet.size() / 5;
+        if (intersectSet.size() > CLUSTERING_FACTOR) {
+            int k = intersectSet.size() / CLUSTERING_FACTOR;
             KMeans clustering = new KMeans.Builder(k, d)
-                    .iterations(50)
+                    .iterations(10)
                     .pp(true)
                     .epsilon(.001)
                     .useEpsilon(true)
@@ -144,11 +148,8 @@ public class PTESController {
                 stops.add(stop);
             }
             suggestions.add(Suggestion.builder().transferStops(stops).legs(List.of()).build());
-            System.out.println();
         }
 
-        suggestions.addAll(list.stream()
-                .map(r -> Suggestion.builder().transferStops(List.of()).legs(List.of(r)).build()).toList());
         return suggestions;
     }
 

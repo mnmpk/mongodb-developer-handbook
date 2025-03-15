@@ -106,7 +106,7 @@ function drawLine(path, color) {
         map: map,
         path: path,
         strokeColor: color,
-        strokeOpacity: 0.5,
+        strokeOpacity: 0.2,
         strokeWeight: 1,
     }));
 }
@@ -146,39 +146,51 @@ function search() {
                 r.legs.forEach((l, i) => {
                     let path = [];
                     l.stops.forEach((s, i) => {
-                        if (i >= l.startIndex && i <= l.endIndex)
+                        if (i >= l.startIndex && i <= l.endIndex) {
                             path.push({ lat: s.location.position.values[1], lng: s.location.position.values[0] });
+                        }
                     });
-                    drawLine(path, r.legs.length == 1 ? "#000000" : (i == 0 ? "#FF0000" : "#00FF00"));
+                    drawLine(path, r.legs.length == 1 ? "#000000" : (i == 0 ? "#FF0000" : "#0000FF"));
                     const startStop = l.stops[l.startIndex];
                     const endStop = l.stops[l.endIndex];
-                    if (!stops[startStop.id]) {
-                        stops[startStop.id] = { details: startStop, routes: [] };
+                    if (i == 0) {
+                        if (!stops[startStop.id]) {
+                            stops[startStop.id] = { start: true, details: startStop, routes: [] };
+                        }
+                        stops[startStop.id].start = true;
+                        stops[startStop.id].routes.push(l.route + " " + l.serviceType);
                     }
-                    stops[startStop.id].routes.push(l.route + " " + l.serviceType);
-
-                    if (!stops[endStop.id]) {
-                        stops[endStop.id] = { details: endStop, routes: [] };
+                    if (i == r.legs.length - 1) {
+                        if (!stops[endStop.id]) {
+                            stops[endStop.id] = { end: true, details: endStop, routes: [] };
+                        }
+                        stops[endStop.id].end = true;
+                        stops[endStop.id].routes.push(l.route + " " + l.serviceType);
                     }
-                    stops[endStop.id].routes.push(l.route + " " + l.serviceType);
                 });
 
                 if (r.transferStops) {
                     r.transferStops.forEach((s, i) => {
                         if (!stops[s.id]) {
-                            stops[s.id] = { details: s, routes: [] };
+                            stops[s.id] = { transfer: true, details: s, routes: [] };
                         }
-                        if (r.legs[i])
+                        if (r.legs[i]) {
+                            stops[s.id].transfer = true;
                             stops[s.id].routes.push(r.legs[i].route + " " + r.legs[i].serviceType + ">" + r.legs[i + 1].route + " " + r.legs[i + 1].serviceType);
+                        }
                     });
                 }
             });
             Object.keys(stops).forEach(k => {
+                let color = "#";
+                color += (stops[k].start) ? "FF" : "00";
+                color += (stops[k].transfer) ? "FF" : "00";
+                color += (stops[k].end) ? "FF" : "00";
                 const marker = new AdvancedMarkerElement({
                     position: { lat: stops[k].details.location.position.values[1], lng: stops[k].details.location.position.values[0] },
-                    content: (stops[k].routes.length == 0) ? new PinElement({
-                        background: "#FBBC04",
-                    }).element : null,
+                    content: new PinElement({
+                        background: (stops[k].routes.length == 0) ? "#FBBC04" : color,
+                    }).element,
                     gmpClickable: true,
                     map: map,
                 });
