@@ -146,21 +146,21 @@ function search() {
                 r.legs.forEach((l, i) => {
                     let path = [];
                     l.stops.forEach((s, i) => {
-                        if (i >= l.startIndex && i <= l.endIndex) {
+                        //if (i >= l.startIndex && i <= l.endIndex) {
                             path.push({ lat: s.location.position.values[1], lng: s.location.position.values[0] });
-                        }
+                        //}
                     });
                     drawLine(path, r.legs.length == 1 ? "#000000" : (i == 0 ? "#FF0000" : "#0000FF"));
                     const startStop = l.stops[l.startIndex];
                     const endStop = l.stops[l.endIndex];
-                    if (i == 0) {
+                    if (i == 0 && startStop) {
                         if (!stops[startStop.id]) {
                             stops[startStop.id] = { start: true, details: startStop, routes: [] };
                         }
                         stops[startStop.id].start = true;
                         stops[startStop.id].routes.push(l.route + " " + l.serviceType);
                     }
-                    if (i == r.legs.length - 1) {
+                    if (i == r.legs.length - 1 && endStop) {
                         if (!stops[endStop.id]) {
                             stops[endStop.id] = { end: true, details: endStop, routes: [] };
                         }

@@ -92,11 +92,18 @@ public class PTESController {
 
     private List<Suggestion> getDirectRoutesAnd1T(List<Route> startRoutes, List<Route> endRoutes) {
         List<Suggestion> suggestions = new ArrayList<>();
+        
+        //For 2T
+        final List<Position> transferStopList = new ArrayList<>();;
 
-        Set<Position> intersectSet = new HashSet<>();
+        //Set<Position> intersectSet = new HashSet<>();
         startRoutes.forEach(r -> {
             List<Position> rStopList = new ArrayList<>();
             r.getStops().stream().forEach(s -> rStopList.add(s.getLocation().getCoordinates()));
+
+            //For 2T
+            transferStopList.addAll(rStopList);
+
             endRoutes.forEach(r2 -> {
                 // Direct route
                 if (r.getRoute().equalsIgnoreCase(r2.getRoute()) &&
@@ -104,10 +111,10 @@ public class PTESController {
                         r.getServiceType().equalsIgnoreCase(r2.getServiceType()) &&
                         r.getStartIndex() < r2.getStartIndex()) {
                     r.setEndIndex(r2.getStartIndex());
-                    suggestions.add(Suggestion.builder().transferStops(List.of()).legs(List.of(r)).build());
+                    //suggestions.add(Suggestion.builder().transferStops(List.of()).legs(List.of(r)).build());
                 }
 
-                // 1T with exact matching stops
+                // 1T
                 for (int i = 0; i < r2.getStops().size(); i++) {
                     Stop s = r2.getStops().get(i);
                     if (rStopList.stream().anyMatch(ss -> getDistance(ss, s.getLocation().getCoordinates()) < 500)) {
@@ -123,9 +130,7 @@ public class PTESController {
                                 !tr1.getBound().equalsIgnoreCase(tr2.getBound()) &&
                                 !tr1.getServiceType().equalsIgnoreCase(tr2.getServiceType())) &&
                                 tr1.getStartIndex() < tr1.getEndIndex() && tr2.getStartIndex() < tr2.getEndIndex()) {
-                            suggestions.add(Suggestion.builder().transferStops(List.of(s)).legs(List.of(
-                                    tr1,
-                                    tr2)).build());
+                            //suggestions.add(Suggestion.builder().transferStops(List.of(s)).legs(List.of(tr1,tr2)).build());
                             logger.debug(tr1.getRoute() + ">" + tr2.getRoute() + " r1 start:" + tr1.getStartIndex()
                                     + ", transfer: r1-" + rStopList.indexOf(s.getLocation().getCoordinates()) + "|"
                                     + tr1.getEndIndex() + " r2-" + i + "|" + tr2.getStartIndex() + " r2 end:"
@@ -134,10 +139,23 @@ public class PTESController {
                             // For Kmeans
                             // intersectSet.add(s.getLocation().getCoordinates());
                         }
+                        transferStopList.remove(s.getLocation().getCoordinates());
                     }
                 }
             });
         });
+
+                // 2T
+                List<Route> intermediateRoutes = this.getIntermediateRoute(transferStopList);
+                //intermediateRoutes.stream().forEach(r->suggestions.add(Suggestion.builder().transferStops(List.of()).legs(List.of(r)).build()));
+                /*List<Stop> stops = new ArrayList<>();
+                for (int i = 0; i < transferStopList.size(); i++) {
+                    Stop stop = new Stop();
+                    stop.setId("S" + i);
+                    stop.setLocation(new Point(transferStopList.get(i)));
+                    stops.add(stop);
+                } 
+                suggestions.add(Suggestion.builder().transferStops(stops).legs(List.of()).build());*/
 
         // logger.info(""+intersectSet);
         /*
@@ -181,22 +199,14 @@ public class PTESController {
         return distance;
     }
 
-    private List<Suggestion> get1TRoutes(List<Route> startRoutes, List<Route> endRoutes) {
-        Set<Position> transferStops = new HashSet<>();
-        startRoutes.stream().forEach(r -> {
-            r.getStops().forEach(s -> {
-                if (!s.getLocation().equals(r.getNearestStop())) {
-                    transferStops.add(s.getLocation().getCoordinates());
-                }
-            });
-        });
-        List<Route> intermediateRoute = mongoTemplate.getCollection(mongoTemplate.getCollectionName(Route.class))
+    private List<Route> getIntermediateRoute(List<Position> transferStops) {
+        return mongoTemplate.getCollection(mongoTemplate.getCollectionName(Route.class))
                 .withDocumentClass(Route.class)
                 .find(Filters.geoIntersects("stops.location",
-                        new MultiPoint(transferStops.stream().collect(Collectors.toList()))))
+                        new MultiPoint(transferStops)))
                 .into(new ArrayList<>());
 
-        List<Route> list = new ArrayList<>();
+        /*List<Route> list = new ArrayList<>();
         intermediateRoute.forEach(r -> {
             endRoutes.forEach(r2 -> {
                 if (r.getRoute().equalsIgnoreCase(r2.getRoute()) &&
@@ -208,7 +218,7 @@ public class PTESController {
                 }
             });
         });
-        return list.stream().map(r -> Suggestion.builder().legs(List.of(r)).build()).toList();
+        return list.stream().map(r -> Suggestion.builder().legs(List.of(r)).build()).toList();*/
     }
 
     private List<Suggestion> get2TRoutes() {
