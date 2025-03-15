@@ -111,7 +111,7 @@ public class PTESController {
                         r.getServiceType().equalsIgnoreCase(r2.getServiceType()) &&
                         r.getStartIndex() < r2.getStartIndex()) {
                     r.setEndIndex(r2.getStartIndex());
-                    //suggestions.add(Suggestion.builder().transferStops(List.of()).legs(List.of(r)).build());
+                    suggestions.add(Suggestion.builder().transferStops(List.of()).legs(List.of(r)).build());
                 }
 
                 // 1T
@@ -130,7 +130,7 @@ public class PTESController {
                                 !tr1.getBound().equalsIgnoreCase(tr2.getBound()) &&
                                 !tr1.getServiceType().equalsIgnoreCase(tr2.getServiceType())) &&
                                 tr1.getStartIndex() < tr1.getEndIndex() && tr2.getStartIndex() < tr2.getEndIndex()) {
-                            //suggestions.add(Suggestion.builder().transferStops(List.of(s)).legs(List.of(tr1,tr2)).build());
+                            suggestions.add(Suggestion.builder().transferStops(List.of(s)).legs(List.of(tr1,tr2)).build());
                             logger.debug(tr1.getRoute() + ">" + tr2.getRoute() + " r1 start:" + tr1.getStartIndex()
                                     + ", transfer: r1-" + rStopList.indexOf(s.getLocation().getCoordinates()) + "|"
                                     + tr1.getEndIndex() + " r2-" + i + "|" + tr2.getStartIndex() + " r2 end:"
