@@ -176,7 +176,7 @@ function search() {
                         }
                         if (r.legs[i]) {
                             stops[s.id].transfer = true;
-                            stops[s.id].routes.push(r.legs[i].route + " " + r.legs[i].serviceType + ">" + r.legs[i + 1].route + " " + r.legs[i + 1].serviceType);
+                            stops[s.id].routes.push(r.legs.map(l=>l.route + " " + l.serviceType).join(">"));
                         }
                     });
                 }

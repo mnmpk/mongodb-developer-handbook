@@ -2,23 +2,18 @@ package com.mongodb.javabasic.controller;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-import org.geotools.measure.Measure;
 import org.geotools.referencing.GeodeticCalculator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -28,7 +23,6 @@ import com.mongodb.javabasic.repositories.RouteRepository;
 import com.mongodb.javabasic.repositories.StopRepository;
 import com.mongodb.javabasic.service.AggregationService;
 
-import si.uom.SI;
 
 import com.mongodb.javabasic.model.Stop;
 import com.mongodb.javabasic.model.Suggestion;
@@ -36,7 +30,6 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.geojson.MultiPoint;
 import com.mongodb.client.model.geojson.Point;
 import com.mongodb.client.model.geojson.Position;
-import com.mongodb.javabasic.KMeans;
 import com.mongodb.javabasic.model.Route;
 
 @RestController
@@ -138,29 +131,37 @@ public class PTESController {
                         r.getServiceType().equalsIgnoreCase(r2.getServiceType()) &&
                         r.getStartIndex() < r2.getStartIndex()) {
                     r.setEndIndex(r2.getStartIndex());
-                    logger.info("adding direct route:"+r.getRoute()+"-"+r.getServiceType());
+                    logger.info("adding direct route:" + r.getRoute() + "-" + r.getServiceType());
                     suggestions.add(Suggestion.builder().transferStops(List.of()).legs(List.of(r)).build());
                 }
 
                 // 1T
                 for (int i = 0; i < r2.getStops().size(); i++) {
                     Stop s = r2.getStops().get(i);
-                    if (rStopList.stream().anyMatch(ss -> getDistance(ss, s.getLocation().getCoordinates()) < 500)) {
+                    Position nearestMatch = null;
+                    double distance = 500;
+                    for (int j = 0; j < rStopList.size(); j++) {
+                        double d = getDistance(rStopList.get(j), s.getLocation().getCoordinates());
+                        if (d < distance) {
+                            nearestMatch = rStopList.get(j);
+                            distance = d;
+                        }
+                    }
+                    if (nearestMatch != null) {
                         Route tr1 = Route.builder().route(r.getRoute()).bound(r.getBound())
                                 .serviceType(r.getServiceType())
                                 .stops(r.getStops()).startIndex(r.getStartIndex())
-                                .endIndex(rStopList.indexOf(s.getLocation().getCoordinates())).build();
+                                .endIndex(rStopList.indexOf(nearestMatch)).build();
                         Route tr2 = Route.builder().route(r2.getRoute()).bound(r2.getBound())
                                 .serviceType(r2.getServiceType()).stops(r2.getStops()).startIndex(i)
                                 .endIndex(r2.getStartIndex()).build();
                         String key = tr1.getRoute() + "-" + tr1.getServiceType() + ">" + tr2.getRoute()
                                 + "-" + tr2.getServiceType();
                         if (!(tr1.getRoute().equalsIgnoreCase(tr2.getRoute()) &&
-                                !tr1.getBound().equalsIgnoreCase(tr2.getBound()) &&
-                                !tr1.getServiceType().equalsIgnoreCase(tr2.getServiceType())) &&
-                                tr1.getStartIndex() < tr1.getEndIndex() && tr2.getStartIndex() < tr2.getEndIndex() &&
+                                tr1.getBound().equalsIgnoreCase(tr2.getBound()) &&
+                                tr1.getServiceType().equalsIgnoreCase(tr2.getServiceType())) &&
+                                tr1.getStartIndex() <= tr1.getEndIndex() && tr2.getStartIndex() <= tr2.getEndIndex() &&
                                 !map.containsKey(key)) {
-
                             map.put(key,
                                     Suggestion.builder().transferStops(List.of(s)).legs(List.of(tr1,
                                             tr2)).build());
@@ -180,7 +181,7 @@ public class PTESController {
         logger.info("endRoute stop size:" + transfer2StopMap.size());
 
         // 2T
-        if (suggestions.size() < 10)
+        if (suggestions.size() < 50)
             this.get2T(suggestions, transfer1StopMap, transfer2StopMap);
 
         return suggestions;
