@@ -146,11 +146,11 @@ function search() {
                 r.legs.forEach((l, i) => {
                     let path = [];
                     l.stops.forEach((s, i) => {
-                        //if (i >= l.startIndex && i <= l.endIndex) {
-                            path.push({ lat: s.location.position.values[1], lng: s.location.position.values[0] });
-                        //}
+                        if (i >= l.startIndex && i <= l.endIndex) {
+                        path.push({ lat: s.location.position.values[1], lng: s.location.position.values[0] });
+                        }
                     });
-                    drawLine(path, r.legs.length == 1 ? "#000000" : (i == 0 ? "#FF0000" : "#0000FF"));
+                    drawLine(path, r.legs.length == 1 ? "#000000" : (i == 0 ? "#FF0000" : i == 1 ? "#00FF00" : "#0000FF"));
                     const startStop = l.stops[l.startIndex];
                     const endStop = l.stops[l.endIndex];
                     if (i == 0 && startStop) {

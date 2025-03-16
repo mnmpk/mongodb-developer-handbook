@@ -9,7 +9,7 @@
         ]
       },
       "distanceField": "distance",
-      "maxDistance": 500,
+      "maxDistance": ${maxDistance},
       "query": {},
       "includeLocs": "nearestStop",
       "spherical": true
