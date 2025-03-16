@@ -147,7 +147,7 @@ function search() {
                     let path = [];
                     l.stops.forEach((s, i) => {
                         if (i >= l.startIndex && i <= l.endIndex) {
-                        path.push({ lat: s.location.position.values[1], lng: s.location.position.values[0] });
+                            path.push({ lat: s.location.position.values[1], lng: s.location.position.values[0] });
                         }
                     });
                     drawLine(path, r.legs.length == 1 ? "#000000" : (i == 0 ? "#FF0000" : i == 1 ? "#00FF00" : "#0000FF"));
