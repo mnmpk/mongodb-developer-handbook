@@ -81,9 +81,9 @@ export class GeoSpatialComponent {
       next: (result: any) => {
         this.clearOverlays();
         this.suggestedRoutes = result;
-        let stops:any = {};
+        let stops: any = {};
         this.suggestedRoutes.forEach(r => {
-          r.legs.forEach((l:any, i:number) => {
+          r.legs.forEach((l: any, i: number) => {
             const startStop = l.stops[l.startIndex];
             const endStop = l.stops[l.endIndex];
             if (i == 0 && startStop) {
@@ -103,45 +103,18 @@ export class GeoSpatialComponent {
           });
 
           if (r.transferStops) {
-            r.transferStops.forEach((s:any, i:number) => {
+            r.transferStops.forEach((s: any, i: number) => {
               if (!stops[s.id]) {
                 stops[s.id] = { transfer: true, details: s, routes: [] };
               }
               if (r.legs[i]) {
                 stops[s.id].transfer = true;
-                stops[s.id].routes.push(r.legs.map((l:any) => l.route + " " + l.serviceType).join(">"));
+                stops[s.id].routes.push(r.legs.map((l: any) => l.route + " " + l.serviceType).join(">"));
               }
             });
           }
         });
         this.suggestedRouteStops = stops;
-        /*Object.keys(stops).forEach(k => {
-          let color = "#";
-          color += (stops[k].start) ? "FF" : "00";
-          color += (stops[k].transfer) ? "FF" : "00";
-          color += (stops[k].end) ? "FF" : "00";
-          const marker = new AdvancedMarkerElement({
-            position: { lat: stops[k].details.location.position.values[1], lng: stops[k].details.location.position.values[0] },
-            content: new PinElement({
-              background: (stops[k].routes.length == 0) ? "#FBBC04" : color,
-            }).element,
-            gmpClickable: true,
-            map: map,
-          });
-          marker.addListener("click", ({ domEvent, latLng }) => {
-            const { target } = domEvent;
-            let content = stops[k].details.id + "<br/>" +
-              stops[k].details.nameTc + "</br>" +
-              stops[k].details.nameEn + "<br/><br/>";
-            stops[k].routes.forEach(r => {
-              content += r + "<br/>";
-            });
-            infoWindow.close();
-            infoWindow.setContent(content);
-            infoWindow.open(marker.map, marker);
-          });
-          markers.push(marker);
-        });*/
       },
       error: (err: any) => {
       }
@@ -163,9 +136,20 @@ export class GeoSpatialComponent {
     this.infoWindow.open(marker);
   }
   openSuggestedRouteInfoWindow(marker: MapAdvancedMarker, k: any) {
+    this.selectedStop = this.suggestedRouteStops[k];
+    this.infoWindow.open(marker);
   }
-  getMarkerOption(s: any) {
-
+  getMarkerOption(k: string): google.maps.marker.AdvancedMarkerElementOptions {
+    let color = "#";
+    color += (this.suggestedRouteStops[k].start) ? "FF" : "00";
+    color += (this.suggestedRouteStops[k].transfer) ? "FF" : "00";
+    color += (this.suggestedRouteStops[k].end) ? "FF" : "00";
+    return {
+      content: new google.maps.marker.PinElement({
+        background: (this.suggestedRouteStops[k].routes.length == 0) ? "#FBBC04" : color,
+      }).element,
+      gmpClickable: true,
+    };
   }
   getPath(r: any) {
     return r.stops.map((s: any) => {
