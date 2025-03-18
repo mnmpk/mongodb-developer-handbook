@@ -1,0 +1,28 @@
+[
+  {
+    "$geoNear": {
+      "key": "stops.location",
+      "near": {
+        "type": "Point",
+        "coordinates": [
+          ${lng}, ${lat}
+        ]
+      },
+      "distanceField": "distance",
+      "maxDistance": ${maxDistance},
+      "query": {},
+      "includeLocs": "nearestStop",
+      "spherical": true
+    }
+  },
+  {
+    "$set": {
+      "startIndex": {
+        "$indexOfArray": [
+          "$stops.location",
+          "$nearestStop"
+        ]
+      }
+    }
+  }
+]
