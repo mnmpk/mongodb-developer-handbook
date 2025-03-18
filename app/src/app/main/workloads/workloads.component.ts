@@ -14,9 +14,10 @@ import { MatSort } from '@angular/material/sort';
 import { map, merge, startWith, switchMap } from 'rxjs';
 
 @Component({
-  selector: 'app-workloads',
-  templateUrl: './workloads.component.html',
-  styleUrl: './workloads.component.scss'
+    selector: 'app-workloads',
+    templateUrl: './workloads.component.html',
+    styleUrl: './workloads.component.scss',
+    standalone: false
 })
 export class WorkloadsComponent {
   UtilityService = UtilityService;

@@ -7,11 +7,10 @@ import { UtilityService } from './shared/utility.service';
 import { LoaderModule } from './shared/loader/loader.module';
 
 @Component({
-  selector: 'app-root',
-  standalone: true,
-  imports: [RouterOutlet, SharedModule, LoaderModule, MainModule],
-  templateUrl: './app.component.html',
-  styleUrl: './app.component.scss'
+    selector: 'app-root',
+    imports: [RouterOutlet, SharedModule, LoaderModule, MainModule],
+    templateUrl: './app.component.html',
+    styleUrl: './app.component.scss'
 })
 export class AppComponent {
   UtilityService = UtilityService;

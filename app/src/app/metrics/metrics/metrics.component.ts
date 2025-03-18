@@ -6,9 +6,10 @@ import { WorkloadType } from '../../shared/models/workload';
 import { UtilityService } from '../../shared/utility.service';
 
 @Component({
-  selector: 'app-metrics',
-  templateUrl: './metrics.component.html',
-  styleUrl: './metrics.component.scss'
+    selector: 'app-metrics',
+    templateUrl: './metrics.component.html',
+    styleUrl: './metrics.component.scss',
+    standalone: false
 })
 export class MetricsComponent {
   throughput!: EChartsOption;
