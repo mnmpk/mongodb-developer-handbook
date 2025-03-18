@@ -1,9 +1,9 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FlexLayoutModule } from '@angular/flex-layout';
 import { MaterialModule } from './material/material.module';
 import { ReactiveFormsModule } from '@angular/forms';
 import { NgxEchartsModule } from 'ngx-echarts';
+import { GoogleMapsModule } from '@angular/google-maps';
 
 
 
@@ -11,19 +11,19 @@ import { NgxEchartsModule } from 'ngx-echarts';
   declarations: [],
   imports: [
     CommonModule,
-    FlexLayoutModule,
     ReactiveFormsModule,
     MaterialModule,
     NgxEchartsModule.forRoot({
       echarts: () => import('echarts')
-    })
+    }),
+    GoogleMapsModule
   ],
   exports: [
     CommonModule,
-    FlexLayoutModule,
     ReactiveFormsModule,
     MaterialModule,
-    NgxEchartsModule
+    NgxEchartsModule,
+    GoogleMapsModule
   ]
 })
 export class SharedModule { }

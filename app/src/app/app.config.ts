@@ -16,7 +16,7 @@ import { environment } from '../environments/environment';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes), provideAnimationsAsync(),
-    importProvidersFrom(HttpClientModule),
+    provideHttpClient(),
     provideHttpClient(withInterceptors([loaderInterceptor])),
     provideEcharts(),
     provideApollo(() => {

@@ -4,12 +4,14 @@ import { SearchComponent } from './main/search/search.component';
 import { TransactionComponent } from './main/transaction/transaction.component';
 import { WorkloadsComponent } from './main/workloads/workloads.component';
 import { DashboardComponent } from './main/dashboard/dashboard.component';
+import { GeoSpatialComponent } from './main/geo-spatial/geo-spatial.component';
 
 export const routes: Routes = [
     { path: 'dashboard', component: DashboardComponent },
     { path: 'workloads', component: WorkloadsComponent },
     { path: 'transaction', component: TransactionComponent },
     { path: 'change-stream', component: ChangeStreamComponent },
+    { path: 'geo-spatial', component: GeoSpatialComponent },
     { path: 'search', component: SearchComponent },
     { path: '', redirectTo: 'dashboard', pathMatch: 'prefix' },
 ];

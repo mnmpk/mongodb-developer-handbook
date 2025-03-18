@@ -4,6 +4,5 @@ export const environment = {
     production: false,
 	japiUrl: japiUrl,
 	graphQLUrl: "http://localhost:4000/graphql",
-	defaultPageSize: 50,
-	googleMapsApiKey: 'AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg'
+	defaultPageSize: 50
 };

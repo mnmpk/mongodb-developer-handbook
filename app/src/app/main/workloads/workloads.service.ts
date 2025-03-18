@@ -1,10 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { environment } from '../../environments/environment';
+import { environment } from '../../../environments/environment';
 import { Observable } from 'rxjs';
-import { Page } from '../shared/models/page';
-import { Stat } from '../shared/models/stats';
-import { Workload } from '../shared/models/workload';
+import { Page } from '../../shared/models/page';
+import { Stat } from '../../shared/models/stats';
+import { Workload } from '../../shared/models/workload';
 
 const baseURL = environment.japiUrl;
 @Injectable({

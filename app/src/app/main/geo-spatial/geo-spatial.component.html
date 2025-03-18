@@ -1,0 +1,28 @@
+<google-map [options]="mapOptions" (mapClick)="addPoint($event)">
+    @for (stop of stops; track stop) {
+    <map-advanced-marker #marker="mapAdvancedMarker" [position]="{ lat: stop.location.position.values[1], lng: stop.location.position.values[0] }" (mapClick)="openInfoWindow(marker, stop)" />
+    }
+
+    <map-advanced-marker *ngIf="start" [position]="start" />
+    <map-advanced-marker *ngIf="end" [position]="end" />
+    <ng-container *ngIf="suggestedRouteStops">
+    @for (k of keys(suggestedRouteStops); track k) {
+        <map-advanced-marker #marker="mapAdvancedMarker" [position]="{ lat: suggestedRouteStops[k].details.location.position.values[1], lng: suggestedRouteStops[k].details.location.position.values[0] }" (mapClick)="openSuggestedRouteInfoWindow(marker, k)" />
+    }
+    </ng-container>
+    <map-info-window>
+        {{selectedStop?.id}}<br/>{{selectedStop?.nameTc}}<br/>{{selectedStop?.nameEn}}<br/>
+    </map-info-window>
+
+
+    @for (route of routes; track route) {
+    <map-polyline [path]="getPath(route)" [options]="getPolylineOption('#000000')" />
+    }
+    <ng-container *ngIf="suggestedRoutes">
+    @for (route of suggestedRoutes; track route) {
+        @for (leg of route.legs; track leg; let i = $index) {
+            <map-polyline [path]="getPath(leg)" [options]="getPolylineOption(route.legs.length == 1 ? '#000000' : (i == 0 ? '#FF0000' : i == 1 ? '#00FF00' : '#0000FF'))" />
+        }
+    }
+</ng-container>
+</google-map>

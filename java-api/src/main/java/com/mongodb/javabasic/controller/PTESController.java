@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -76,9 +77,9 @@ public class PTESController {
     }
 
     @PostMapping("/routes")
-    public List<Suggestion> getRoutes(double[] start, double[] end) {
-        List<Route> startRoutes = this.getRoutes(start[1], start[0]);
-        List<Route> endRoutes = this.getRoutes(end[1], end[0]);
+    public List<Suggestion> getRoutes(@RequestBody Map<String,double[]> map) {
+        List<Route> startRoutes = this.getRoutes(map.get("start")[1], map.get("start")[0]);
+        List<Route> endRoutes = this.getRoutes(map.get("end")[1], map.get("end")[0]);
         List<Suggestion> suggestions = new ArrayList<>();
 
         suggestions.addAll(this.getDirectRoutesAnd1T(startRoutes, endRoutes));

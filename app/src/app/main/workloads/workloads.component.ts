@@ -1,7 +1,7 @@
 import { Component, EventEmitter, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Converter, Implementation, OperationType, Workload, WorkloadType, WriteConcern } from '../../shared/models/workload';
-import { WorkloadsService } from '../workloads.service';
+import { WorkloadsService } from './workloads.service';
 import { UtilityService } from '../../shared/utility.service';
 import { Stat } from '../../shared/models/stats';
 import { MetricsService } from '../../metrics/metrics.service';
