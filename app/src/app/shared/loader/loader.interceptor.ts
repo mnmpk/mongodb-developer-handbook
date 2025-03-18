@@ -1,13 +1,6 @@
 import { inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import {
-	HttpRequest,
-	HttpEvent,
-	HttpResponse,
-	HttpEventType,
-	HttpInterceptorFn,
-	HttpHandlerFn
-} from '@angular/common/http';
+import { HttpRequest, HttpEvent, HttpResponse, HttpEventType, HttpInterceptorFn, HttpHandlerFn } from '@angular/common/http';
 import { LoaderService } from './loader.service';
 
 
