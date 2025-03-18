@@ -1,4 +1,4 @@
-<google-map [options]="mapOptions" (mapClick)="addPoint($event)">
+<google-map width="100%" height="100%" [options]="mapOptions" (mapClick)="addPoint($event)">
     @for (stop of stops; track stop) {
     <map-advanced-marker #marker="mapAdvancedMarker"
         [position]="{ lat: stop.location.position.values[1], lng: stop.location.position.values[0] }"
@@ -14,17 +14,19 @@
             [options]="getMarkerOption(k)" (mapClick)="openSuggestedRouteInfoWindow(marker, k)" />
         }
     </ng-container>
-    <map-info-window *ngIf="selectedStop">
-        <ng-container *ngIf="selectedStop.details">
-            {{selectedStop.details.id}}<br />
-            {{selectedStop.details.nameTc}}<br />
-            {{selectedStop.details.nameEn}}<br />
-            @for (r of selectedStop.routes; track r) {
-            {{r}}<br />
-            }
-        </ng-container>
-        <ng-container *ngIf="!selectedStop.details">
-            {{selectedStop?.id}}<br />{{selectedStop?.nameTc}}<br />{{selectedStop?.nameEn}}<br />
+    <map-info-window>
+        <ng-container *ngIf="selectedStop">
+            <ng-container *ngIf="selectedStop.details">
+                {{selectedStop.details.id}}<br />
+                {{selectedStop.details.nameTc}}<br />
+                {{selectedStop.details.nameEn}}<br />
+                @for (r of selectedStop.routes; track r) {
+                {{r}}<br />
+                }
+            </ng-container>
+            <ng-container *ngIf="!selectedStop.details">
+                {{selectedStop?.id}}<br />{{selectedStop?.nameTc}}<br />{{selectedStop?.nameEn}}<br />
+            </ng-container>
         </ng-container>
     </map-info-window>
 

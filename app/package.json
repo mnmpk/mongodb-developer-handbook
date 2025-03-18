@@ -23,6 +23,8 @@
     "@angular/router": "^19.2.2",
     "@apollo/client": "^3.11.10",
     "apollo-angular": "^10.0.3",
+    "bootstrap": "^5.3.3",
+    "bootstrap-icons": "^1.11.3",
     "echarts": "^5.5.1",
     "graphql": "^16.9.0",
     "graphql-ws": "^5.16.0",

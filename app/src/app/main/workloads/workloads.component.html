@@ -1,6 +1,6 @@
-<div fxFlex fxLayout="column" fxLayoutGap="0.5%">
-    <form fxFlex [formGroup]="form" submit="return false;">
-        <div fxFlex fxLayout="column" fxLayoutGap="0.5%">
+<div class="flex-fill d-flex flex-column">
+    <form [formGroup]="form" submit="return false;">
+        <div class="flex-fill d-flex flex-column">
             <h1>Workloads</h1>
             <!--mat-form-field>
             <mat-label>Implementation</mat-label>
@@ -38,7 +38,7 @@
             </mat-radio-group>
         </div-->
 
-            <div fxFlex fxLayout="column">
+            <div fclass="flex-fill d-flex flex-column">
                 <div *ngIf="UtilityService.implementation==Implementation.DRIVER">
                     <label>Converter</label>
                     <mat-radio-group formControlName="converter">
@@ -57,8 +57,8 @@
                             operations"}}</mat-radio-button>
                     </mat-radio-group>
                 </div>
-                <div fxFlex fxLayout="column" fxLayoutAlign="space-around" fxLayoutGap="0.5%">
-                    <div fxLayoutAlign="space-between" fxLayoutGap="0.5%">
+                <div class="d-flex flex-column justify-content-around">
+                    <div class="d-flex justify-content-between">
                         <div>
                             <mat-form-field>
                                 <mat-label>Type</mat-label>
@@ -97,7 +97,7 @@
                         <mat-label>Search</mat-label>
                         <input matInput (keyup)="search($event)" placeholder="" #input>
                     </mat-form-field>
-                    <div fxFlex class="scroll-container">
+                    <div class="d-flex scroll-container">
                         <table mat-table [dataSource]="dataSource" cdkDropList cdkDropListOrientation="horizontal"
                             (cdkDropListDropped)="dropColumn($event)" matSort>
 

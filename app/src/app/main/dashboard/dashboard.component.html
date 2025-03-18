@@ -1,6 +1,6 @@
-<div fxFlex fxLayout="row" fxLayoutAlign="start start">
-    <div fxFlex="25" #chart echarts [options]="heatMap" [merge]="heatMapUpdate"></div>
-    <div fxFlex>
+<div class="w-100 h-100 flex-fill d-flex justify-content-start align-items-start">
+    <div class="w-25" #chart echarts [options]="heatMap" [merge]="heatMapUpdate"></div>
+    <div class="flex-fill">
         <mat-form-field>
             <mat-label>Type</mat-label>
             <mat-select [(value)]="type" (selectionChange)="change()">

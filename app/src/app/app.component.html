@@ -1,7 +1,8 @@
-<div fxFlex fxLayout="column">
+<div class="h-100 flex-fill d-flex flex-column">
   <mat-toolbar>
     <h1>MongoDB Developer Handbook</h1>
-    <span fxFlex="1 1">&nbsp;</span>
+    <span class="flex-fill">&nbsp;</span>
+    <div>
     <mat-select #impl [value]="UtilityService.implementation"
       (selectionChange)="UtilityService.implementation=impl.value">
       @for (impl of Implementation | keyvalue; track impl) {
@@ -9,10 +10,11 @@
         [disabled]="impl.value==Implementation.PYTHON||impl.value==Implementation.NODEJS">{{impl.value}}</mat-option>
       }
     </mat-select>
+  </div>
   </mat-toolbar>
   <app-loader></app-loader>
 
-  <mat-sidenav-container fxFlex>
+  <mat-sidenav-container class="flex-fill d-flex">
     <mat-sidenav #sidenav mode="side" opened [fixedInViewport]="false">
       <mat-nav-list>
         <a mat-list-item href="dashboard">Dashboard</a>
@@ -25,8 +27,8 @@
       </mat-nav-list>
     </mat-sidenav>
 
-    <mat-sidenav-content fxLayout="column" fxLayoutAlign="start" fxLayoutGap="0.5%">
-      <div fxFlex class="content">
+    <mat-sidenav-content class="flex-fill d-flex flex-column">
+      <div class="flex-fill d-flex content">
         <router-outlet></router-outlet>
       </div>
       <footer></footer>
