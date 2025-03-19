@@ -1,14 +1,20 @@
 const { MongoClient } = require("mongodb");
 const express = require("express");
+const compression = require('compression')
 const mongoose = require("mongoose");
+const session = require('express-session');
+const MongoDBStore = require('connect-mongodb-session')(session);
+
 const User = require('./user');
+const { cache } = require('./middlewares/cache');
 
 const app = express();
 
+app.use(compression());
 app.use(express.json());
 
-const uri = "mongodb://localhost:27017/test";
-
+//const uri = "mongodb://localhost:27017/test";
+const uri = "mongodb+srv://admin:admin12345@demo.uskpz.mongodb.net/mongodb-developer"
 mongoose.connect(uri,
   { serverApi: { version: '1', strict: true } }
 );
@@ -17,6 +23,79 @@ db.on("error", console.error.bind(console, "connection error: "));
 db.once("open", async function () {
   console.log("Connected successfully");
 });
+
+
+var store = new MongoDBStore({
+  uri: uri,
+  collection: 'sessions'
+});
+store.on('error', function (error) {
+  console.log(error);
+});
+
+app.use(session({
+  secret: 'This is a secret',
+  cookie: {
+    maxAge: 1000 * 60 * 60 * 24 * 7 // 1 week
+  },
+  store: store,
+  // Boilerplate options, see:
+  // * https://www.npmjs.com/package/express-session#resave
+  // * https://www.npmjs.com/package/express-session#saveuninitialized
+  resave: true,
+  saveUninitialized: true
+}));
+app.use(cache({ client: db.getClient(), expireAfterSeconds: 600 }));
+
+app.get('/cache-1mb', async (req, res) => {
+  res.send({value:require('node:crypto').randomBytes(1*1024*1024/3).toString()});
+});
+app.get('/cache-5mb', async (req, res) => {
+  res.send({value:require('node:crypto').randomBytes(5*1024*1024/3).toString()});
+});
+app.get('/cache-10mb', async (req, res) => {
+  res.send({value:require('node:crypto').randomBytes(10*1024*1024/3).toString()});
+});
+app.get('/test-cache', cache({ client: db.getClient(), collection: 'cache2' }), async (req, res) => {
+  res.send("test cache: " + Math.random());
+});
+
+
+
+app.get('/login', async (req, res) => {
+  req.session.principal = req.query['uId'];
+
+  //Populate other channel's data
+  let temp =  { channel: "web", views: 1, search: [] };
+  const coll = db.getClient().db().collection('sessions');
+  const shareData = await coll.findOne({ "principal": req.session.principal, "attrs.shareData.channel": "mob" });
+  if(shareData && shareData.attrs && shareData.attrs.shareData){
+    temp.search=temp.search.concat(shareData.attrs.shareData.search[1]);
+    temp.views += shareData.attrs.shareData.views;
+  }
+  req.session.shareData = temp;
+
+
+  res.status(200);
+  res.end('welcome to the session demo.');
+});
+
+app.get('/session', async (req, res) => {
+  if (req.session.principal) {
+    req.session.shareData.search.push(req.query['s']);
+    req.session.shareData.views++;
+    res.status(200);
+    res.write(JSON.stringify(req.session.shareData));
+    res.end();
+    //res.send("views: " + req.session.views);
+  } else {
+
+    res.status(200);
+    res.end('Please login first');
+  }
+});
+
+
 const saveDate = async (name, date) => {
   let user = new User({
     name: name,
@@ -46,7 +125,7 @@ const updateWithVer = async (id, version, name) => {
 }
 
 app.get('/stable-api', async (req, res) => {
-  const clientOptions=[
+  const clientOptions = [
     { serverApi: { version: '1' } },
     //APIStrictError
     { serverApi: { version: '1', strict: true } },
@@ -57,7 +136,7 @@ app.get('/stable-api', async (req, res) => {
     //InvalidOptions
     { serverApi: { strict: true, deprecationErrors: true } }
   ]
-  clientOptions.forEach(async option=>{
+  clientOptions.forEach(async option => {
     try {
       const c = new MongoClient(uri,
         option

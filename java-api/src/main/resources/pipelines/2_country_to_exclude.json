@@ -1,0 +1,17 @@
+[
+  {
+    "$group": {
+      "_id": "$country_code",
+      "dest": {
+        "$first": "$country_code"
+      }
+    }
+  },
+  {
+    "$out":
+      {
+        "db": "mongodb-developer",
+        "coll": "tsp_exclude_country"
+      }
+  }
+]

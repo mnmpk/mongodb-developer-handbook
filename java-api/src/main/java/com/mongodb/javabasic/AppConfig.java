@@ -1,5 +1,7 @@
 package com.mongodb.javabasic;
 
+import java.time.Instant;
+import java.time.temporal.TemporalUnit;
 import java.util.concurrent.Executor;
 
 import org.bson.codecs.configuration.CodecProvider;
@@ -80,15 +82,17 @@ public class AppConfig {
             }
         };
     }
+
     @Bean
     public freemarker.template.Configuration freemarkerConfig() {
-      freemarker.template.Configuration freemarkerConfig = new freemarker.template.Configuration(
-          freemarker.template.Configuration.VERSION_2_3_29);
-      freemarkerConfig.setDefaultEncoding("UTF-8");
-      freemarkerConfig.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
-      freemarkerConfig.setLogTemplateExceptions(true);
-      freemarkerConfig.setWrapUncheckedExceptions(true);
-      freemarkerConfig.setFallbackOnNullLoopVariable(true);
-      return freemarkerConfig;
+        freemarker.template.Configuration freemarkerConfig = new freemarker.template.Configuration(
+                freemarker.template.Configuration.VERSION_2_3_29);
+        freemarkerConfig.setDefaultEncoding("UTF-8");
+        freemarkerConfig.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
+        freemarkerConfig.setLogTemplateExceptions(true);
+        freemarkerConfig.setWrapUncheckedExceptions(true);
+        freemarkerConfig.setFallbackOnNullLoopVariable(true);
+        return freemarkerConfig;
     }
+
 }

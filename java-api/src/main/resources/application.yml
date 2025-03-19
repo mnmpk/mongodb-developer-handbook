@@ -38,4 +38,4 @@ settings:
   changeStream:
     batchSize: 10000
     maxAwaitTime: 800
-    watchColls: tTableRating,tLocn,tArea
+    watchColls: ori_country_info,ori_port,tsp_port_info,tsp_flatten_ports,tsp_exclude_country,tsp_uo_direct,tsp_uo_redirect
