@@ -1,3 +1,4 @@
 databaseChangeLog:
   - include:
       file: db/changelog/20250213_create_collection.xml
+      file: db/changelog/data/20250319_configs.xml

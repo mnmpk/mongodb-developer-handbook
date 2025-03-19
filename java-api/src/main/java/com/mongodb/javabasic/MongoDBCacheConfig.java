@@ -7,8 +7,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
-import com.mongodb.javabasic.cache.CacheConfig;
 import com.mongodb.javabasic.cache.MongoCacheManager;
+import com.mongodb.javabasic.model.CacheConfig;
 
 @Configuration
 @EnableCaching
@@ -20,9 +20,13 @@ public class MongoDBCacheConfig {
     @Bean
     public CacheManager mongoCacheManager() {
         return new MongoCacheManager(mongoTemplate, CacheConfig.builder()
-                .collectionName("cache")
-                .ttl(600)
-                .flushOnBoot(false)
-                .storeBinaryOnly(false).build());
+        .cacheName("data")
+        .ttl(600)
+        .flushOnBoot(false)
+        .storeBinaryOnly(false).build(),CacheConfig.builder()
+        .cacheName("config")
+        .ttl(60*60*24*7)
+        .flushOnBoot(false)
+        .storeBinaryOnly(true).build());
     }
 }

@@ -1,7 +1,5 @@
 package com.mongodb.javabasic;
 
-import java.time.Instant;
-import java.time.temporal.TemporalUnit;
 import java.util.concurrent.Executor;
 
 import org.bson.codecs.configuration.CodecProvider;

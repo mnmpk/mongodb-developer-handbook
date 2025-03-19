@@ -37,6 +37,7 @@ import lombok.Data;
 @Data
 public class MongoCache implements Cache {
     private static final long DEFAULT_TTL = TimeUnit.DAYS.toSeconds(30);
+    private static final String COLL_NAME_SUFFIX = "_cache";
     private static final String FIELD_CREATED = "created";
     private static final String FIELD_ACCESSED = "accessed";
     private static final String FIELD_EXPIRED_AT = "expireAt";
@@ -50,29 +51,29 @@ public class MongoCache implements Cache {
 
     private final boolean flushOnBoot;
     private final boolean storeBinaryOnly;
-    private final String collectionName;
+    private final String cacheName;
     private final long ttl;
     private final MongoTemplate mongoTemplate;
 
     private MongoCollection<Document> collection;
 
-    public MongoCache(MongoTemplate mongoTemplate, String collectionName) {
-        this(mongoTemplate, collectionName, DEFAULT_TTL);
+    public MongoCache(MongoTemplate mongoTemplate, String cacheName) {
+        this(mongoTemplate, cacheName, DEFAULT_TTL);
     }
 
-    public MongoCache(MongoTemplate mongoTemplate, String collectionName, long ttl) {
-        this(mongoTemplate, collectionName, DEFAULT_TTL, false, true);
+    public MongoCache(MongoTemplate mongoTemplate, String cacheName, long ttl) {
+        this(mongoTemplate, cacheName, DEFAULT_TTL, false, true);
     }
 
-    public MongoCache(MongoTemplate mongoTemplate, String collectionName, long ttl,
+    public MongoCache(MongoTemplate mongoTemplate, String cacheName, long ttl,
             boolean flushOnBoot, boolean storeBinaryOnly) {
         this.mongoTemplate = mongoTemplate;
 
         this.flushOnBoot = flushOnBoot;
         this.storeBinaryOnly = storeBinaryOnly;
-        this.collectionName = collectionName;
+        this.cacheName = cacheName;
         this.ttl = ttl;
-        collection = this.mongoTemplate.getCollection(collectionName);
+        collection = this.mongoTemplate.getCollection(cacheName+COLL_NAME_SUFFIX);
 
         if (isFlushOnBoot()) {
             clear();
@@ -83,7 +84,7 @@ public class MongoCache implements Cache {
 
     @Override
     public @NonNull String getName() {
-        return this.collectionName;
+        return this.cacheName;
     }
 
     @Override
