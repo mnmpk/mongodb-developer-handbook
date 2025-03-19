@@ -17,15 +17,15 @@ export class GeoSpatialService {
 		lat: number
 		lng: number
 	}) {
-		return this.httpClient.get<any>(`${baseURL}/ptes/stops`, { params: latLng });
+		return this.httpClient.get<any>(`${baseURL}/geo-spatial/stops`, { params: latLng });
 	}
 	findRoutesNearby(latLng: {
 		lat: number
 		lng: number
 	}) {
-		return this.httpClient.get<any>(`${baseURL}/ptes/routes`, { params: latLng });
+		return this.httpClient.get<any>(`${baseURL}/geo-spatial/routes`, { params: latLng });
 	}
 	search(data:{start:number[],end:number[]}){
-		return this.httpClient.post<any>(`${baseURL}/ptes/routes`, data);
+		return this.httpClient.post<any>(`${baseURL}/geo-spatial/routes`, data);
 	}
 }

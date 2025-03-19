@@ -20,8 +20,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.mongodb.javabasic.repositories.RouteRepository;
-import com.mongodb.javabasic.repositories.StopRepository;
 import com.mongodb.javabasic.service.AggregationService;
 
 
@@ -34,8 +32,8 @@ import com.mongodb.client.model.geojson.Position;
 import com.mongodb.javabasic.model.Route;
 
 @RestController
-@RequestMapping(path = "/ptes")
-public class PTESController {
+@RequestMapping(path = "/geo-spatial")
+public class GeoSpatialController {
     private final Logger logger = LoggerFactory.getLogger(getClass());
     private static final int SEARCH_THRESHOLD = 500;
     private static final int TRANSFER_WALK_THRESHOLD = 100;
@@ -44,12 +42,6 @@ public class PTESController {
 
     @Autowired
     private AggregationService aggregationService;
-
-    @Autowired
-    private RouteRepository routeRepository;
-
-    @Autowired
-    private StopRepository stopRepository;
 
     @GetMapping("/stops")
     public List<Stop> getStops(@RequestParam("lat") double lat, @RequestParam("lng") double lng) {
@@ -101,7 +93,7 @@ public class PTESController {
                     transfer1StopMap.put(s.getLocation().getCoordinates(), new ArrayList<>());
                 transfer1StopMap.get(s.getLocation().getCoordinates()).add(
                         Route.builder().route(r.getRoute()).bound(r.getBound())
-                                .serviceType(r.getServiceType()).stops(r.getStops()).endIndex(i).build());
+                                .serviceType(r.getServiceType()).stops(r.getStops()).startIndex(r.getStartIndex()).endIndex(i).build());
             }
         });
         logger.info("startRoute stop size:" + transfer1StopMap.size());

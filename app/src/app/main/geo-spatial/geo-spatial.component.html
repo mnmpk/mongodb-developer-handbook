@@ -37,7 +37,7 @@
     <ng-container *ngIf="suggestedRoutes">
         @for (route of suggestedRoutes; track route) {
         @for (leg of route.legs; track leg; let i = $index) {
-        <map-polyline [path]="getPath(leg)"
+        <map-polyline [path]="getPath(leg, false)"
             [options]="getPolylineOption(route.legs.length == 1 ? '#000000' : (i == 0 ? '#FF0000' : i == 1 ? '#00FF00' : '#0000FF'))" />
         }
         }

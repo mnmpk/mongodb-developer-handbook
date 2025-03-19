@@ -90,15 +90,17 @@ export class GeoSpatialComponent {
               if (!stops[startStop.id]) {
                 stops[startStop.id] = { start: true, details: startStop, routes: [] };
               }
-              stops[startStop.id].start = true;
-              stops[startStop.id].routes.push(l.route + " " + l.serviceType);
+              if (!stops[startStop.id].start)
+                stops[startStop.id].start = true;
+              stops[startStop.id].routes.push(r.legs.map((l: any) => l.route + " " + l.serviceType).join(">"));
             }
             if (i == r.legs.length - 1 && endStop) {
               if (!stops[endStop.id]) {
                 stops[endStop.id] = { end: true, details: endStop, routes: [] };
               }
-              stops[endStop.id].end = true;
-              stops[endStop.id].routes.push(l.route + " " + l.serviceType);
+              if (!stops[endStop.id].end)
+                stops[endStop.id].end = true;
+              stops[endStop.id].routes.push(r.legs.map((l: any) => l.route + " " + l.serviceType).join(">"));
             }
           });
 
@@ -151,8 +153,11 @@ export class GeoSpatialComponent {
       gmpClickable: true,
     };
   }
-  getPath(r: any) {
-    return r.stops.map((s: any) => {
+  getPath(r: any, full: boolean = true) {
+    let stops = r.stops;
+    if (!full)
+      stops = stops.slice(r.startIndex, r.endIndex + 1)
+    return stops.map((s: any) => {
       return { lat: s.location.position.values[1], lng: s.location.position.values[0] }
     });
 
