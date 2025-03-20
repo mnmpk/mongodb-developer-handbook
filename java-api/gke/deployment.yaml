@@ -20,6 +20,10 @@ spec:
         env:
         - name: DATABASE_PASSWORD
           value: "${DATABASE_PASSWORD}"
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         ports:
         - containerPort: 8080
         - containerPort: 8081
