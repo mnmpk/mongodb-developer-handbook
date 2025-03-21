@@ -51,7 +51,9 @@ public class SessionController {
         doc.put("views", (int) doc.get("views") + 1);
         session.setAttribute("shareData", doc);
         return new Document("principal",
-                "")
+                SecurityContextHolder.getContext().getAuthentication() != null
+                        ? SecurityContextHolder.getContext().getAuthentication().getName()
+                        : "")
                 .append("data", session.getAttribute("shareData"));
     }
 
