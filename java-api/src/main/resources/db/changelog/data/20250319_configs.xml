@@ -30,6 +30,15 @@
                     ],
                     "value": 100
                 },
+                {
+                    "params": [
+                        {
+                        "key": "key",
+                        "value": "MAX_SUGGESTIONS"
+                        }
+                    ],
+                    "value": 50
+                },
             ]
             </mongodb:documents>
         </mongodb:insertMany>

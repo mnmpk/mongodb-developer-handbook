@@ -42,12 +42,14 @@ public class GeoSpatialService {
 
     public List<Route> getRoutes(double lat, double lng) {
         int searchThreshold = configService.getConfig("SEARCH_THRESHOLD", Integer.class).get(0);
-        
+
         return aggregationService.getPipelineResults(mongoTemplate.getCollectionName(Route.class), "direct-route.json",
                 Route.class, Map.of("lat", lat, "lng", lng, "maxDistance", searchThreshold));
     }
 
     public List<Suggestion> getRouteSuggestions(List<Route> startRoutes, List<Route> endRoutes) {
+        int searchThreshold = configService.getConfig("SEARCH_THRESHOLD", Integer.class).get(0);
+        int maxSuggestions = configService.getConfig("MAX_SUGGESTIONS", Integer.class).get(0);
         List<Suggestion> suggestions = new ArrayList<>();
 
         // For 2T
@@ -93,42 +95,48 @@ public class GeoSpatialService {
                     suggestions.add(Suggestion.builder().transferStops(List.of()).legs(List.of(r)).build());
                 }
 
-                // 1T
-                for (int i = 0; i < r2.getStops().size(); i++) {
-                    Stop s = r2.getStops().get(i);
-                    Position nearestMatch = null;
-                    double distance = 500;
-                    for (int j = 0; j < rStopList.size(); j++) {
-                        double d = getDistance(rStopList.get(j), s.getLocation().getCoordinates());
-                        if (d < distance) {
-                            nearestMatch = rStopList.get(j);
-                            distance = d;
+                if (suggestions.size() < maxSuggestions) {
+                    // 1T
+                    for (int i = 0; i < r2.getStops().size(); i++) {
+                        Stop s = r2.getStops().get(i);
+                        Position nearestMatch = null;
+                        double distance = searchThreshold;
+                        for (int j = 0; j < rStopList.size(); j++) {
+                            double d = getDistance(rStopList.get(j), s.getLocation().getCoordinates());
+                            if (d < distance) {
+                                nearestMatch = rStopList.get(j);
+                                distance = d;
+                            }
                         }
-                    }
-                    if (nearestMatch != null) {
-                        Route tr1 = Route.builder().route(r.getRoute()).bound(r.getBound())
-                                .serviceType(r.getServiceType())
-                                .stops(r.getStops()).startIndex(r.getStartIndex())
-                                .endIndex(rStopList.indexOf(nearestMatch)).build();
-                        Route tr2 = Route.builder().route(r2.getRoute()).bound(r2.getBound())
-                                .serviceType(r2.getServiceType()).stops(r2.getStops()).startIndex(i)
-                                .endIndex(r2.getStartIndex()).build();
-                        String key = tr1.getRoute() + "-" + tr1.getServiceType() + ">" + tr2.getRoute()
-                                + "-" + tr2.getServiceType();
-                        if (!(tr1.getRoute().equalsIgnoreCase(tr2.getRoute()) &&
-                                tr1.getBound().equalsIgnoreCase(tr2.getBound()) &&
-                                tr1.getServiceType().equalsIgnoreCase(tr2.getServiceType())) &&
-                                tr1.getStartIndex() <= tr1.getEndIndex() && tr2.getStartIndex() <= tr2.getEndIndex() &&
-                                !map.containsKey(key)) {
-                            map.put(key,
-                                    Suggestion.builder().transferStops(List.of(s)).legs(List.of(tr1,
-                                            tr2)).build());
-                            logger.info("adding 1T route " + key);
+                        if (nearestMatch != null) {
+                            Route tr1 = Route.builder().route(r.getRoute()).bound(r.getBound())
+                                    .serviceType(r.getServiceType())
+                                    .stops(r.getStops()).startIndex(r.getStartIndex())
+                                    .endIndex(rStopList.indexOf(nearestMatch)).build();
+                            Route tr2 = Route.builder().route(r2.getRoute()).bound(r2.getBound())
+                                    .serviceType(r2.getServiceType()).stops(r2.getStops()).startIndex(i)
+                                    .endIndex(r2.getStartIndex()).build();
+                            String key = tr1.getRoute() + "-" + tr1.getServiceType() + ">" + tr2.getRoute()
+                                    + "-" + tr2.getServiceType();
+                            if (!(tr1.getRoute().equalsIgnoreCase(tr2.getRoute()) &&
+                                    tr1.getBound().equalsIgnoreCase(tr2.getBound()) &&
+                                    tr1.getServiceType().equalsIgnoreCase(tr2.getServiceType())) &&
+                                    tr1.getStartIndex() <= tr1.getEndIndex() && tr2.getStartIndex() <= tr2.getEndIndex()
+                                    &&
+                                    !map.containsKey(key)) {
+                                map.put(key,
+                                        Suggestion.builder().transferStops(List.of(s)).legs(List.of(tr1,
+                                                tr2)).build());
+                                logger.info("adding 1T route " + key);
 
+                                if (suggestions.size() >= maxSuggestions) {
+                                    break;
+                                }
+                            }
+                            // For 2T
+                            transfer1StopMap.remove(s.getLocation().getCoordinates());
+                            transfer2StopMap.remove(s.getLocation().getCoordinates());
                         }
-                        // For 2T
-                        transfer1StopMap.remove(s.getLocation().getCoordinates());
-                        transfer2StopMap.remove(s.getLocation().getCoordinates());
                     }
                 }
             });
@@ -136,7 +144,7 @@ public class GeoSpatialService {
         suggestions.addAll(map.values());
 
         // 2T
-        if (suggestions.size() < 50)
+        if (suggestions.size() < maxSuggestions)
             this.get2T(suggestions, transfer1StopMap, transfer2StopMap);
 
         return suggestions;
