@@ -15,7 +15,7 @@ import com.mongodb.client.gridfs.GridFSBuckets;
 
 
 @Configuration
-public class MongoDBConfig {
+public class MongoConfig {
 
     @Autowired
     MongoDatabaseFactory mongoDbFactory;

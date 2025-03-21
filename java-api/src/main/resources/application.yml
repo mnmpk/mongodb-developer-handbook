@@ -19,6 +19,11 @@ spring:
       uri: "mongodb+srv://dev:${DATABASE_PASSWORD}@demo.uskpz.mongodb.net/"
       #?w=4&readConcernLevel=majority&readPreference=primary
       database: mongodb-developer
+    redis:
+      host: tsp-test-byysaj.serverless.ape1.cache.amazonaws.com
+      port: 6379
+      ssl: 
+        enabled: true
   liquibase:
     enabled: true
     change-log: db/changelog/db.changelog-master.yaml
@@ -29,7 +34,7 @@ logging:
         data:
           mongodb:
             core:
-              MongoTemplate: DEBUG
+#              MongoTemplate: DEBUG
 settings:
   #App thread pool setting
   corePoolsize: 10 

@@ -10,9 +10,9 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import com.mongodb.javabasic.cache.MongoCacheManager;
 import com.mongodb.javabasic.model.CacheConfig;
 
-@Configuration
-@EnableCaching
-public class MongoDBCacheConfig {
+//@Configuration
+//@EnableCaching
+public class MongoCacheConfig {
 
     @Autowired
     MongoTemplate mongoTemplate;

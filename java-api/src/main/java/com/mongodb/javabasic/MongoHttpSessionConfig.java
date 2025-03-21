@@ -10,7 +10,7 @@ import org.springframework.session.data.mongo.config.annotation.web.http.EnableM
 
 @Configuration(proxyBeanMethods = false)
 @EnableMongoHttpSession
-public class HttpSessionConfig {
+public class MongoHttpSessionConfig {
 
 	/*@Bean
 	public JdkMongoSessionConverter jdkMongoSessionConverter() {
