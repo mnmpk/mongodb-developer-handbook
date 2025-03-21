@@ -9,6 +9,7 @@ import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.bson.Document;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
@@ -63,16 +64,14 @@ public class CustomEntityController extends GenericController<CustomEntity> {
 	public Stat<CustomEntity> load(Workload workload) {
 		EasyRandom generator = new EasyRandom(new EasyRandomParameters()
 				.seed(new Date().getTime()));
-		Random rd = new Random();
-		byte[] dummyData = new byte[workload.getDocumentSize()];
-		rd.nextBytes(dummyData);
+		String dummyData = RandomStringUtils.randomAscii(workload.getDocumentSize());
 		List<CustomEntity> customEntities = new ArrayList<>();
 		switch (workload.getOperationType()) {
 			case INSERT:
 				customEntities = generator.objects(CustomEntity.class, workload.getQuantity()).map(e -> {
 					e.setId(null);
-					e.setData(new LinkedHashMap<>(Map.of("bin", dummyData)));
-					e.setDocument(new Document("bin", dummyData));
+					e.setData(new LinkedHashMap<>(Map.of("text", dummyData)));
+					e.setDocument(new Document("text", dummyData));
 					e.setVersion(1);
 					return e;
 				}).collect(Collectors.toList());
@@ -89,8 +88,8 @@ public class CustomEntityController extends GenericController<CustomEntity> {
 				customEntities = IntStream.range(0, workload.getIds().size()).mapToObj(i -> {
 					CustomEntity e = temp.get(i);
 					e.setId(workload.getIds().get(i));
-					e.setData(new LinkedHashMap<>(Map.of("text", new String(dummyData))));
-					e.setDocument(new Document("text", new String(dummyData)));
+					e.setData(new LinkedHashMap<>(Map.of("text", dummyData)));
+					e.setDocument(new Document("text", dummyData));
 					e.setVersion(1);
 					return e;
 				}).collect(Collectors.toList());

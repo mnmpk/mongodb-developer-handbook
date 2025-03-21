@@ -80,7 +80,21 @@ export class WorkloadsComponent {
   }
 
   search(event: Event) {
-
+    let formValue = { ...this.getFormValue(WorkloadType.READ), qty: this.paginator.pageSize };
+    this.loading = true;
+    this.service.search(formValue, this.paginator.pageIndex, this.paginator.pageSize, this.sort.active, this.sort.direction).subscribe({
+      next: (stat: Stat<any>) => {
+        this.metricsService.addResult(stat);
+        this.stat = stat;
+        this.columns = this.stat.fields;
+        this.dataSource = new MatTableDataSource(stat.data[0].content);
+        this.page = stat.data[0];
+      },
+      error: (err: any) => {
+        alert(err.message);
+        this.loading = false;
+      }
+    });
   }
   getFields() {
     return this.stat?.fields;

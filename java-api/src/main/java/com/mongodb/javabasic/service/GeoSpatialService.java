@@ -80,11 +80,11 @@ public class GeoSpatialService {
 
         Map<String, Suggestion> map = new HashMap<>();
 
-        startRoutes.forEach(r -> {
+        for (Route r : startRoutes) {
             List<Position> rStopList = new ArrayList<>();
             r.getStops().stream().forEach(s -> rStopList.add(s.getLocation().getCoordinates()));
 
-            endRoutes.forEach(r2 -> {
+            for (Route r2 : endRoutes) {
                 // Direct route
                 if (r.getRoute().equalsIgnoreCase(r2.getRoute()) &&
                         r.getBound().equalsIgnoreCase(r2.getBound()) &&
@@ -129,7 +129,7 @@ public class GeoSpatialService {
                                                 tr2)).build());
                                 logger.info("adding 1T route " + key);
 
-                                if (suggestions.size() >= maxSuggestions) {
+                                if (map.size() >= maxSuggestions) {
                                     break;
                                 }
                             }
@@ -138,9 +138,14 @@ public class GeoSpatialService {
                             transfer2StopMap.remove(s.getLocation().getCoordinates());
                         }
                     }
+                } else {
+                    break;
                 }
-            });
-        });
+            }
+            if (map.size() >= maxSuggestions) {
+                break;
+            }
+        }
         suggestions.addAll(map.values());
 
         // 2T
@@ -152,7 +157,7 @@ public class GeoSpatialService {
 
     private void get2T(List<Suggestion> suggestions, Map<Position, List<Route>> transfer1Stops,
             Map<Position, List<Route>> transfer2Stops) {
-
+        int maxSuggestions = configService.getConfig("MAX_SUGGESTIONS", Integer.class).get(0);
         int walkThreshold = configService.getConfig("TRANSFER_WALK_THRESHOLD", Integer.class).get(0);
 
         List<Route> intermediateRoutes = mongoTemplate.getCollection(mongoTemplate.getCollectionName(Route.class))
@@ -163,55 +168,69 @@ public class GeoSpatialService {
         logger.info("transfer1Stops:" + transfer1Stops.size() + " transfer2Stops:" + transfer2Stops.size()
                 + " intermediateRoutes:" + intermediateRoutes.size());
         Map<String, Suggestion> map = new HashMap<>();
-        intermediateRoutes.stream()
-                .forEach(r -> {
-                    Map<Position, Stop> startRouteConnectedStops = new LinkedHashMap<>();
-                    Map<Position, Stop> endRouteConnectedStops = new LinkedHashMap<>();
-                    for (Stop s : r.getStops()) {
-                        for (Position p : transfer1Stops.keySet()) {
-                            if (getDistance(p, s.getLocation().getCoordinates()) < walkThreshold) {
-                                startRouteConnectedStops.put(p, s);
-                            }
-                        }
-                        for (Position p : transfer2Stops.keySet()) {
-                            if (getDistance(p, s.getLocation().getCoordinates()) < walkThreshold) {
-                                endRouteConnectedStops.put(p, s);
-                            }
-                        }
+        for (Route r : intermediateRoutes) {
+            Map<Position, Stop> startRouteConnectedStops = new LinkedHashMap<>();
+            Map<Position, Stop> endRouteConnectedStops = new LinkedHashMap<>();
+            for (Stop s : r.getStops()) {
+                for (Position p : transfer1Stops.keySet()) {
+                    if (getDistance(p, s.getLocation().getCoordinates()) < walkThreshold) {
+                        startRouteConnectedStops.put(p, s);
                     }
-                    if (startRouteConnectedStops.size() > 0 && endRouteConnectedStops.size() > 0) {
-                        for (Position ps : startRouteConnectedStops.keySet()) {
-                            for (Position pe : endRouteConnectedStops.keySet()) {
-                                int startIndex = r.getStops().indexOf(startRouteConnectedStops.get(ps));
-                                int endIndex = r.getStops().indexOf(endRouteConnectedStops.get(pe));
-                                if (startIndex < endIndex) {
-                                    for (Route sr : transfer1Stops.get(ps)) {
-                                        for (Route er : transfer2Stops.get(pe)) {
-                                            String key = sr.getRoute() + "-" + sr.getServiceType() + ">" + r.getRoute()
-                                                    + "-" + r.getServiceType() + ">" + er.getRoute() + "-"
-                                                    + er.getServiceType();
-                                            if (!map.containsKey(key)) {
+                }
+                for (Position p : transfer2Stops.keySet()) {
+                    if (getDistance(p, s.getLocation().getCoordinates()) < walkThreshold) {
+                        endRouteConnectedStops.put(p, s);
+                    }
+                }
+            }
+            if (startRouteConnectedStops.size() > 0 && endRouteConnectedStops.size() > 0) {
+                for (Position ps : startRouteConnectedStops.keySet()) {
+                    for (Position pe : endRouteConnectedStops.keySet()) {
+                        int startIndex = r.getStops().indexOf(startRouteConnectedStops.get(ps));
+                        int endIndex = r.getStops().indexOf(endRouteConnectedStops.get(pe));
+                        if (startIndex < endIndex) {
+                            for (Route sr : transfer1Stops.get(ps)) {
+                                for (Route er : transfer2Stops.get(pe)) {
+                                    String key = sr.getRoute() + "-" + sr.getServiceType() + ">" + r.getRoute()
+                                            + "-" + r.getServiceType() + ">" + er.getRoute() + "-"
+                                            + er.getServiceType();
+                                    if (!map.containsKey(key)) {
 
-                                                Route r2 = Route.builder().route(r.getRoute()).bound(r.getBound())
-                                                        .serviceType(r.getServiceType()).stops(r.getStops())
-                                                        .startIndex(startIndex)
-                                                        .endIndex(endIndex).build();
+                                        Route r2 = Route.builder().route(r.getRoute()).bound(r.getBound())
+                                                .serviceType(r.getServiceType()).stops(r.getStops())
+                                                .startIndex(startIndex)
+                                                .endIndex(endIndex).build();
 
-                                                map.put(key,
-                                                        Suggestion.builder()
-                                                                .transferStops(List.of(startRouteConnectedStops.get(ps),
-                                                                        endRouteConnectedStops.get(pe)))
-                                                                .legs(List.of(sr, r2, er)).build());
+                                        map.put(key,
+                                                Suggestion.builder()
+                                                        .transferStops(List.of(startRouteConnectedStops.get(ps),
+                                                                endRouteConnectedStops.get(pe)))
+                                                        .legs(List.of(sr, r2, er)).build());
 
-                                                logger.info("adding 2T route " + key);
-                                            }
+                                        logger.info("adding 2T route " + key);
+                                        if (map.size() >= maxSuggestions) {
+                                            break;
                                         }
                                     }
                                 }
+                                if (map.size() >= maxSuggestions) {
+                                    break;
+                                }
                             }
                         }
+                        if (map.size() >= maxSuggestions) {
+                            break;
+                        }
                     }
-                });
+                    if (map.size() >= maxSuggestions) {
+                        break;
+                    }
+                }
+                if (map.size() >= maxSuggestions) {
+                    break;
+                }
+            }
+        }
 
         suggestions.addAll(map.values());
     }

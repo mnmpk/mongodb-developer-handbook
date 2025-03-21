@@ -5,11 +5,13 @@ import { SharedModule } from '../shared/shared.module';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { MetricsModule } from '../metrics/metrics.module';
 import { GeoSpatialComponent } from './geo-spatial/geo-spatial.component';
+import { CacheComponent } from './cache/cache.component';
+import { SessionComponent } from './session/session.component';
 
 
 
 @NgModule({
-  declarations: [DashboardComponent, WorkloadsComponent, ChangeStreamComponent, GeoSpatialComponent],
+  declarations: [DashboardComponent, WorkloadsComponent, ChangeStreamComponent, GeoSpatialComponent, CacheComponent, SessionComponent],
   imports: [
     SharedModule, MetricsModule
   ]

@@ -1,1 +1,45 @@
-<p>session works!</p>
+<div class="flex-fill d-flex flex-column">
+    <form [formGroup]="form" submit="return false;">
+        <div class="flex-fill d-flex flex-column">
+            <h1>Session</h1>
+            <mat-form-field>
+                <mat-label>Text</mat-label>
+                <input matInput type="text" formControlName="text">
+            </mat-form-field>
+            <div class="flex-fill d-flex flex-column">
+                <div class="d-flex flex-column justify-content-around">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <button type="button" mat-flat-button [disabled]="form.invalid"
+                                (click)="put()"><mat-icon>check</mat-icon>Submit</button>
+                            <button type="button" mat-flat-button [disabled]="form.invalid" (click)="clear()">Clear
+                                session</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <mat-form-field>
+                <mat-label>Login as</mat-label>
+                <mat-select formControlName="uId">
+                    <mat-option value="m0001">m0001</mat-option>
+                    <mat-option value="m0002">m0002</mat-option>
+                    <mat-option value="m0003">m0003</mat-option>
+                    <mat-option value="m0004">m0004</mat-option>
+                </mat-select>
+            </mat-form-field>
+            <div class="flex-fill d-flex flex-column">
+                <div class="d-flex flex-column justify-content-around">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <button type="button" mat-flat-button [disabled]="form.invalid"
+                                (click)="login()"><mat-icon>check</mat-icon>Login</button>
+                            <button type="button" mat-flat-button [disabled]="form.invalid"
+                                (click)="logout()">Logout</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {{sessionData|json}}
+        </div>
+    </form>
+</div>
