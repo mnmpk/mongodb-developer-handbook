@@ -67,11 +67,11 @@ app.use(session({
 }));
 
 app.use(/\/mongo\/.*/, mongoCache({ client: db.getClient(), expireAfterSeconds: 600 }));
-app.get('/mongo/put', require('./controllers/cache').put);
+app.get('/mongo/data', require('./controllers/cache').put);
 app.get('/mongo/clear', require('./controllers/cache').clear);
 
 app.use(/\/redis\/.*/, redisCache({ client: redisClient, expireAfterSeconds: 600 }));
-app.get('/redis/put', require('./controllers/cache').put);
+app.get('/redis/data', require('./controllers/cache').put);
 app.get('/redis/clear', require('./controllers/cache').clear);
 
 

@@ -31,7 +31,7 @@ function init() {
     return async (req, res, next) => {
         const key = requestToKey(req);
         // if there is some cached data, retrieve it and return it
-        const cachedValue = await readData(database, collection, key, ttl);
+        const cachedValue = await readData(key);
         if (cachedValue && cachedValue.v) {
             return res.send(cachedValue.v);
         } else {
@@ -43,7 +43,7 @@ function init() {
                 res.send = oldSend;
                 // cache the response only if it is successful
                 if (res.statusCode.toString().startsWith("2")) {
-                    writeData(database, collection, key, data, ttl).then();
+                    writeData(key, data).then();
                 }
 
                 return res.send(data);
