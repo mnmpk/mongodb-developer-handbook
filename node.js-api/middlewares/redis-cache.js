@@ -11,7 +11,7 @@ function requestToKey(req) {
 
     // `${req.path}@...` to make it easier to find
     // keys on a Redis client
-    return `${req.path}@${hash.sha1(reqDataToHash)}`;
+    return `${hash.sha1(reqDataToHash)}`;
 }
 
 
