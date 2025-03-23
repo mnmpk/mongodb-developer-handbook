@@ -17,14 +17,14 @@ function requestToKey(req) {
 
 async function writeData(key, data) {
     try {
-        await client.set(key, data);
+        await c.set(key, data);
     } catch (e) {
         console.error(`Failed to cache data for key=${key}`, e);
     }
 }
 
 async function readData(key, ttl) {
-    return await client.get('key');
+    return await c.get('key');
 }
 
 function init() {
