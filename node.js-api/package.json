@@ -2,10 +2,12 @@
   "dependencies": {
     "compression": "^1.8.0",
     "connect-mongodb-session": "^5.0.0",
+    "connect-redis": "^8.0.2",
     "express": "^4.19.2",
     "express-session": "^1.18.1",
     "moment": "^2.29.4",
     "mongoose": "^8.0.0",
-    "object-hash": "^3.0.0"
+    "object-hash": "^3.0.0",
+    "redis": "^4.7.0"
   }
 }
