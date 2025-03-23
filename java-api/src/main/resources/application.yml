@@ -20,7 +20,7 @@ spring:
       #?w=4&readConcernLevel=majority&readPreference=primary
       database: mongodb-developer
     redis:
-      host: tsp-test-byysaj.serverless.ape1.cache.amazonaws.com
+      host: clustercfg.tsp-test-cluster.byysaj.ape1.cache.amazonaws.com
       port: 6379
       ssl: 
         enabled: true
