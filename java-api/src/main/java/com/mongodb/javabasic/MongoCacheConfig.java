@@ -25,7 +25,7 @@ public class MongoCacheConfig {
         .cacheName("data")
         .ttl(600)
         .flushOnBoot(false)
-        .storeBinaryOnly(false).build(),CacheConfig.builder()
+        .storeBinaryOnly(true).build(),CacheConfig.builder()
         .cacheName("config")
         .ttl(60*60*24*7)
         .flushOnBoot(false)
