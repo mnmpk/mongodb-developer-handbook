@@ -11,6 +11,7 @@ import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -38,6 +39,7 @@ import com.mongodb.client.ClientSession;
 
 import jakarta.annotation.PostConstruct;
 
+@Profile("scheduler")
 @Component
 public class DataGeneration {
     private final Logger logger = LoggerFactory.getLogger(getClass());

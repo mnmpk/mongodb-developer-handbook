@@ -18,6 +18,8 @@ spec:
         image: gcr.io/${PROJECT_ID}/${REPO_NAME}-java:${TAG_NAME}
         imagePullPolicy: Always
         env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: "scheduler,mongo"
         - name: DATABASE_PASSWORD
           value: "${DATABASE_PASSWORD}"
         - name: POD_NAME
