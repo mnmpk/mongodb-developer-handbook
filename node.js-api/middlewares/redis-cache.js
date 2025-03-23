@@ -11,20 +11,20 @@ function requestToKey(req) {
 
     // `${req.path}@...` to make it easier to find
     // keys on a Redis client
-    return `${hash.sha1(reqDataToHash)}`;
+    return `${req.path}@${hash.sha1(reqDataToHash)}`;
 }
 
 
 async function writeData(key, data) {
     try {
-        await c.set(key, data);
+        await c.set(key, SON.stringify(data));
     } catch (e) {
         console.error(`Failed to cache data for key=${key}`, e);
     }
 }
 
 async function readData(key, ttl) {
-    return await c.get('key');
+    return JSON.parse(await c.get('key'));
 }
 
 function init() {
