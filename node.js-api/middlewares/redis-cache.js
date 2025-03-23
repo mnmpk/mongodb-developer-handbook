@@ -17,7 +17,7 @@ function requestToKey(req) {
 
 async function writeData(key, data) {
     try {
-        await c.set(key, SON.stringify(data));
+        await c.set(key, JSON.stringify(data));
     } catch (e) {
         console.error(`Failed to cache data for key=${key}`, e);
     }
