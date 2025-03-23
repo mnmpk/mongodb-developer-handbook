@@ -5,12 +5,13 @@ import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
 import com.mongodb.javabasic.cache.MongoCacheManager;
 import com.mongodb.javabasic.model.CacheConfig;
 
+@Profile("mongo")
 @Configuration
 @EnableCaching
 public class MongoCacheConfig {
@@ -19,7 +20,6 @@ public class MongoCacheConfig {
     MongoTemplate mongoTemplate;
 
     @Bean
-    @Primary
     public CacheManager mongoCacheManager() {
         return new MongoCacheManager(mongoTemplate, CacheConfig.builder()
         .cacheName("data")

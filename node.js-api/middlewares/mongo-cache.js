@@ -58,10 +58,10 @@ function init({ database = "", collection = DEFAULT_COLL, ttl = DEFAULT_TTL } = 
     };
 }
 
-function cache({ client, database = "", collection = DEFAULT_COLL, expireAfterSeconds = DEFAULT_TTL }) {
+function mongoCache({ client, database = "", collection = DEFAULT_COLL, expireAfterSeconds = DEFAULT_TTL }) {
     c = client;
     c.db(database).collection(collection).createIndex({ expires: -1 }, { name: INDEX_NAME, expireAfterSeconds: 0 });
     return init({ database, collection, ttl: expireAfterSeconds });
 }
 
-module.exports = { cache };
+module.exports = { mongoCache };

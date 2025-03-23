@@ -6,7 +6,7 @@ const session = require('express-session');
 const MongoDBStore = require('connect-mongodb-session')(session);
 
 const User = require('./user');
-const { cache } = require('./middlewares/cache');
+const { mongoCache } = require('./middlewares/mongo-cache');
 
 const app = express();
 
@@ -45,7 +45,7 @@ app.use(session({
   resave: true,
   saveUninitialized: true
 }));
-app.use(cache({ client: db.getClient(), expireAfterSeconds: 600 }));
+app.use(mongoCache({ client: db.getClient(), expireAfterSeconds: 600 }));
 
 app.get('/cache-1mb', async (req, res) => {
   res.send({value:require('node:crypto').randomBytes(1*1024*1024/3).toString()});
@@ -56,7 +56,7 @@ app.get('/cache-5mb', async (req, res) => {
 app.get('/cache-10mb', async (req, res) => {
   res.send({value:require('node:crypto').randomBytes(10*1024*1024/3).toString()});
 });
-app.get('/test-cache', cache({ client: db.getClient(), collection: 'cache2' }), async (req, res) => {
+app.get('/test-cache', mongoCache({ client: db.getClient(), collection: 'cache2' }), async (req, res) => {
   res.send("test cache: " + Math.random());
 });
 
