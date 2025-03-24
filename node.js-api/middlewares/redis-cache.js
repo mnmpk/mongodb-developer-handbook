@@ -25,7 +25,7 @@ async function writeData(key, data) {
 }
 
 async function readData(key, ttl) {
-    return JSON.parse(await c.get('key'));
+    return JSON.parse(await c.get(key));
 }
 
 function init() {
@@ -33,7 +33,6 @@ function init() {
         const key = requestToKey(req);
         // if there is some cached data, retrieve it and return it
         const cachedValue = await readData(key);
-        console.log(cachedValue);
         if (cachedValue && cachedValue.v) {
             return res.send(cachedValue.v);
         } else {
