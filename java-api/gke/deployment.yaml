@@ -31,10 +31,10 @@ spec:
         - containerPort: 8081
         resources:
           limits:
-            cpu: 1.2G
+            cpu: 1G
             memory: 1G
           requests:
-            cpu: 1G
+            cpu: 800m
             memory: 800m
         livenessProbe:
           initialDelaySeconds: 50
