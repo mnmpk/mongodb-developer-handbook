@@ -24,6 +24,9 @@ spec:
       - name: ${APP_NAME}
         image: gcr.io/${PROJECT_ID}/${REPO_NAME}:${TAG_NAME}
         imagePullPolicy: Always
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: "mongo"
 #        env: 
 #        - name: SOURCE
 #          value: "${SOURCE}" 
