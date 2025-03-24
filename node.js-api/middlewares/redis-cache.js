@@ -33,8 +33,8 @@ function init() {
         const key = requestToKey(req);
         // if there is some cached data, retrieve it and return it
         const cachedValue = await readData(key);
-        if (cachedValue && cachedValue.v) {
-            return res.send(cachedValue.v);
+        if (cachedValue && cachedValue) {
+            return res.send(cachedValue);
         } else {
             // override how res.send behaves
             // to introduce the caching logic
