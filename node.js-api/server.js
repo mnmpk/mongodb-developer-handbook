@@ -18,7 +18,6 @@ const session = require('express-session');
 
 //Mongo Store
 const MongoDBStore = require('connect-mongodb-session')(session);
-const { mongoCache } = require('./middlewares/mongo-cache');
 var mongoStore = new MongoDBStore({
   uri: mongoUri,
   collection: 'sessions'
@@ -30,7 +29,6 @@ mongoStore.on('error', function (error) {
 
 //Redis Store
 const { RedisStore } = require("connect-redis");
-const { redisCache } = require('./middlewares/redis-cache');
 const { createClient } = require("redis");
 const redisUri = "rediss://clustercfg.tsp-cache.byysaj.ape1.cache.amazonaws.com:6379";
 let redisClient = createClient({
@@ -66,17 +64,26 @@ app.use(session({
   saveUninitialized: true
 }));
 
+const c = require('./controllers/cache');
+const { mongoCache, clearMongo } = require('./middlewares/mongo-cache');
+const { redisCache, clearRedis } = require('./middlewares/redis-cache');
+
+c.init(db);
 app.use(/\/mongo\/.*/, mongoCache({ client: db.getClient(), expireAfterSeconds: 600 }));
-app.get('/mongo/data', require('./controllers/cache').put);
-app.get('/mongo/clear', require('./controllers/cache').clear);
+app.get('/mongo/data', c.put);
 
-app.use(/\/redis\/.*/, redisCache({ client: redisClient, expireAfterSeconds: 600 }));
-app.get('/redis/data', require('./controllers/cache').put);
-app.get('/redis/clear', require('./controllers/cache').clear);
+app.use(/\/redis\/.*/, redisCache({ client: redisClient }));
+app.get('/redis/data', c.put);
 
+app.get('/clear/mongo', clearMongo({ client: db.getClient() }), c.put);
+app.get('/clear/redis', clearRedis({ client: redisClient }), c.put);
 
-app.get('/login', require('./controllers/session').login);
-app.get('/logout', require('./controllers/session').logout);
+const s = require('./controllers/session');
+s.init(db);
+app.get('/login', s.login);
+app.get('/put', s.put);
+app.get('/clear', s.clear);
+app.get('/logout', s.logout);
 
 app.get('/session', async (req, res) => {
   if (req.session.principal) {

@@ -1,6 +1,6 @@
 package com.mongodb.javabasic.controller;
 
-import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.text.RandomStringGenerator;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,13 +25,15 @@ public class CacheController {
     @GetMapping("/data")
     @Cacheable(value = "data")
     public Document cache(@RequestParam int size) {
-        return mongoTemplate.insert(new Document("value", RandomStringUtils.randomAscii(size)), "cacheObject");
+        return mongoTemplate.insert(new Document("value", new RandomStringGenerator.Builder()
+        .withinRange('a', 'z').build().generate(size)), "cacheObject");
     }
 
     @GetMapping("/clear")
     @CacheEvict(cacheNames = "data", key="#size")
     public Document noCache(@RequestParam int size) {
-        return mongoTemplate.insert(new Document("value", RandomStringUtils.randomAscii(size)), "cacheObject");
+        return mongoTemplate.insert(new Document("value", new RandomStringGenerator.Builder()
+        .withinRange('a', 'z').build().generate(size)), "cacheObject");
     }
 
 }

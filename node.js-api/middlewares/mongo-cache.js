@@ -14,7 +14,8 @@ function requestToKey(req) {
 
     // `${req.path}@...` to make it easier to find
     // keys on a Redis client
-    return `${req.path}@${hash.sha1(reqDataToHash)}`;
+    //return `${req.path}@${hash.sha1(reqDataToHash)}`;
+    return `${hash.sha1(reqDataToHash)}`;
 }
 
 
@@ -63,5 +64,12 @@ function mongoCache({ client, database = "", collection = DEFAULT_COLL, expireAf
     c.db(database).collection(collection).createIndex({ expires: -1 }, { name: INDEX_NAME, expireAfterSeconds: 0 });
     return init({ database, collection, ttl: expireAfterSeconds });
 }
+function clearMongo({ client, database = "", collection = DEFAULT_COLL }) {
+    return async (req, res, next) => {
+        const key = requestToKey(req);
+        client.db(database).collection(collection).deleteOne({ _id: key });
+        next();
+    };
+}
 
-module.exports = { mongoCache };
+module.exports = { mongoCache, clearMongo };

@@ -11,7 +11,8 @@ function requestToKey(req) {
 
     // `${req.path}@...` to make it easier to find
     // keys on a Redis client
-    return `${req.path}@${hash.sha1(reqDataToHash)}`;
+    //return `${req.path}@${hash.sha1(reqDataToHash)}`;
+    return `${hash.sha1(reqDataToHash)}`;
 }
 
 
@@ -59,5 +60,12 @@ function redisCache({ client }) {
     c = client;
     return init();
 }
+function clearRedis({ client }) {
+    return async (req, res, next) => {
+        const key = requestToKey(req);
+        client.del(key);
+        next();
+    };
+}
 
-module.exports = { redisCache };
+module.exports = { redisCache, clearRedis };
