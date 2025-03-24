@@ -7,7 +7,7 @@
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
          http://www.liquibase.org/xml/ns/mongodb
          http://www.liquibase.org/xml/ns/mongodb/liquibase-mongodb-latest.xsd">
-    <changeSet id="1" author="MMA">
+    <changeSet id="24" author="MMA">
         <comment>Insert configs</comment>
         <mongodb:insertMany collectionName="configs">
             <mongodb:documents>
