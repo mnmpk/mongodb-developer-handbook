@@ -87,31 +87,31 @@ export class GeoSpatialComponent {
             const startStop = l.stops[l.startIndex];
             const endStop = l.stops[l.endIndex];
             if (i == 0 && startStop) {
-              if (!stops[startStop.id]) {
-                stops[startStop.id] = { start: true, details: startStop, routes: [] };
+              if (!stops[startStop.stopId]) {
+                stops[startStop.stopId] = { start: true, details: startStop, routes: [] };
               }
-              if (!stops[startStop.id].start)
-                stops[startStop.id].start = true;
-              stops[startStop.id].routes.push(r.legs.map((l: any) => l.route + " " + l.serviceType).join(">"));
+              if (!stops[startStop.stopId].start)
+                stops[startStop.stopId].start = true;
+              stops[startStop.stopId].routes.push(r.legs.map((l: any) => l.companyCode+":"+l.nameEn).join(">"));
             }
             if (i == r.legs.length - 1 && endStop) {
-              if (!stops[endStop.id]) {
-                stops[endStop.id] = { end: true, details: endStop, routes: [] };
+              if (!stops[endStop.stopId]) {
+                stops[endStop.stopId] = { end: true, details: endStop, routes: [] };
               }
-              if (!stops[endStop.id].end)
-                stops[endStop.id].end = true;
-              stops[endStop.id].routes.push(r.legs.map((l: any) => l.route + " " + l.serviceType).join(">"));
+              if (!stops[endStop.stopId].end)
+                stops[endStop.stopId].end = true;
+              stops[endStop.stopId].routes.push(r.legs.map((l: any) => l.companyCode+":"+l.nameEn).join(">"));
             }
           });
 
           if (r.transferStops) {
             r.transferStops.forEach((s: any, i: number) => {
-              if (!stops[s.id]) {
-                stops[s.id] = { transfer: true, details: s, routes: [] };
+              if (!stops[s.stopId]) {
+                stops[s.stopId] = { transfer: true, details: s, routes: [] };
               }
               if (r.legs[i]) {
-                stops[s.id].transfer = true;
-                stops[s.id].routes.push(r.legs.map((l: any) => l.route + " " + l.serviceType).join(">"));
+                stops[s.stopId].transfer = true;
+                stops[s.stopId].routes.push(r.legs.map((l: any) => l.companyCode+":"+l.nameEn).join(">"));
               }
             });
           }

@@ -26,7 +26,7 @@ spec:
         imagePullPolicy: Always
         env:
         - name: SPRING_PROFILES_ACTIVE
-          value: "mongo"
+          value: "mongo,changeStream"
 #        env: 
 #        - name: SOURCE
 #          value: "${SOURCE}" 

@@ -17,7 +17,7 @@
     <map-info-window>
         <ng-container *ngIf="selectedStop">
             <ng-container *ngIf="selectedStop.details">
-                {{selectedStop.details.id}}<br />
+                {{selectedStop.details.stopId}}<br />
                 {{selectedStop.details.nameTc}}<br />
                 {{selectedStop.details.nameEn}}<br />
                 @for (r of selectedStop.routes; track r) {
@@ -25,7 +25,7 @@
                 }
             </ng-container>
             <ng-container *ngIf="!selectedStop.details">
-                {{selectedStop?.id}}<br />{{selectedStop?.nameTc}}<br />{{selectedStop?.nameEn}}<br />
+                {{selectedStop?.stopId}}<br />{{selectedStop?.nameTc}}<br />{{selectedStop?.nameEn}}<br />
             </ng-container>
         </ng-container>
     </map-info-window>

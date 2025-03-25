@@ -60,8 +60,18 @@ public class GeoSpatialService {
                 if (!transfer1StopMap.containsKey(s.getLocation().getCoordinates()))
                     transfer1StopMap.put(s.getLocation().getCoordinates(), new ArrayList<>());
                 transfer1StopMap.get(s.getLocation().getCoordinates()).add(
-                        Route.builder().route(r.getRoute()).bound(r.getBound())
-                                .serviceType(r.getServiceType()).stops(r.getStops()).startIndex(r.getStartIndex())
+                        Route.builder().routeId(r.getRouteId()).routeSeq(r.getRouteSeq()).routeType(r.getRouteType())
+                                .serviceMode(r.getServiceMode()).serviceType(r.getServiceType())
+                                .nameEn(r.getNameEn()).nameSc(r.getNameSc())
+                                .nameTc(r.getNameTc()).locStartNamec(r.getLocStartNamec())
+                                .locStartNames(r.getLocStartNames())
+                                .locStartNamee(r.getLocStartNamee()).locEndNamec(r.getLocEndNamec())
+                                .locEndNames(r.getLocEndNames())
+                                .locEndNamee(r.getLocEndNamee()).companyCode(r.getCompanyCode())
+                                .isCircular(r.isCircular())
+                                .journeyTime(r.getJourneyTime()).operationMode(r.getOperationMode())
+                                .stops(r.getStops())
+                                .startIndex(r.getStartIndex())
                                 .endIndex(i).build());
             }
         });
@@ -72,8 +82,17 @@ public class GeoSpatialService {
                 if (!transfer2StopMap.containsKey(s.getLocation().getCoordinates()))
                     transfer2StopMap.put(s.getLocation().getCoordinates(), new ArrayList<>());
                 transfer2StopMap.get(s.getLocation().getCoordinates()).add(
-                        Route.builder().route(r.getRoute()).bound(r.getBound())
-                                .serviceType(r.getServiceType()).stops(r.getStops()).startIndex(i)
+                        Route.builder().routeId(r.getRouteId()).routeSeq(r.getRouteSeq()).routeType(r.getRouteType())
+                                .serviceMode(r.getServiceMode()).serviceType(r.getServiceType())
+                                .nameEn(r.getNameEn()).nameSc(r.getNameSc())
+                                .nameTc(r.getNameTc()).locStartNamec(r.getLocStartNamec())
+                                .locStartNames(r.getLocStartNames())
+                                .locStartNamee(r.getLocStartNamee()).locEndNamec(r.getLocEndNamec())
+                                .locEndNames(r.getLocEndNames())
+                                .locEndNamee(r.getLocEndNamee()).companyCode(r.getCompanyCode())
+                                .isCircular(r.isCircular())
+                                .journeyTime(r.getJourneyTime()).operationMode(r.getOperationMode()).stops(r.getStops())
+                                .startIndex(i)
                                 .endIndex(r.getStartIndex()).build());
             }
         });
@@ -86,12 +105,11 @@ public class GeoSpatialService {
 
             for (Route r2 : endRoutes) {
                 // Direct route
-                if (r.getRoute().equalsIgnoreCase(r2.getRoute()) &&
-                        r.getBound().equalsIgnoreCase(r2.getBound()) &&
-                        r.getServiceType().equalsIgnoreCase(r2.getServiceType()) &&
+                if (r.getRouteId().equals(r2.getRouteId()) &&
+                        r.getRouteSeq().equals(r2.getRouteSeq()) &&
                         r.getStartIndex() < r2.getStartIndex()) {
                     r.setEndIndex(r2.getStartIndex());
-                    logger.info("adding direct route:" + r.getRoute() + "-" + r.getServiceType());
+                    logger.info("adding direct route:" + r.getRouteId());
                     suggestions.add(Suggestion.builder().transferStops(List.of()).legs(List.of(r)).build());
                 }
 
@@ -109,18 +127,35 @@ public class GeoSpatialService {
                             }
                         }
                         if (nearestMatch != null) {
-                            Route tr1 = Route.builder().route(r.getRoute()).bound(r.getBound())
-                                    .serviceType(r.getServiceType())
+                            Route tr1 = Route.builder().routeId(r.getRouteId()).routeSeq(r.getRouteSeq())
+                                    .routeType(r.getRouteType())
+                                    .serviceMode(r.getServiceMode()).serviceType(r.getServiceType())
+                                    .nameEn(r.getNameEn()).nameSc(r.getNameSc())
+                                    .nameTc(r.getNameTc()).locStartNamec(r.getLocStartNamec())
+                                    .locStartNames(r.getLocStartNames())
+                                    .locStartNamee(r.getLocStartNamee()).locEndNamec(r.getLocEndNamec())
+                                    .locEndNames(r.getLocEndNames())
+                                    .locEndNamee(r.getLocEndNamee()).companyCode(r.getCompanyCode())
+                                    .isCircular(r.isCircular())
+                                    .journeyTime(r.getJourneyTime()).operationMode(r.getOperationMode())
                                     .stops(r.getStops()).startIndex(r.getStartIndex())
                                     .endIndex(rStopList.indexOf(nearestMatch)).build();
-                            Route tr2 = Route.builder().route(r2.getRoute()).bound(r2.getBound())
-                                    .serviceType(r2.getServiceType()).stops(r2.getStops()).startIndex(i)
+                            Route tr2 = Route.builder().routeId(r2.getRouteId()).routeSeq(r2.getRouteSeq())
+                                    .routeType(r2.getRouteType())
+                                    .serviceMode(r2.getServiceMode()).serviceType(r2.getServiceType())
+                                    .nameEn(r2.getNameEn()).nameSc(r2.getNameSc())
+                                    .nameTc(r2.getNameTc()).locStartNamec(r2.getLocStartNamec())
+                                    .locStartNames(r2.getLocStartNames())
+                                    .locStartNamee(r2.getLocStartNamee()).locEndNamec(r2.getLocEndNamec())
+                                    .locEndNames(r2.getLocEndNames())
+                                    .locEndNamee(r2.getLocEndNamee()).companyCode(r2.getCompanyCode())
+                                    .isCircular(r2.isCircular())
+                                    .journeyTime(r2.getJourneyTime()).operationMode(r2.getOperationMode())
+                                    .stops(r2.getStops()).startIndex(i)
                                     .endIndex(r2.getStartIndex()).build();
-                            String key = tr1.getRoute() + "-" + tr1.getServiceType() + ">" + tr2.getRoute()
-                                    + "-" + tr2.getServiceType();
-                            if (!(tr1.getRoute().equalsIgnoreCase(tr2.getRoute()) &&
-                                    tr1.getBound().equalsIgnoreCase(tr2.getBound()) &&
-                                    tr1.getServiceType().equalsIgnoreCase(tr2.getServiceType())) &&
+                            String key = tr1.getRouteId() + ">" + tr2.getRouteId();
+                            if (!(tr1.getRouteId().equals(tr2.getRouteId()) &&
+                                    tr1.getRouteSeq().equals(tr2.getRouteSeq())) &&
                                     tr1.getStartIndex() <= tr1.getEndIndex() && tr2.getStartIndex() <= tr2.getEndIndex()
                                     &&
                                     !map.containsKey(key)) {
@@ -191,13 +226,22 @@ public class GeoSpatialService {
                         if (startIndex < endIndex) {
                             for (Route sr : transfer1Stops.get(ps)) {
                                 for (Route er : transfer2Stops.get(pe)) {
-                                    String key = sr.getRoute() + "-" + sr.getServiceType() + ">" + r.getRoute()
-                                            + "-" + r.getServiceType() + ">" + er.getRoute() + "-"
-                                            + er.getServiceType();
+                                    String key = sr.getRouteId() + ">" + r.getRouteId()
+                                            + ">" + er.getRouteId();
                                     if (!map.containsKey(key)) {
 
-                                        Route r2 = Route.builder().route(r.getRoute()).bound(r.getBound())
-                                                .serviceType(r.getServiceType()).stops(r.getStops())
+                                        Route r2 = Route.builder().routeId(r.getRouteId()).routeSeq(r.getRouteSeq())
+                                                .routeType(r.getRouteType())
+                                                .serviceMode(r.getServiceMode()).serviceType(r.getServiceType())
+                                                .nameEn(r.getNameEn()).nameSc(r.getNameSc())
+                                                .nameTc(r.getNameTc()).locStartNamec(r.getLocStartNamec())
+                                                .locStartNames(r.getLocStartNames())
+                                                .locStartNamee(r.getLocStartNamee()).locEndNamec(r.getLocEndNamec())
+                                                .locEndNames(r.getLocEndNames())
+                                                .locEndNamee(r.getLocEndNamee()).companyCode(r.getCompanyCode())
+                                                .isCircular(r.isCircular())
+                                                .journeyTime(r.getJourneyTime()).operationMode(r.getOperationMode())
+                                                .stops(r.getStops())
                                                 .startIndex(startIndex)
                                                 .endIndex(endIndex).build();
 

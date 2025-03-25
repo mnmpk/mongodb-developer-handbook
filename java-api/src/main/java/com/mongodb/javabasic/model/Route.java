@@ -18,12 +18,30 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Route {
-    private String route;
-    private String bound;
-    @BsonProperty("service_type")
+    private Integer routeId;
+    private String companyCode;
+    private Integer routeType;
+    private boolean isCircular;
+    private Double journeyTime;
+    private String serviceMode;
+    private String operationMode;
     private String serviceType;
-    private List<Stop> stops;
+    private String locStartNamec;
+    private String locStartNames;
+    private String locStartNamee;
+    private String locEndNamec;
+    private String locEndNames;
+    private String locEndNamee;
+    private Integer routeSeq;
+    @BsonProperty("routeNamee")
+    private String nameEn;
+    @BsonProperty("routeNamec")
+    private String nameTc;
+    @BsonProperty("routeNames")
+    private String nameSc;
 
+
+    private List<Stop> stops;
 
     private Point nearestStop;
     private Integer startIndex;
