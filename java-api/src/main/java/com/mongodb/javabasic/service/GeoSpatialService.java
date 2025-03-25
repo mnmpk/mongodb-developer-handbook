@@ -181,6 +181,7 @@ public class GeoSpatialService {
                 break;
             }
         }
+        logger.info("Direct route suggestion:"+suggestions.toString());
         suggestions.addAll(map.values());
 
         // 2T
@@ -231,17 +232,16 @@ public class GeoSpatialService {
                                     if (!map.containsKey(key)) {
 
                                         Route r2 = Route.builder().routeId(r.getRouteId()).routeSeq(r.getRouteSeq())
-                                                .routeType(r.getRouteType())
-                                                .serviceMode(r.getServiceMode()).serviceType(r.getServiceType())
-                                                .nameEn(r.getNameEn()).nameSc(r.getNameSc())
-                                                .nameTc(r.getNameTc()).locStartNamec(r.getLocStartNamec())
-                                                .locStartNames(r.getLocStartNames())
-                                                .locStartNamee(r.getLocStartNamee()).locEndNamec(r.getLocEndNamec())
-                                                .locEndNames(r.getLocEndNames())
-                                                .locEndNamee(r.getLocEndNamee()).companyCode(r.getCompanyCode())
-                                                .isCircular(r.isCircular())
-                                                .journeyTime(r.getJourneyTime()).operationMode(r.getOperationMode())
-                                                .stops(r.getStops())
+                                        .routeType(r.getRouteType())
+                                        .serviceMode(r.getServiceMode()).serviceType(r.getServiceType())
+                                        .nameEn(r.getNameEn()).nameSc(r.getNameSc())
+                                        .nameTc(r.getNameTc()).locStartNamec(r.getLocStartNamec())
+                                        .locStartNames(r.getLocStartNames())
+                                        .locStartNamee(r.getLocStartNamee()).locEndNamec(r.getLocEndNamec())
+                                        .locEndNames(r.getLocEndNames())
+                                        .locEndNamee(r.getLocEndNamee()).companyCode(r.getCompanyCode())
+                                        .isCircular(r.isCircular())
+                                        .journeyTime(r.getJourneyTime()).operationMode(r.getOperationMode()).stops(r.getStops())
                                                 .startIndex(startIndex)
                                                 .endIndex(endIndex).build();
 
