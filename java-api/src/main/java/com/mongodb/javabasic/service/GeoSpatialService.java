@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.geotools.referencing.GeodeticCalculator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -157,11 +158,12 @@ public class GeoSpatialService {
                             if (!(tr1.getRouteId().equals(tr2.getRouteId()) &&
                                     tr1.getRouteSeq().equals(tr2.getRouteSeq())) &&
                                     tr1.getStartIndex() <= tr1.getEndIndex() && tr2.getStartIndex() <= tr2.getEndIndex()
-                                    && !map.containsKey(key) //Known issue: The first transfer combination may not be the best combination (not the nearest transfer stop)
-                                    ) {
+                                    && (!map.containsKey(key) || distance < map.get(key).getTransferDistance())) {
                                 map.put(key,
-                                        Suggestion.builder().transferStops(List.of(s)).legs(List.of(tr1,
-                                                tr2)).build());
+                                        Suggestion.builder().transferDistance(distance).transferStops(List.of(s))
+                                                .legs(List.of(tr1,
+                                                        tr2))
+                                                .build());
                                 logger.info("adding 1T route " + key);
 
                                 if (map.size() >= maxSuggestions) {
@@ -181,7 +183,7 @@ public class GeoSpatialService {
                 break;
             }
         }
-        logger.info("Direct route suggestion:"+suggestions.toString());
+        logger.info("Direct route suggestion:" + suggestions.toString());
         suggestions.addAll(map.values());
 
         // 2T
@@ -205,50 +207,56 @@ public class GeoSpatialService {
                 + " intermediateRoutes:" + intermediateRoutes.size());
         Map<String, Suggestion> map = new HashMap<>();
         for (Route r : intermediateRoutes) {
-            Map<Position, Stop> startRouteConnectedStops = new LinkedHashMap<>();
-            Map<Position, Stop> endRouteConnectedStops = new LinkedHashMap<>();
+            Map<Position, Pair<Double, Stop>> startRouteConnectedStops = new LinkedHashMap<>();
+            Map<Position, Pair<Double, Stop>> endRouteConnectedStops = new LinkedHashMap<>();
             for (Stop s : r.getStops()) {
                 for (Position p : transfer1Stops.keySet()) {
-                    if (getDistance(p, s.getLocation().getCoordinates()) < walkThreshold) {
-                        startRouteConnectedStops.put(p, s);
+                    double d = getDistance(p, s.getLocation().getCoordinates());
+                    if (d < walkThreshold) {
+                        startRouteConnectedStops.put(p, Pair.of(d, s));
                     }
                 }
                 for (Position p : transfer2Stops.keySet()) {
-                    if (getDistance(p, s.getLocation().getCoordinates()) < walkThreshold) {
-                        endRouteConnectedStops.put(p, s);
+                    double d = getDistance(p, s.getLocation().getCoordinates());
+                    if (d < walkThreshold) {
+                        endRouteConnectedStops.put(p, Pair.of(d, s));
                     }
                 }
             }
             if (startRouteConnectedStops.size() > 0 && endRouteConnectedStops.size() > 0) {
                 for (Position ps : startRouteConnectedStops.keySet()) {
                     for (Position pe : endRouteConnectedStops.keySet()) {
-                        int startIndex = r.getStops().indexOf(startRouteConnectedStops.get(ps));
-                        int endIndex = r.getStops().indexOf(endRouteConnectedStops.get(pe));
+                        Pair<Double, Stop> startStop = startRouteConnectedStops.get(ps);
+                        Pair<Double, Stop> endStop = endRouteConnectedStops.get(pe);
+                        int startIndex = r.getStops().indexOf(startStop.getRight());
+                        int endIndex = r.getStops().indexOf(endStop.getRight());
                         if (startIndex < endIndex) {
                             for (Route sr : transfer1Stops.get(ps)) {
                                 for (Route er : transfer2Stops.get(pe)) {
                                     String key = sr.getRouteId() + ">" + r.getRouteId()
                                             + ">" + er.getRouteId();
-                                    if (!map.containsKey(key)) {
+                                    double totalWalkDistance = startStop.getLeft() + endStop.getLeft();
+                                    if (!map.containsKey(key) || totalWalkDistance < map.get(key).getTransferDistance()) {
 
                                         Route r2 = Route.builder().routeId(r.getRouteId()).routeSeq(r.getRouteSeq())
-                                        .routeType(r.getRouteType())
-                                        .serviceMode(r.getServiceMode()).serviceType(r.getServiceType())
-                                        .nameEn(r.getNameEn()).nameSc(r.getNameSc())
-                                        .nameTc(r.getNameTc()).locStartNamec(r.getLocStartNamec())
-                                        .locStartNames(r.getLocStartNames())
-                                        .locStartNamee(r.getLocStartNamee()).locEndNamec(r.getLocEndNamec())
-                                        .locEndNames(r.getLocEndNames())
-                                        .locEndNamee(r.getLocEndNamee()).companyCode(r.getCompanyCode())
-                                        .isCircular(r.isCircular())
-                                        .journeyTime(r.getJourneyTime()).operationMode(r.getOperationMode()).stops(r.getStops())
+                                                .routeType(r.getRouteType())
+                                                .serviceMode(r.getServiceMode()).serviceType(r.getServiceType())
+                                                .nameEn(r.getNameEn()).nameSc(r.getNameSc())
+                                                .nameTc(r.getNameTc()).locStartNamec(r.getLocStartNamec())
+                                                .locStartNames(r.getLocStartNames())
+                                                .locStartNamee(r.getLocStartNamee()).locEndNamec(r.getLocEndNamec())
+                                                .locEndNames(r.getLocEndNames())
+                                                .locEndNamee(r.getLocEndNamee()).companyCode(r.getCompanyCode())
+                                                .isCircular(r.isCircular())
+                                                .journeyTime(r.getJourneyTime()).operationMode(r.getOperationMode())
+                                                .stops(r.getStops())
                                                 .startIndex(startIndex)
                                                 .endIndex(endIndex).build();
 
                                         map.put(key,
-                                                Suggestion.builder()
-                                                        .transferStops(List.of(startRouteConnectedStops.get(ps),
-                                                                endRouteConnectedStops.get(pe)))
+                                                Suggestion.builder().transferDistance(totalWalkDistance)
+                                                        .transferStops(List.of(startStop.getRight(),
+                                                                endStop.getRight()))
                                                         .legs(List.of(sr, r2, er)).build());
 
                                         logger.info("adding 2T route " + key);

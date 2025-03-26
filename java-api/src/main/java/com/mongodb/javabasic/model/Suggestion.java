@@ -8,6 +8,7 @@ import lombok.Data;
 @Data
 @Builder
 public class Suggestion {
+    private double transferDistance;
     private List<Stop> transferStops;
     private List<Route> legs;
 }
