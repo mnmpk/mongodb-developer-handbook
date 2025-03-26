@@ -17,15 +17,17 @@
     <map-info-window>
         <ng-container *ngIf="selectedStop">
             <ng-container *ngIf="selectedStop.details">
-                {{selectedStop.details.stopId}}<br />
-                {{selectedStop.details.nameTc}}<br />
-                {{selectedStop.details.nameEn}}<br />
+                <div [innerHTML]="selectedStop.details.stopId"></div>
+                <div [innerHTML]="selectedStop.details.nameTc"></div>
+                <div [innerHTML]="selectedStop.details.nameEn"></div>
                 @for (r of selectedStop.routes; track r) {
-                {{r}}<br />
+                    <div [innerHTML]="r"></div>
                 }
             </ng-container>
             <ng-container *ngIf="!selectedStop.details">
-                {{selectedStop?.stopId}}<br />{{selectedStop?.nameTc}}<br />{{selectedStop?.nameEn}}<br />
+                <div [innerHTML]="selectedStop?.stopId"></div>
+                <div [innerHTML]="selectedStop?.nameTc"></div>
+                <div [innerHTML]="selectedStop?.nameEn"></div>
             </ng-container>
         </ng-container>
     </map-info-window>
@@ -42,4 +44,12 @@
         }
         }
     </ng-container>
+
+    @for (walk of walks; track walk) {
+        <map-polyline [path]="walk" [options]="{
+            strokeColor: '#000000',
+            strokeOpacity: 1,
+            strokeWeight: 1,
+          }" />
+        }
 </google-map>

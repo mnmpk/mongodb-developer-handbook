@@ -157,8 +157,8 @@ public class GeoSpatialService {
                             if (!(tr1.getRouteId().equals(tr2.getRouteId()) &&
                                     tr1.getRouteSeq().equals(tr2.getRouteSeq())) &&
                                     tr1.getStartIndex() <= tr1.getEndIndex() && tr2.getStartIndex() <= tr2.getEndIndex()
-                                    &&
-                                    !map.containsKey(key)) {
+                                    && !map.containsKey(key) //Known issue: The first transfer combination may not be the best combination (not the nearest transfer stop)
+                                    ) {
                                 map.put(key,
                                         Suggestion.builder().transferStops(List.of(s)).legs(List.of(tr1,
                                                 tr2)).build());
