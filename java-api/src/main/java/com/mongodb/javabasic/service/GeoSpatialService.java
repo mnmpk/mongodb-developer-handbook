@@ -96,7 +96,8 @@ public class GeoSpatialService {
                     break;
                 }
             }
-            suggestions.addAll(new ArrayList<>(map.values()).subList(0, Math.min(map.size(), maxSuggestions-suggestions.size())));
+            suggestions.addAll(new ArrayList<>(map.values()).subList(0,
+                    Math.min(map.size(), maxSuggestions - suggestions.size())));
             sw.stop();
         }
 
@@ -163,9 +164,6 @@ public class GeoSpatialService {
                                             tr2))
                                     .build());
                     logger.info("adding 1T route " + key);
-                    if (map.size() >= maxSuggestions) {
-                        break;
-                    }
                 }
                 // For 2T
                 excludePositions.add(s.getLocation().getCoordinates());
@@ -175,7 +173,7 @@ public class GeoSpatialService {
 
     private void get2T(List<Suggestion> suggestions, List<Route> startRoutes,
             List<Route> endRoutes, int maxSuggestions) {
-                StopWatch sw = new StopWatch();
+        StopWatch sw = new StopWatch();
         sw.start("getWalkThreshold");
         int walkThreshold = configService.getConfig("TRANSFER_WALK_THRESHOLD", Integer.class).get(0);
         sw.stop();
@@ -241,73 +239,77 @@ public class GeoSpatialService {
         sw.start("process intermediateRoutes");
         for (Route r : intermediateRoutes) {
             cfs.add(CompletableFuture.runAsync(() -> {
-            Map<Position, Pair<Double, Stop>> startRouteConnectedStops = new LinkedHashMap<>();
-            Map<Position, Pair<Double, Stop>> endRouteConnectedStops = new LinkedHashMap<>();
-            for (Stop s : r.getStops()) {
-                for (Position p : transfer1StopMap.keySet()) {
-                    double d = getDistance(p, s.getLocation().getCoordinates());
-                    if (d < walkThreshold) {
-                        startRouteConnectedStops.put(p, Pair.of(d, s));
+                Map<Position, Pair<Double, Stop>> startRouteConnectedStops = new LinkedHashMap<>();
+                Map<Position, Pair<Double, Stop>> endRouteConnectedStops = new LinkedHashMap<>();
+                for (Stop s : r.getStops()) {
+                    for (Position p : transfer1StopMap.keySet()) {
+                        double d = getDistance(p, s.getLocation().getCoordinates());
+                        if (d < walkThreshold) {
+                            startRouteConnectedStops.put(p, Pair.of(d, s));
+                        }
+                    }
+                    for (Position p : transfer2StopMap.keySet()) {
+                        double d = getDistance(p, s.getLocation().getCoordinates());
+                        if (d < walkThreshold) {
+                            endRouteConnectedStops.put(p, Pair.of(d, s));
+                        }
                     }
                 }
-                for (Position p : transfer2StopMap.keySet()) {
-                    double d = getDistance(p, s.getLocation().getCoordinates());
-                    if (d < walkThreshold) {
-                        endRouteConnectedStops.put(p, Pair.of(d, s));
-                    }
-                }
-            }
-            if (startRouteConnectedStops.size() > 0 && endRouteConnectedStops.size() > 0) {
-                for (Position ps : startRouteConnectedStops.keySet()) {
-                    for (Position pe : endRouteConnectedStops.keySet()) {
-                        Pair<Double, Stop> startStop = startRouteConnectedStops.get(ps);
-                        Pair<Double, Stop> endStop = endRouteConnectedStops.get(pe);
-                        int startIndex = r.getStops().indexOf(startStop.getRight());
-                        int endIndex = r.getStops().indexOf(endStop.getRight());
-                        if (startIndex < endIndex) {
-                            for (Route sr : transfer1StopMap.get(ps)) {
-                                for (Route er : transfer2StopMap.get(pe)) {
-                                    String key = sr.getRouteId() + ">" + r.getRouteId()
-                                            + ">" + er.getRouteId();
-                                    double totalWalkDistance = startStop.getLeft() + endStop.getLeft();
-                                    if (!map.containsKey(key)
-                                            || totalWalkDistance < map.get(key).getTransferDistance()) {
+                if (startRouteConnectedStops.size() > 0 && endRouteConnectedStops.size() > 0) {
+                    for (Position ps : startRouteConnectedStops.keySet()) {
+                        for (Position pe : endRouteConnectedStops.keySet()) {
+                            Pair<Double, Stop> startStop = startRouteConnectedStops.get(ps);
+                            Pair<Double, Stop> endStop = endRouteConnectedStops.get(pe);
+                            int startIndex = r.getStops().indexOf(startStop.getRight());
+                            int endIndex = r.getStops().indexOf(endStop.getRight());
+                            if (startIndex < endIndex) {
+                                for (Route sr : transfer1StopMap.get(ps)) {
+                                    for (Route er : transfer2StopMap.get(pe)) {
+                                        String key = sr.getRouteId() + ">" + r.getRouteId()
+                                                + ">" + er.getRouteId();
+                                        double totalWalkDistance = startStop.getLeft() + endStop.getLeft();
+                                        if (!map.containsKey(key)
+                                                || totalWalkDistance < map.get(key).getTransferDistance()) {
 
-                                        Route r2 = Route.builder().routeId(r.getRouteId()).routeSeq(r.getRouteSeq())
-                                                .routeType(r.getRouteType())
-                                                .serviceMode(r.getServiceMode()).serviceType(r.getServiceType())
-                                                .nameEn(r.getNameEn()).nameSc(r.getNameSc())
-                                                .nameTc(r.getNameTc()).locStartNamec(r.getLocStartNamec())
-                                                .locStartNames(r.getLocStartNames())
-                                                .locStartNamee(r.getLocStartNamee()).locEndNamec(r.getLocEndNamec())
-                                                .locEndNames(r.getLocEndNames())
-                                                .locEndNamee(r.getLocEndNamee()).companyCode(r.getCompanyCode())
-                                                .isCircular(r.isCircular())
-                                                .journeyTime(r.getJourneyTime()).operationMode(r.getOperationMode())
-                                                .stops(r.getStops())
-                                                .startIndex(startIndex)
-                                                .endIndex(endIndex).build();
+                                            Route r2 = Route.builder().routeId(r.getRouteId()).routeSeq(r.getRouteSeq())
+                                                    .routeType(r.getRouteType())
+                                                    .serviceMode(r.getServiceMode()).serviceType(r.getServiceType())
+                                                    .nameEn(r.getNameEn()).nameSc(r.getNameSc())
+                                                    .nameTc(r.getNameTc()).locStartNamec(r.getLocStartNamec())
+                                                    .locStartNames(r.getLocStartNames())
+                                                    .locStartNamee(r.getLocStartNamee()).locEndNamec(r.getLocEndNamec())
+                                                    .locEndNames(r.getLocEndNames())
+                                                    .locEndNamee(r.getLocEndNamee()).companyCode(r.getCompanyCode())
+                                                    .isCircular(r.isCircular())
+                                                    .journeyTime(r.getJourneyTime()).operationMode(r.getOperationMode())
+                                                    .stops(r.getStops())
+                                                    .startIndex(startIndex)
+                                                    .endIndex(endIndex).build();
 
-                                        map.put(key,
-                                                Suggestion.builder().transferDistance(totalWalkDistance)
-                                                        .transferStops(List.of(startStop.getRight(),
-                                                                endStop.getRight()))
-                                                        .legs(List.of(sr, r2, er)).build());
+                                            map.put(key,
+                                                    Suggestion.builder().transferDistance(totalWalkDistance)
+                                                            .transferStops(List.of(startStop.getRight(),
+                                                                    endStop.getRight()))
+                                                            .legs(List.of(sr, r2, er)).build());
 
-                                        logger.info("adding 2T route " + key);
+                                            logger.info("adding 2T route " + key);
+                                        }
                                     }
                                 }
                             }
                         }
                     }
                 }
+            }));
+            CompletableFuture.allOf(cfs.toArray(new CompletableFuture<?>[cfs.size()])).join();
+            if (suggestions.size() + map.size() >= maxSuggestions) {
+                break;
             }
-        }));
         }
-        CompletableFuture.allOf(cfs.toArray(new CompletableFuture<?>[cfs.size()])).join();
         sw.stop();
         logger.info(sw.prettyPrint());
-        suggestions.addAll(new ArrayList<>(map.values()).subList(0, Math.min(map.size(), maxSuggestions-suggestions.size())));
+        suggestions.addAll(
+                new ArrayList<>(map.values()).subList(0, Math.min(map.size(), maxSuggestions - suggestions.size())));
     }
 
     private double getDistance(Position from, Position to) {
