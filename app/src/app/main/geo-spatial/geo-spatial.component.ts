@@ -90,22 +90,22 @@ export class GeoSpatialComponent {
             if (startStop) {
               if (!stops[startStop.stopId]) {
                 stops[startStop.stopId] = { details: startStop, routes: [] };
-                stops[startStop.stopId].routes.push(r.legs.map((ll: any) => (l==ll)?("<b>"+ll.companyCode + ":" + ll.nameEn+"</b>"):(ll.companyCode + ":" + ll.nameEn)).join(">"));
               }
+              stops[startStop.stopId].routes.push(r.legs.map((ll: any) => (l == ll) ? ("<b>" + ll.companyCode + ":" + ll.nameEn + "</b>") : (ll.companyCode + ":" + ll.nameEn)).join(">"));
               if (i == 0 && !stops[startStop.stopId].start)
                 stops[startStop.stopId].start = true;
             }
             if (endStop) {
               if (!stops[endStop.stopId]) {
                 stops[endStop.stopId] = { details: endStop, routes: [] };
-                stops[endStop.stopId].routes.push(r.legs.map((ll: any) => (l==ll)?("<b>"+ll.companyCode + ":" + ll.nameEn+"</b>"):(ll.companyCode + ":" + ll.nameEn)).join(">"));
-              }
+              } 
+              stops[endStop.stopId].routes.push(r.legs.map((ll: any) => (l == ll) ? ("<b>" + ll.companyCode + ":" + ll.nameEn + "</b>") : (ll.companyCode + ":" + ll.nameEn)).join(">"));
               if (i == r.legs.length - 1 && !stops[endStop.stopId].end)
                 stops[endStop.stopId].end = true;
             }
 
-            if(i>0 && i<=r.legs.length-1){
-              const prevLegEndStop = r.legs[i-1].stops[r.legs[i-1].endIndex];
+            if (i > 0 && i <= r.legs.length - 1) {
+              const prevLegEndStop = r.legs[i - 1].stops[r.legs[i - 1].endIndex];
               this.walks.push([{ lat: prevLegEndStop.location.position.values[1], lng: prevLegEndStop.location.position.values[0] }, { lat: l.stops[l.startIndex].location.position.values[1], lng: l.stops[l.startIndex].location.position.values[0] }]);
             }
           });
