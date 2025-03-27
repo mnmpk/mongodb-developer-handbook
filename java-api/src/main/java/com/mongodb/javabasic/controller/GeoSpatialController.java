@@ -3,6 +3,9 @@ package com.mongodb.javabasic.controller;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +20,7 @@ import com.mongodb.javabasic.service.GeoSpatialService;
 import com.mongodb.javabasic.model.Stop;
 import com.mongodb.javabasic.model.Suggestion;
 import com.mongodb.javabasic.model.Route;
+import com.mongodb.javabasic.model.Stat;
 
 @RestController
 @RequestMapping(path = "/geo-spatial")
@@ -36,12 +40,29 @@ public class GeoSpatialController {
     }
 
     @PostMapping("/routes")
-    public List<Suggestion> getRoutes(@RequestBody Map<String,double[]> map) {
-        List<Route> startRoutes = this.getRoutes(map.get("start")[1], map.get("start")[0]);
-        List<Route> endRoutes = this.getRoutes(map.get("end")[1], map.get("end")[0]);
-        List<Suggestion> suggestions = new ArrayList<>();
-        suggestions.addAll(geoSpatialService.getRouteSuggestions(startRoutes, endRoutes));
-        return suggestions;
+    public List<Suggestion> getRoutes(@RequestBody Map<String, double[]> map) {
+        var cfs = new ArrayList<CompletableFuture<List<Route>>>();
+        cfs.add(CompletableFuture.supplyAsync(() -> {
+            return this.getRoutes(map.get("start")[1], map.get("start")[0]);
+        }));
+        cfs.add(CompletableFuture.supplyAsync(() -> {
+            return this.getRoutes(map.get("end")[1], map.get("end")[0]);
+        }));
+        return CompletableFuture
+                .allOf(cfs.toArray(new CompletableFuture<?>[cfs.size()]))
+                .thenApply(v -> {
+                    try {
+                        return geoSpatialService.getRouteSuggestions(cfs.get(0).get(), cfs.get(1).get());
+                    } catch (InterruptedException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    } catch (ExecutionException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                    return null;
+                }).join();
+
     }
 
 }

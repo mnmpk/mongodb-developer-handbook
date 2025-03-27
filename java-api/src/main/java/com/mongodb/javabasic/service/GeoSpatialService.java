@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StopWatch;
 
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.geojson.MultiPoint;
@@ -53,7 +54,9 @@ public class GeoSpatialService {
         int maxSuggestions = configService.getConfig("MAX_SUGGESTIONS", Integer.class).get(0);
         List<Suggestion> suggestions = new ArrayList<>();
 
+        StopWatch sw = new StopWatch();
         // For 2T
+        sw.start("Create transfer1StopMap");
         final Map<Position, List<Route>> transfer1StopMap = new ConcurrentHashMap<>();
         startRoutes.forEach(r -> {
             for (int i = r.getStartIndex(); i < r.getStops().size(); i++) {
@@ -76,6 +79,8 @@ public class GeoSpatialService {
                                 .endIndex(i).build());
             }
         });
+        sw.stop();
+        sw.start("Create transfer2StopMap");
         final Map<Position, List<Route>> transfer2StopMap = new ConcurrentHashMap<>();
         endRoutes.forEach(r -> {
             for (int i = 0; i <= r.getStartIndex(); i++) {
@@ -97,9 +102,10 @@ public class GeoSpatialService {
                                 .endIndex(r.getStartIndex()).build());
             }
         });
+        sw.stop();
 
+        sw.start("Direct route+1T");
         Map<String, Suggestion> map = new HashMap<>();
-
         for (Route r : startRoutes) {
             List<Position> rStopList = new ArrayList<>();
             r.getStops().stream().forEach(s -> rStopList.add(s.getLocation().getCoordinates()));
@@ -185,11 +191,16 @@ public class GeoSpatialService {
         }
         logger.info("Direct route suggestion:" + suggestions.toString());
         suggestions.addAll(map.values());
+        sw.stop();
 
         // 2T
+        sw.start("2T");
         if (suggestions.size() < maxSuggestions)
             this.get2T(suggestions, transfer1StopMap, transfer2StopMap);
+        sw.stop();
 
+
+        logger.info(sw.prettyPrint());
         return suggestions;
     }
 
@@ -236,7 +247,8 @@ public class GeoSpatialService {
                                     String key = sr.getRouteId() + ">" + r.getRouteId()
                                             + ">" + er.getRouteId();
                                     double totalWalkDistance = startStop.getLeft() + endStop.getLeft();
-                                    if (!map.containsKey(key) || totalWalkDistance < map.get(key).getTransferDistance()) {
+                                    if (!map.containsKey(key)
+                                            || totalWalkDistance < map.get(key).getTransferDistance()) {
 
                                         Route r2 = Route.builder().routeId(r.getRouteId()).routeSeq(r.getRouteSeq())
                                                 .routeType(r.getRouteType())
