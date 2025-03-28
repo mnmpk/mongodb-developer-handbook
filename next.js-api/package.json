@@ -11,9 +11,10 @@
   "dependencies": {
     "jose": "^6.0.8",
     "mongodb": "^6.14.2",
-    "next": "15.2.1",
+    "next": "^15.2.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "redis": "^4.7.0",
     "tsp-app": "file:"
   },
   "devDependencies": {

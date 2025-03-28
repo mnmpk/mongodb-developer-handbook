@@ -22,6 +22,6 @@
       "@/*": ["./*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "next.config.ts", "app/lib/mongo-cache-handler.js", "app/lib/redis-cache-handler.js", "app/lib/database.js"],
   "exclude": ["node_modules"]
 }
