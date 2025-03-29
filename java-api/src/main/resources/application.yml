@@ -40,6 +40,11 @@ settings:
   corePoolsize: 10 
   maxPoolSize: 30
   queueSize: 100000
+  instance-group:
+    collection: "_instances"
+    heartbeat:
+      interval: 2000
+    maxTimeout: 10000
   changeStream:
     batchSize: 10000
     maxAwaitTime: 800
