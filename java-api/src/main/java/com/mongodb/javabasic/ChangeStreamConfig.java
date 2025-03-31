@@ -22,6 +22,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.BulkWriteOptions;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Sorts;
 import com.mongodb.client.model.UpdateOneModel;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.model.Updates;
@@ -46,6 +47,9 @@ public class ChangeStreamConfig {
         @Value("${settings.changeStream.watchColls}")
         private String[] watchColls;
 
+        @Value("${settings.instance-group.collection}")
+        private String heartbeatColl;
+
         private Logger logger = LoggerFactory.getLogger(getClass());
 
         @Autowired
@@ -53,6 +57,22 @@ public class ChangeStreamConfig {
 
         @Autowired
         private AggregationService aggregationService;
+
+        @PostConstruct
+        public void monitorHeartbeat() throws Exception {
+                logger.info("Start watching:" + heartbeatColl);
+                new Thread(()->{
+                        mongoTemplate.getCollection(heartbeatColl).watch(List.of(Aggregates.match(
+                                Filters.in("operationType", List.of("insert", "delete")))), Document.class)
+                                .forEach((e) -> {
+                                        String podName = System.getenv("HOSTNAME");
+                                        List<String> activePods = mongoTemplate.getCollection(heartbeatColl).find()
+                                                        .sort(Sorts.ascending("_id")).map(i -> i.getString("_id"))
+                                                        .into(new ArrayList<>());
+                                        logger.info("Current active pods: "+ activePods+ ", Index of this pod: "+ activePods.indexOf(podName) + ", Pod Name: "+ podName);
+                                });
+                }).start();
+        }
 
         @PostConstruct
         public void startChangeStream() throws Exception {
