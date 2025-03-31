@@ -85,21 +85,6 @@ app.get('/put', s.put);
 app.get('/clear', s.clear);
 app.get('/logout', s.logout);
 
-app.get('/session', async (req, res) => {
-  if (req.session.principal) {
-    req.session.shareData.search.push(req.query['s']);
-    req.session.shareData.views++;
-    res.status(200);
-    res.write(JSON.stringify(req.session.shareData));
-    res.end();
-    //res.send("views: " + req.session.views);
-  } else {
-
-    res.status(200);
-    res.end('Please login first');
-  }
-});
-
 
 
 app.get('/stable-api', require('./controllers/stable-api').stableAPI);
