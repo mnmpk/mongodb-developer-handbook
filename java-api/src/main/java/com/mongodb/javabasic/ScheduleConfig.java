@@ -41,7 +41,7 @@ public class ScheduleConfig {
 
     }
 
-    @Scheduled(fixedRateString = "${settings.instance-group.heartbest.interval}")
+    @Scheduled(fixedRateString = "${settings.instance-group.heartbeat.interval}")
     private void heartbeat() {
         String podName = System.getenv("HOSTNAME");
         mongoTemplate.getCollection(collection).updateOne(Filters.eq("_id", podName),
