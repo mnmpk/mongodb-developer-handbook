@@ -14,6 +14,8 @@ management:
     rabbit:
       enabled: false
 spring:
+  profiles:
+    active: mongo
   data:
     mongodb:
       uri: "mongodb+srv://dev:${DATABASE_PASSWORD}@demo.uskpz.mongodb.net/"
