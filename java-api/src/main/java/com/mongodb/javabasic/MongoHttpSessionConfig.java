@@ -1,6 +1,5 @@
 package com.mongodb.javabasic;
 
-import java.time.Duration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,10 +16,14 @@ public class MongoHttpSessionConfig {
 	/*@Bean
 	public JdkMongoSessionConverter jdkMongoSessionConverter() {
 		return new JdkMongoSessionConverter(Duration.ofMinutes(30));
-	}*/
+	}
 	@Bean
 	public JacksonMongoSessionConverter jacksonMongoSessionConverter() {
 		return new JacksonMongoSessionConverter();
+	}*/
+	@Bean
+	public MongoSessionConverter mongoSessionConverter() {
+		return new MongoSessionConverter();
 	}
 
 }
