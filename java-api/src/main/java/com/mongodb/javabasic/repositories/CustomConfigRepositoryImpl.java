@@ -14,7 +14,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
+import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoIterable;
 import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Projections;
@@ -29,7 +31,7 @@ public class CustomConfigRepositoryImpl<T> implements CustomConfigRepository<T> 
         private CodecRegistry pojoCodecRegistry;
 
         @Override
-        public List<T> getConfig(Class<T> clazz) {
+        public List<T> getConfigs(Class<T> clazz) {
                 MongoCollection<T> coll = mongoTemplate.getDb()
                                 .getCollection(mongoTemplate.getCollectionName(Config.class), clazz);
                 return coll.aggregate(
@@ -38,9 +40,18 @@ public class CustomConfigRepositoryImpl<T> implements CustomConfigRepository<T> 
                                 .into(new ArrayList<>());
         }
 
-        @SuppressWarnings({ "unchecked" })
         @Override
-        public List<T> getConfig(List<Entry<String, List<String>>> entries, Class<T> clazz) {
+        public List<T> getConfigs(List<Entry<String, List<String>>> entries, Class<T> clazz) {
+                return getMongoIterable(entries, clazz).into(new ArrayList<>());
+        }
+
+        @Override
+        public T getConfig(List<Entry<String, List<String>>> entries, Class<T> clazz) {
+                return getMongoIterable(entries, clazz).first();
+        }
+
+        @SuppressWarnings({ "unchecked" })
+        private MongoIterable<T> getMongoIterable(List<Entry<String, List<String>>> entries, Class<T> clazz) {
                 List<Bson> filters = new ArrayList<>();
                 for (Entry<String, List<String>> entry : entries) {
                         filters.add(Filters.and(
@@ -60,11 +71,13 @@ public class CustomConfigRepositoryImpl<T> implements CustomConfigRepository<T> 
                                                 return (T) Double.valueOf(d.getDouble("value").getValue());
                                         } else if (clazz == String.class) {
                                                 return (T) d.getString("value").getValue();
+                                        } else if (clazz == Boolean.class) {
+                                                return (T) (Boolean) d.getBoolean("value").getValue();
                                         }
                                         return pojoCodecRegistry.get(clazz).decode(
                                                         d.getDocument("value").asBsonReader(),
                                                         DecoderContext.builder().build());
-                                }).into(new ArrayList<>());
+                                });
 
         }
 }

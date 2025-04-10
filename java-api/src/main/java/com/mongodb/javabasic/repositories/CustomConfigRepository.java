@@ -5,6 +5,7 @@ import java.util.Map.Entry;
 
 public interface CustomConfigRepository<T> {
 
-    public List<T> getConfig(Class<T> clazz);
-    public List<T> getConfig(List<Entry<String, List<String>>> entries, Class<T> clazz);
+    public List<T> getConfigs(Class<T> clazz);
+    public List<T> getConfigs(List<Entry<String, List<String>>> entries, Class<T> clazz);
+    public T getConfig(List<Entry<String, List<String>>> entries, Class<T> clazz);
 }

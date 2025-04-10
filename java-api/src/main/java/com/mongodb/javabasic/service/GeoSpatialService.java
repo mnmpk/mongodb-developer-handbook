@@ -37,23 +37,26 @@ public class GeoSpatialService {
     private AggregationService aggregationService;
     @Autowired
     private ConfigService<Integer> configService;
+    @Autowired
+    private ConfigService<Boolean> bConfigService;
 
     public List<Stop> getStops(double lat, double lng) {
+        Integer searchThreshold = configService.getConfig("SEARCH_THRESHOLD", Integer.class);
         return mongoTemplate.getCollection(mongoTemplate.getCollectionName(Stop.class)).withDocumentClass(Stop.class)
-                .find(Filters.nearSphere("location", new Point(new Position(lng, lat)), 500d, 0d))
+                .find(Filters.nearSphere("location", new Point(new Position(lng, lat)), (double) searchThreshold, 0d))
                 .into(new ArrayList<>());
     }
 
     public List<Route> getRoutes(double lat, double lng) {
-        int searchThreshold = configService.getConfig("SEARCH_THRESHOLD", Integer.class).get(0);
+        Integer searchThreshold = configService.getConfig("SEARCH_THRESHOLD", Integer.class);
 
         return aggregationService.getPipelineResults(mongoTemplate.getCollectionName(Route.class), "direct-route.json",
                 Route.class, Map.of("lat", lat, "lng", lng, "maxDistance", searchThreshold));
     }
 
     public List<Suggestion> getRouteSuggestions(List<Route> startRoutes, List<Route> endRoutes) {
-        int searchThreshold = configService.getConfig("SEARCH_THRESHOLD", Integer.class).get(0);
-        int maxSuggestions = configService.getConfig("MAX_SUGGESTIONS", Integer.class).get(0);
+        Integer searchThreshold = configService.getConfig("SEARCH_THRESHOLD", Integer.class);
+        Integer maxSuggestions = configService.getConfig("MAX_SUGGESTIONS", Integer.class);
         List<Suggestion> suggestions = new ArrayList<>();
 
         StopWatch sw = new StopWatch();
@@ -100,9 +103,9 @@ public class GeoSpatialService {
                     Math.min(map.size(), maxSuggestions - suggestions.size())));
             sw.stop();
         }
-
+        Boolean is2TEnable = bConfigService.getConfig("2T_ENABLE", Boolean.class);
         // 2T
-        if (suggestions.size() < maxSuggestions) {
+        if (suggestions.size() < maxSuggestions && (is2TEnable != null && is2TEnable)) {
             sw.start("2T");
             this.get2T(suggestions, startRoutes, endRoutes, maxSuggestions);
             sw.stop();
@@ -175,7 +178,7 @@ public class GeoSpatialService {
             List<Route> endRoutes, int maxSuggestions) {
         StopWatch sw = new StopWatch();
         sw.start("getWalkThreshold");
-        int walkThreshold = configService.getConfig("TRANSFER_WALK_THRESHOLD", Integer.class).get(0);
+        int walkThreshold = configService.getConfig("TRANSFER_WALK_THRESHOLD", Integer.class);
         sw.stop();
         // For 2T
         sw.start("transfer1StopMap");

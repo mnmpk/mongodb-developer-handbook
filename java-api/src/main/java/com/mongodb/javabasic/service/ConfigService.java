@@ -18,14 +18,19 @@ public class ConfigService<T> {
 
     public List<T> getConfig(Map<String, String> allParams, Class<T> clazz) {
         if (allParams.size() > 0) {
-            return configRepository.getConfig(allParams.entrySet().stream()
+            return configRepository.getConfigs(allParams.entrySet().stream()
                     .map(e -> Map.entry(e.getKey(), Arrays.asList(e.getValue().split(",")))).toList(), clazz);
         }
-        return configRepository.getConfig(clazz);
+        return configRepository.getConfigs(clazz);
     }
 
     @Cacheable(value = "config")
-    public List<T> getConfig(String key, Class<T> clazz) {
+    public List<T> getConfigs(String key, Class<T> clazz) {
+        return configRepository.getConfigs(List.of(Map.entry("key", List.of(key))), clazz);
+    }
+    
+    @Cacheable(value = "config")
+    public T getConfig(String key, Class<T> clazz) {
         return configRepository.getConfig(List.of(Map.entry("key", List.of(key))), clazz);
     }
 }
