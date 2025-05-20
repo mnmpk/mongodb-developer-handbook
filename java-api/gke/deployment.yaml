@@ -19,7 +19,7 @@ spec:
         imagePullPolicy: Always
         env:
         - name: SPRING_PROFILES_ACTIVE
-          value: "scheduler,mongo"
+          value: "scheduler,mongo,changeStream"
         - name: DATABASE_PASSWORD
           value: "${DATABASE_PASSWORD}"
         - name: POD_NAME
