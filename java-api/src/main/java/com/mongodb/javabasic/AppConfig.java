@@ -74,7 +74,7 @@ public class AppConfig {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**").allowedOrigins("http://localhost:4200", "https://mongodb-handbook.mzinx.com/")
+                registry.addMapping("/**").allowedOrigins("http://localhost:4200", "https://mongodb-handbook.mzinx.com/", "https://mongodb-japi.mzinx.com/")
                         .allowedMethods("*")
                         .allowedHeaders("*")
                         .allowCredentials(true);
