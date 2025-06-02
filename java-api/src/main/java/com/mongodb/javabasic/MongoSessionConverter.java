@@ -15,6 +15,8 @@ import org.bson.codecs.DecoderContext;
 import org.bson.codecs.EncoderContext;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.io.BasicOutputBuffer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.convert.MongoConverter;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -23,16 +25,16 @@ import org.springframework.session.FindByIndexNameSessionRepository;
 import org.springframework.session.data.mongo.AbstractMongoSessionConverter;
 import org.springframework.session.data.mongo.MongoSession;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.mongodb.javabasic.model.SessionsEntity;
 
 public class MongoSessionConverter extends AbstractMongoSessionConverter {
+	private final Logger logger = LoggerFactory.getLogger(getClass());
+    private static final String ATTRS_FIELD_NAME = "attrs.";
+    private static final String SESSION_ENTITY_ATTR_NAME = "data";
     private static final String PRINCIPAL_FIELD_NAME = "principal";
 
-    @Autowired
-    private CodecRegistry pojoCodecRegistry;
     @Autowired
     MongoConverter mongoConverter;
 
@@ -41,44 +43,28 @@ public class MongoSessionConverter extends AbstractMongoSessionConverter {
         if (FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME.equals(indexName)) {
             return Query.query(Criteria.where(PRINCIPAL_FIELD_NAME).is(indexValue));
         } else {
-            return Query.query(Criteria.where(indexName).is(indexValue));
+            return Query.query(Criteria.where(ATTRS_FIELD_NAME+indexName).is(indexValue));
         }
     }
 
     @Override
     protected DBObject convert(MongoSession session) {
-        SessionsEntity sessionEntity = new SessionsEntity();
-        sessionEntity.setId(session.getId());
-        sessionEntity.setCreationTime(session.getCreationTime());
-        sessionEntity.setLastAccessedTime(session.getLastAccessedTime());
-        sessionEntity.setExpireAt(
-                Date.from(session.getLastAccessedTime().plusSeconds(session.getMaxInactiveInterval().getSeconds())));
-        sessionEntity.setExpireAfterSeconds(session.getMaxInactiveInterval().getSeconds());
-        sessionEntity.setData(new LinkedHashMap<String, Object>());
-        for (String attr : session.getAttributeNames()) {
-            sessionEntity.getData().put(attr, session.getAttribute(attr));
-        }
         BasicDBObject dbObj=new BasicDBObject();
-        mongoConverter.write(sessionEntity, dbObj);
+        dbObj.put(PRINCIPAL_FIELD_NAME, extractPrincipal(session));
+        //dbObj.put(EXPIRE_AT_FIELD_NAME, session.getExpireAt());
+        mongoConverter.write(session, dbObj);
         return dbObj;
-        /*BsonDocumentWriter bsonWriter = new BsonDocumentWriter(new BsonDocument());
-        pojoCodecRegistry.get(SessionsEntity.class).encode(bsonWriter, sessionEntity,
-                EncoderContext.builder().build());
-        return new BasicDBObject(bsonWriter.getDocument());*/
-
     }
 
     @Override
     protected MongoSession convert(Document sessionWrapper) {
-        SessionsEntity s = mongoConverter.read(SessionsEntity.class, sessionWrapper);
-        /*SessionsEntity s = pojoCodecRegistry.get(SessionsEntity.class).decode(
-                sessionWrapper.toBsonDocument().asBsonReader(),
-                DecoderContext.builder().build());*/
-        MongoSession session = new MongoSession(s.getId(), s.getCreationTime().toEpochMilli());
-        session.setLastAccessedTime(s.getLastAccessedTime());
-        session.setMaxInactiveInterval(Duration.of(s.getExpireAfterSeconds(), ChronoUnit.SECONDS));
-        for (String attr : s.getData().keySet()) {
-            session.setAttribute(attr, s.getData().get(attr));
+        MongoSession session = new MongoSession(sessionWrapper.getString("_id"));
+        Document attrs = sessionWrapper.get("attrs", Document.class);
+        if(sessionWrapper!=null && attrs!=null && attrs.containsKey(SESSION_ENTITY_ATTR_NAME)) {
+            SessionsEntity s = mongoConverter.read(SessionsEntity.class, attrs.get(SESSION_ENTITY_ATTR_NAME, Document.class));
+            session.setAttribute(SESSION_ENTITY_ATTR_NAME, s);
+        }else{
+            session.setAttribute(SESSION_ENTITY_ATTR_NAME, new SessionsEntity());
         }
         return session;
 

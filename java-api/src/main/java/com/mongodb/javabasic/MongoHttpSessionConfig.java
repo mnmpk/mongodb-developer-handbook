@@ -16,8 +16,8 @@ public class MongoHttpSessionConfig {
 	/*@Bean
 	public JdkMongoSessionConverter jdkMongoSessionConverter() {
 		return new JdkMongoSessionConverter(Duration.ofMinutes(30));
-	}
-	@Bean
+	}*/
+	/*@Bean
 	public JacksonMongoSessionConverter jacksonMongoSessionConverter() {
 		return new JacksonMongoSessionConverter();
 	}*/
