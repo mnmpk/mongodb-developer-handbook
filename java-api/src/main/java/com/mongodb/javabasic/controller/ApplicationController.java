@@ -33,11 +33,12 @@ public class ApplicationController {
                 return "OK";
         }
 
+        //Simulate CPU bound tasks: smaller wait time, TPS result should larger with less threads
+        //Simulate IO bound tasks: larger wait time, TPS result should larger with more threads
         @GetMapping("/threads")
         public String threads(@RequestParam(required = false, defaultValue = "100") int noOfThreads,
-                        @RequestParam(required = false, defaultValue = "1000") double noOfTasks,
-                        @RequestParam(required = false, defaultValue = "100") int serviceTime,
-                        @RequestParam(required = false, defaultValue = "100") int waitTime) {
+                        @RequestParam(required = false, defaultValue = "10000") double noOfTasks,
+                        @RequestParam(required = false, defaultValue = "10") int waitTime) {
                 ExecutorService es = Executors.newFixedThreadPool(noOfThreads);
                 StopWatch stopWatch = new StopWatch();
                 stopWatch.start();
@@ -47,7 +48,13 @@ public class ApplicationController {
                                 public void run() {
                                         try {
                                                 // Simulate service time
-                                                Thread.sleep(serviceTime);
+                                                StopWatch s = new StopWatch();
+                                                s.start();
+                                                for (int j = 0; j < 1000; j++) {
+                                                        double result = Math.sqrt(Math.pow(Math.random(), 2)
+                                                                        + Math.pow(Math.random(), 2));
+                                                }
+                                                s.stop();
                                                 // Simulate wait time
                                                 Thread.sleep(waitTime);
                                         } catch (InterruptedException e) {
@@ -80,7 +87,7 @@ public class ApplicationController {
                 } catch (InterruptedException e) {
                         // TODO Auto-generated catch block
                         e.printStackTrace();
-                }finally {
+                } finally {
                         if (!es.isTerminated()) {
                                 es.shutdownNow();
                         }
