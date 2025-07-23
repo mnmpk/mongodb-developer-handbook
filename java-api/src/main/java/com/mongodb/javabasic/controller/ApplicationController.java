@@ -1,5 +1,6 @@
 package com.mongodb.javabasic.controller;
 
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -38,7 +39,8 @@ public class ApplicationController {
         @GetMapping("/threads")
         public String threads(@RequestParam(required = false, defaultValue = "100") int noOfThreads,
                         @RequestParam(required = false, defaultValue = "10000") double noOfTasks,
-                        @RequestParam(required = false, defaultValue = "10") int waitTime) {
+                        @RequestParam(required = false, defaultValue = "10") int serviceTime,
+                        @RequestParam(required = false, defaultValue = "20") int waitTime) {
                 ExecutorService es = Executors.newFixedThreadPool(noOfThreads);
                 StopWatch stopWatch = new StopWatch();
                 stopWatch.start();
@@ -48,13 +50,11 @@ public class ApplicationController {
                                 public void run() {
                                         try {
                                                 // Simulate service time
-                                                StopWatch s = new StopWatch();
-                                                s.start();
-                                                for (int j = 0; j < 1000; j++) {
+                                                long start = new Date().getTime();
+                                                while (new Date().getTime()-start<serviceTime) {
                                                         double result = Math.sqrt(Math.pow(Math.random(), 2)
                                                                         + Math.pow(Math.random(), 2));
                                                 }
-                                                s.stop();
                                                 // Simulate wait time
                                                 Thread.sleep(waitTime);
                                         } catch (InterruptedException e) {
