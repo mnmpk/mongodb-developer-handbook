@@ -149,4 +149,10 @@ public class ApplicationController {
 
         // Search
         // Create index
+
+        // Application framework:
+        // RBAC, FBAC, DBAC
+        // Application Parameters
+        // Translations
+        // Stream processing
 }
