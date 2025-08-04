@@ -43,28 +43,28 @@ public class SessionController {
         @GetMapping("/put")
         public Object put(HttpServletRequest request, HttpServletResponse response, HttpSession session,
                         @RequestParam("s") String search) {
-                Map<String, Object> doc = initSharedData(session);
+                Map<String, Object> doc = initData(session);
                 if (search != null)
                         ((List<String>) doc.get("search")).add(search);
                 String podName = System.getenv("HOSTNAME");
                 doc.put("podName", podName);
                 doc.put("views", (int) doc.get("views") + 1);
-                session.setAttribute("shareData", doc);
+                session.setAttribute("data", doc);
                 return new Document("principal",
                                 SecurityContextHolder.getContext().getAuthentication() != null
                                                 ? SecurityContextHolder.getContext().getAuthentication().getName()
                                                 : "")
-                                .append("data", session.getAttribute("shareData"));
+                                .append("data", session.getAttribute("data"));
         }
 
         @GetMapping("/clear")
         public Object clear(HttpServletRequest request, HttpServletResponse response, HttpSession session) {
-                session.removeAttribute("shareData");
+                session.removeAttribute("data");
                 return new Document("principal",
                                 SecurityContextHolder.getContext().getAuthentication() != null
                                                 ? SecurityContextHolder.getContext().getAuthentication().getName()
                                                 : "")
-                                .append("data", session.getAttribute("shareData"));
+                                .append("data", session.getAttribute("data"));
         }
 
         @GetMapping("/login")
@@ -77,14 +77,14 @@ public class SessionController {
                 context.setAuthentication(auth);
                 SecurityContextHolder.setContext(context);
 
-                Map<String, Object> doc = initSharedData(session);
-                populateShareData(session, doc);
+                Map<String, Object> doc = initData(session);
+                populateData(session, doc);
                 securityContextRepository.saveContext(context, request, response);
                 return new Document("principal",
                                 SecurityContextHolder.getContext().getAuthentication() != null
                                                 ? SecurityContextHolder.getContext().getAuthentication().getName()
                                                 : "")
-                                .append("data", session.getAttribute("shareData"));
+                                .append("data", session.getAttribute("data"));
         }
 
         @GetMapping("/logout")
@@ -100,11 +100,11 @@ public class SessionController {
                                 SecurityContextHolder.getContext().getAuthentication() != null
                                                 ? SecurityContextHolder.getContext().getAuthentication().getName()
                                                 : "")
-                                .append("data", session.getAttribute("shareData"));
+                                .append("data", session.getAttribute("data"));
         }
 
-        private Map<String, Object> initSharedData(HttpSession session) {
-                Map<String, Object> doc = (LinkedHashMap<String, Object>) session.getAttribute("shareData");
+        private Map<String, Object> initData(HttpSession session) {
+                Map<String, Object> doc = (LinkedHashMap<String, Object>) session.getAttribute("data");
                 if (doc == null) {
                         doc = new LinkedHashMap<>();
                         doc.putAll(Map.of("search", new ArrayList<>(), "views", 1, "channel", "mob"));
@@ -112,17 +112,17 @@ public class SessionController {
                 return doc;
         }
 
-        private void populateShareData(HttpSession session, Map<String, Object> map) {
+        private void populateData(HttpSession session, Map<String, Object> map) {
                 String name = SecurityContextHolder.getContext().getAuthentication().getName();
                 Document doc = mongoTemplate.getCollection("sessions")
                                 .find(Filters.and(Filters.eq("session.principal", name),
-                                                Filters.eq("session.shareData.channel", "web")))
+                                                Filters.eq("session.data.channel", "web")))
                                 .first();
                 if (doc != null) {
-                        Document shareData = doc.get("session", Document.class).get("shareData", Document.class);
+                        Document data = doc.get("session", Document.class).get("data", Document.class);
                         ((List<String>) map.get("search")).addAll(
-                                        shareData.getList("search", String.class));
-                        map.put("views", (int) map.get("views") + shareData.get("views", Integer.class));
+                                        data.getList("search", String.class));
+                        map.put("views", (int) map.get("views") + data.get("views", Integer.class));
                 }
         }
 }

@@ -1,5 +1,7 @@
 package com.mongodb.javabasic;
 
+import static org.springframework.session.data.mongo.AbstractMongoSessionConverter.SPRING_SECURITY_CONTEXT;
+
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -27,12 +29,10 @@ import org.springframework.session.data.mongo.MongoSession;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
-import com.mongodb.javabasic.model.SessionsEntity;
 
 public class MongoSessionConverter extends AbstractMongoSessionConverter {
-	private final Logger logger = LoggerFactory.getLogger(getClass());
+    private final Logger logger = LoggerFactory.getLogger(getClass());
     private static final String ATTRS_FIELD_NAME = "attrs.";
-    private static final String SESSION_ENTITY_ATTR_NAME = "data";
     private static final String PRINCIPAL_FIELD_NAME = "principal";
 
     @Autowired
@@ -43,15 +43,16 @@ public class MongoSessionConverter extends AbstractMongoSessionConverter {
         if (FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME.equals(indexName)) {
             return Query.query(Criteria.where(PRINCIPAL_FIELD_NAME).is(indexValue));
         } else {
-            return Query.query(Criteria.where(ATTRS_FIELD_NAME+indexName).is(indexValue));
+            return Query.query(Criteria.where(ATTRS_FIELD_NAME + indexName).is(indexValue));
         }
     }
 
     @Override
     protected DBObject convert(MongoSession session) {
-        BasicDBObject dbObj=new BasicDBObject();
+        BasicDBObject dbObj = new BasicDBObject();
         dbObj.put(PRINCIPAL_FIELD_NAME, extractPrincipal(session));
-        //dbObj.put(EXPIRE_AT_FIELD_NAME, session.getExpireAt());
+        // dbObj.put(EXPIRE_AT_FIELD_NAME, session.getExpireAt());
+
         mongoConverter.write(session, dbObj);
         return dbObj;
     }
@@ -60,11 +61,18 @@ public class MongoSessionConverter extends AbstractMongoSessionConverter {
     protected MongoSession convert(Document sessionWrapper) {
         MongoSession session = new MongoSession(sessionWrapper.getString("_id"));
         Document attrs = sessionWrapper.get("attrs", Document.class);
-        if(sessionWrapper!=null && attrs!=null && attrs.containsKey(SESSION_ENTITY_ATTR_NAME)) {
-            SessionsEntity s = mongoConverter.read(SessionsEntity.class, attrs.get(SESSION_ENTITY_ATTR_NAME, Document.class));
-            session.setAttribute(SESSION_ENTITY_ATTR_NAME, s);
-        }else{
-            session.setAttribute(SESSION_ENTITY_ATTR_NAME, new SessionsEntity());
+        logger.info("attrs: {}", attrs);
+        if (sessionWrapper != null && attrs != null) {
+
+            attrs.keySet().forEach(key -> {
+                if ("SPRING_SECURITY_CONTEXT".equals(key)) {
+                    logger.info("key: {}, value: {}", key, attrs.get(key));
+                } else {
+                    session.setAttribute(key, mongoConverter.read(LinkedHashMap.class,
+                            attrs.get(key, Document.class)));
+                }
+            });
+
         }
         return session;
 
