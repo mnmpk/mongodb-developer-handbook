@@ -1,0 +1,22 @@
+<div class="flex-fill d-flex flex-column">
+    <form [formGroup]="form" submit="return false;">
+        <div class="flex-fill d-flex flex-column">
+            <h1>Thread</h1>
+            <mat-form-field>
+                <mat-label>Size</mat-label>
+                <input matInput type="number" formControlName="size">
+            </mat-form-field>
+            <div class="flex-fill d-flex flex-column">
+                <div class="d-flex flex-column justify-content-around">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <button type="button" mat-flat-button [disabled]="form.invalid"
+                                (click)="submit()"><mat-icon>check</mat-icon>Submit</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+    <app-metrics></app-metrics>
+</div>
