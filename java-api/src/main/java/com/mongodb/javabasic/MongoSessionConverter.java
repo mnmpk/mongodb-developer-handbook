@@ -1,6 +1,5 @@
 package com.mongodb.javabasic;
 
-import static org.springframework.session.data.mongo.AbstractMongoSessionConverter.SPRING_SECURITY_CONTEXT;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
