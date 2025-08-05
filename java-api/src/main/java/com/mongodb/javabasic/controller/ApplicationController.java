@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.mongodb.javabasic.model.CustomEntity;
+import com.mongodb.javabasic.model.Stat;
+import com.mongodb.javabasic.model.Workload;
 import com.mongodb.javabasic.repositories.CustomEntityRepository;
 
 @RestController
@@ -34,15 +36,18 @@ public class ApplicationController {
                 return "OK";
         }
 
-        //Simulate CPU bound tasks: smaller wait time, TPS result should larger with less threads
-        //Simulate IO bound tasks: larger wait time, TPS result should larger with more threads
+        // Simulate CPU bound tasks: smaller wait time, TPS result should larger with
+        // less threads
+        // Simulate IO bound tasks: larger wait time, TPS result should larger with more
+        // threads
         @GetMapping("/threads")
-        public String threads(@RequestParam(required = false, defaultValue = "100") int noOfThreads,
-                        @RequestParam(required = false, defaultValue = "10000") double noOfTasks,
+        public Stat<Object> threads(@RequestParam(required = false, defaultValue = "100") int noOfThreads,
+                        @RequestParam(required = false, defaultValue = "10000") int noOfTasks,
                         @RequestParam(required = false, defaultValue = "10") int serviceTime,
                         @RequestParam(required = false, defaultValue = "20") int waitTime) {
                 ExecutorService es = Executors.newFixedThreadPool(noOfThreads);
                 StopWatch stopWatch = new StopWatch();
+                Date startAt = new Date();
                 stopWatch.start();
                 for (int i = 0; i < noOfTasks; i++) {
                         es.execute(new Runnable() {
@@ -51,7 +56,7 @@ public class ApplicationController {
                                         try {
                                                 // Simulate service time
                                                 long start = new Date().getTime();
-                                                while (new Date().getTime()-start<serviceTime) {
+                                                while (new Date().getTime() - start < serviceTime) {
                                                         double result = Math.sqrt(Math.pow(Math.random(), 2)
                                                                         + Math.pow(Math.random(), 2));
                                                 }
@@ -75,14 +80,17 @@ public class ApplicationController {
                                                 + " ms");
                                 logger.info("TPS: " + (noOfTasks / (stopWatch.getTotalTimeMillis() / 1000.0))
                                                 + " tasks/sec");
-                                return "Total time taken for " + noOfTasks + " tasks: "
-                                                + stopWatch.getTotalTimeMillis() + " ms, Average time per task: "
-                                                + (stopWatch.getTotalTimeMillis() / noOfTasks) + " ms, TPS: "
-                                                + (noOfTasks / (stopWatch.getTotalTimeMillis() / 1000.0))
-                                                + " tasks/sec";
+                                return Stat.builder()
+                                                .startAt(startAt)
+                                                .endAt(new Date())
+                                                .workload(Workload.builder().noOfWorkers(noOfThreads)
+                                                                .quantity(noOfTasks).build())
+                                                .duration(stopWatch.getTotalTimeMillis())
+                                                .avgLatency(stopWatch.getTotalTimeMillis() / noOfTasks)
+                                                .operationPerSecond(noOfTasks/ stopWatch.getTotalTimeSeconds())
+                                                .build();
                         } else {
                                 logger.warn("Not all tasks finished within the timeout.");
-                                return "Not all tasks finished within the timeout.";
                         }
                 } catch (InterruptedException e) {
                         // TODO Auto-generated catch block
@@ -92,7 +100,7 @@ public class ApplicationController {
                                 es.shutdownNow();
                         }
                 }
-                return "Error occurred while processing tasks.";
+                return null;
         }
 
         @GetMapping("/test")

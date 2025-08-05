@@ -3,9 +3,33 @@
         <div class="flex-fill d-flex flex-column">
             <h1>Thread</h1>
             <mat-form-field>
-                <mat-label>Size</mat-label>
-                <input matInput type="number" formControlName="size">
+                <mat-label>No. of threads</mat-label>
+                <input matInput [value]="form.get('size')?.value" readonly />
             </mat-form-field>
+            <mat-slider min="1" max="100" step="1">
+                <input matSliderThumb value="10" formControlName="size">
+            </mat-slider>
+            <mat-form-field>
+                <mat-label>No. of tasks</mat-label>
+                <input matInput [value]="form.get('tasks')?.value" readonly />
+            </mat-form-field>
+                <mat-slider min="1" max="100000" step="100">
+                    <input matSliderThumb value="10000" formControlName="tasks">
+                </mat-slider>
+            <mat-form-field>
+                <mat-label>Service time (ms)</mat-label>
+                <input matInput [value]="form.get('serviceTime')?.value" readonly />
+            </mat-form-field>
+                <mat-slider min="1" max="1000" step="1">
+                    <input matSliderThumb value="5" formControlName="serviceTime">
+                </mat-slider>
+            <mat-form-field>
+                <mat-label>Wait time (ms)</mat-label>
+                <input matInput [value]="form.get('waitTime')?.value" readonly />
+            </mat-form-field>
+                <mat-slider min="1" max="1000" step="1">
+                    <input matSliderThumb value="10" formControlName="waitTime">
+                </mat-slider>
             <div class="flex-fill d-flex flex-column">
                 <div class="d-flex flex-column justify-content-around">
                     <div class="d-flex justify-content-between">
