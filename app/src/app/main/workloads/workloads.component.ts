@@ -14,10 +14,10 @@ import { MatSort } from '@angular/material/sort';
 import { map, merge, startWith, switchMap } from 'rxjs';
 
 @Component({
-    selector: 'app-workloads',
-    templateUrl: './workloads.component.html',
-    styleUrl: './workloads.component.scss',
-    standalone: false
+  selector: 'app-workloads',
+  templateUrl: './workloads.component.html',
+  styleUrl: './workloads.component.scss',
+  standalone: false
 })
 export class WorkloadsComponent {
   UtilityService = UtilityService;
@@ -52,6 +52,7 @@ export class WorkloadsComponent {
       entity: ["users"],
       docSize: [5120],
       schema: [],
+      description: [],
       converter: [Converter.MONGODB],
       opType: [OperationType.INSERT, Validators.required],
       numWorkers: [10, [Validators.required, Validators.min(1), Validators.max(100)]],
@@ -80,21 +81,24 @@ export class WorkloadsComponent {
   }
 
   search(event: Event) {
-    let formValue = { ...this.getFormValue(WorkloadType.READ), qty: this.paginator.pageSize };
-    this.loading = true;
-    this.service.search(formValue, this.paginator.pageIndex, this.paginator.pageSize, this.sort.active, this.sort.direction).subscribe({
-      next: (stat: Stat<any>) => {
-        this.metricsService.addResult(stat);
-        this.stat = stat;
-        this.columns = this.stat.fields;
-        this.dataSource = new MatTableDataSource(stat.data[0].content);
-        this.page = stat.data[0];
-      },
-      error: (err: any) => {
-        alert(err.message);
-        this.loading = false;
-      }
-    });
+    if (event.target) {
+      let formValue = { ...this.getFormValue(WorkloadType.READ), query: (event.target as HTMLInputElement).value, qty: this.paginator.pageSize };
+
+      this.loading = true;
+      this.service.search(formValue, this.paginator.pageIndex, this.paginator.pageSize, this.sort.active, this.sort.direction).subscribe({
+        next: (stat: Stat<any>) => {
+          this.metricsService.addResult(stat);
+          this.stat = stat;
+          this.columns = this.stat.fields;
+          this.dataSource = new MatTableDataSource(stat.data[0].content);
+          this.page = stat.data[0];
+        },
+        error: (err: any) => {
+          alert(err.message);
+          this.loading = false;
+        }
+      });
+    }
   }
   getFields() {
     return this.stat?.fields;
@@ -173,8 +177,8 @@ export class WorkloadsComponent {
   getValue(row: any, field: string) {
     if (row[field]) {
       if (typeof row[field] == 'object') {
-        if(Array.isArray(row[field]))
-          return row[field].map((i:any)=>JSON.stringify(i)).join(",");
+        if (Array.isArray(row[field]))
+          return row[field].map((i: any) => JSON.stringify(i)).join(",");
         return JSON.stringify(row[field]);
       } else {
         return row[field];

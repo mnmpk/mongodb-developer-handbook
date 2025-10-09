@@ -79,31 +79,32 @@ public class DriverProductService extends ProductService {
         // define $vectorSearch pipeline
         String indexName = "vector_index";
         FieldSearchPath fieldSearchPath = SearchPath.fieldPath("embedding");
-        int limit = 5;
 
         List<Bson> pipeline = Arrays.asList(
                 Aggregates.vectorSearch(
                         fieldSearchPath,
                         embedding,
                         indexName,
-                        limit,
+                        pageable.getPageSize(),
                         VectorSearchOptions.exactVectorSearchOptions()),
-                Aggregates.project(
-                        Projections.fields(Projections.exclude("_id"), Projections.include("description"),
-                                Projections.metaVectorSearchScore("score"))));
+                Aggregates.project(Projections.fields(Projections.include("sku", "description", "embedding", "uPrice", "soh", "version"), Projections.metaVectorSearchScore("score"))),
+                Aggregates.facet(new Facet("meta", List.of(Aggregates.count("count"))),
+                        new Facet("data", List.of(Aggregates.skip(pageable.getPageNumber() * pageable.getPageSize()),
+                                Aggregates.limit(pageable.getPageSize())))));
 
         // run query and print results
-        List<Document> results = collection.aggregate(pipeline).into(new ArrayList<>());
-
-        if (results.isEmpty()) {
-            System.out.println("No results found.");
-        } else {
-            results.forEach(doc -> {
-                System.out.println("Text: " + doc.getString("description"));
-                System.out.println("Score: " + doc.getDouble("score"));
-            });
-        }
-        //stat.setData(results);
+        Document result = collection.aggregate(pipeline).first();
+        List<Product> list = new ArrayList<Product>();
+            Stream<Document> s = result.getList("data", Document.class).stream();
+                DecoderContext dc = DecoderContext.builder().build();
+                list = s.map(d -> pojoCodecRegistry.get(Product.class).decode(d.toBsonDocument().asBsonReader(), dc))
+                        .toList();
+        if (result.size() > 0)
+            stat.setData(List.of(new PageImpl<>(list, pageable,
+                    result.getList("meta", Document.class).get(0).getInteger("count"))));
+        else
+            stat.setData(List.of(new PageImpl<>(List.of(), pageable,
+                    0)));
         return stat;
     }
 

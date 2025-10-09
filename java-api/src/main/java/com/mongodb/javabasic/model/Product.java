@@ -31,6 +31,7 @@ public class Product {
 
     private String description;
 	private List<BsonArray> embedding;
+    private double score;
 
 	@Field("uPrice")
 	@BsonProperty("uPrice")

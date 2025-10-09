@@ -246,7 +246,7 @@ public void processDefaultDelayMsg(long matchId, int currentSeq, int delay, int 
 
         // Transaction:
         // Insert+Update/Validate+Update
-        // Seach:
+        // Search:
 
         // Cache using MongoDB
 
