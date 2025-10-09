@@ -1,9 +1,12 @@
 package com.mongodb.javabasic.service.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
+import org.bson.BsonArray;
+import org.bson.BsonValue;
 import org.bson.Document;
 import org.bson.codecs.DecoderContext;
 import org.bson.codecs.configuration.CodecRegistry;
@@ -29,12 +32,17 @@ import com.mongodb.client.model.DeleteOneModel;
 import com.mongodb.client.model.Facet;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.InsertOneModel;
+import com.mongodb.client.model.Projections;
 import com.mongodb.client.model.ReplaceOneModel;
 import com.mongodb.client.model.ReplaceOptions;
 import com.mongodb.client.model.Sorts;
 import com.mongodb.client.model.UpdateOneModel;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.model.Updates;
+import com.mongodb.client.model.search.FieldSearchPath;
+import com.mongodb.client.model.search.SearchPath;
+import com.mongodb.client.model.search.VectorSearchOptions;
+import com.mongodb.javabasic.ai.EmbeddingProvider;
 import com.mongodb.javabasic.model.Product;
 import com.mongodb.javabasic.model.Stat;
 import com.mongodb.javabasic.model.Workload;
@@ -56,8 +64,47 @@ public class DriverProductService extends ProductService {
 
     @Override
     public Stat<Page<Product>> search(String query, Pageable pageable) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'search'");
+
+        Stat<Page<Product>> stat = new Stat<>(Product.class);
+        MongoCollection<Document> collection = mongoTemplate
+                .getCollection(mongoTemplate.getCollectionName(Product.class));
+        EmbeddingProvider embeddingProvider = new EmbeddingProvider();
+        BsonArray embeddingBsonArray = embeddingProvider.getEmbedding(query);
+
+        List<Double> embedding = new ArrayList<>();
+        for (BsonValue value : embeddingBsonArray.stream().toList()) {
+            embedding.add(value.asDouble().getValue());
+        }
+
+        // define $vectorSearch pipeline
+        String indexName = "vector_index";
+        FieldSearchPath fieldSearchPath = SearchPath.fieldPath("embedding");
+        int limit = 5;
+
+        List<Bson> pipeline = Arrays.asList(
+                Aggregates.vectorSearch(
+                        fieldSearchPath,
+                        embedding,
+                        indexName,
+                        limit,
+                        VectorSearchOptions.exactVectorSearchOptions()),
+                Aggregates.project(
+                        Projections.fields(Projections.exclude("_id"), Projections.include("description"),
+                                Projections.metaVectorSearchScore("score"))));
+
+        // run query and print results
+        List<Document> results = collection.aggregate(pipeline).into(new ArrayList<>());
+
+        if (results.isEmpty()) {
+            System.out.println("No results found.");
+        } else {
+            results.forEach(doc -> {
+                System.out.println("Text: " + doc.getString("description"));
+                System.out.println("Score: " + doc.getDouble("score"));
+            });
+        }
+        //stat.setData(results);
+        return stat;
     }
 
     @Override
@@ -111,7 +158,8 @@ public class DriverProductService extends ProductService {
     @Override
     public Stat<Product> _load(List<Product> entities, Workload workload) {
         Stat<Product> stat = new Stat<>(Product.class);
-        MongoCollection<Product> collection = mongoTemplate.getCollection(mongoTemplate.getCollectionName(Product.class))
+        MongoCollection<Product> collection = mongoTemplate
+                .getCollection(mongoTemplate.getCollectionName(Product.class))
                 .withWriteConcern(WriteConcern.valueOf(workload.getWriteConcern().name()))
                 .withDocumentClass(Product.class);
         if (workload.isBulk()) {

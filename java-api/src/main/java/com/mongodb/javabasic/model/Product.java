@@ -1,5 +1,8 @@
 package com.mongodb.javabasic.model;
 
+import java.util.List;
+
+import org.bson.BsonArray;
 import org.bson.BsonType;
 import org.bson.codecs.pojo.annotations.BsonProperty;
 import org.bson.codecs.pojo.annotations.BsonRepresentation;
@@ -25,6 +28,9 @@ public class Product {
 	private String id;
     
     private String sku;
+
+    private String description;
+	private List<BsonArray> embedding;
 
 	@Field("uPrice")
 	@BsonProperty("uPrice")

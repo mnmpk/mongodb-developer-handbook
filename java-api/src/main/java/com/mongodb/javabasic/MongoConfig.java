@@ -11,6 +11,7 @@ import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 
 import com.mongodb.client.gridfs.GridFSBucket;
 import com.mongodb.client.gridfs.GridFSBuckets;
+import com.mongodb.javabasic.ai.EmbeddingProvider;
 
 
 @Configuration
@@ -33,5 +34,9 @@ public class MongoConfig {
     @Bean
     public GridFSBucket gridFSBucket(){
         return GridFSBuckets.create(mongoDbFactory.getMongoDatabase());
+    }
+    @Bean
+    public EmbeddingProvider embeddingProvider(){
+        return new EmbeddingProvider();
     }
 }

@@ -1,5 +1,6 @@
 package com.mongodb.javabasic.controller;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -7,6 +8,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.javabasic.model.CustomEntity;
 import com.mongodb.javabasic.model.Stat;
 import com.mongodb.javabasic.model.Workload;
@@ -105,14 +110,104 @@ public class ApplicationController {
 
         @GetMapping("/test")
         public String test() {
-
-                logger.info(mongoTemplate.getDb().getReadConcern().toString());
+this.processDelayMsg(123456789, 10, 2);
+                /*logger.info(mongoTemplate.getDb().getReadConcern().toString());
                 logger.info(mongoTemplate.getDb().getReadPreference().toString());
                 logger.info(mongoTemplate.getDb().getWriteConcern().toString());
                 for (int i = 0; i < 1000; i++) {
                         t();
-                }
+                }*/
                 return "OK";
+        }
+        public void processDelayMsg(long matchId, int currentSeq, int delay) {
+                MongoCollection<Document> collection = mongoTemplate.getCollection("matchDelay");
+
+                collection.updateOne(
+                        Filters.eq("_id", new Document("matchId", matchId).append("v", 1)),
+                        Arrays.asList(new Document("$set", new Document()
+                        .append("delay", new Document("$cond", new Document()
+                                .append("if", new Document("$lt", Arrays.asList("$dSeq", currentSeq)))
+                                .append("then", delay)
+                                .append("else", "$delay")))
+                        .append("dSeq", new Document("$cond", new Document()
+                                .append("if", new Document("$lt", Arrays.asList("$dSeq", currentSeq)))
+                                .append("then", currentSeq)
+                                .append("else", "$dSeq")))
+                        .append("uAt", new Document("$cond", new Document()
+                                .append("if", new Document("$lt", Arrays.asList("$dSeq", currentSeq)))
+                                .append("then", new Date())
+                                .append("else", "$uAt"))))),
+                        new UpdateOptions().upsert(true));
+        }
+        public void processStatusMsg(long matchId, int currentSeq, String status, int[] poolsId) {
+                MongoCollection<Document> collection = mongoTemplate.getCollection("matchDelay");
+
+                collection.updateOne(
+                        Filters.eq("_id", new Document("matchId", matchId).append("v", 1)),
+                        Arrays.asList(new Document("$set", new Document()
+                        .append("status", new Document("$cond", new Document()
+                                .append("if", new Document("$lt", Arrays.asList("$sSeq", currentSeq)))
+                                .append("then", status)
+                                .append("else", "$status")))
+			    .append("pools", new Document("$cond", new Document()
+                                .append("if", new Document("$lt", Arrays.asList("$sSeq", currentSeq)))
+                                .append("then", poolsId)
+                                .append("else", "$pools")))
+
+                        .append("sSeq", new Document("$cond", new Document()
+                                .append("if", new Document("$lt", Arrays.asList("$sSeq", currentSeq)))
+                                .append("then", currentSeq)
+                                .append("else", "$sSeq")))
+                        .append("uAt", new Document("$cond", new Document()
+                                .append("if", new Document("$lt", Arrays.asList("$sSeq", currentSeq)))
+                                .append("then", new Date())
+                                .append("else", "$uAt"))))),
+                        new UpdateOptions().upsert(true));
+        }
+public void processDefaultDelayMsg(long matchId, int currentSeq, int delay, int allUpDelay) {
+                MongoCollection<Document> collection = mongoTemplate.getCollection("defaultDelay");
+
+                collection.updateOne(
+                        Filters.eq("_id", new Document("matchId", matchId).append("v", 1)),
+                        Arrays.asList(new Document("$set", new Document()
+                        .append("delay", new Document("$cond", new Document()
+                                .append("if", new Document("$lt", Arrays.asList("$seq", currentSeq)))
+                                .append("then", delay)
+                                .append("else", "$delay")))
+			    .append("allUpDelay", new Document("$cond", new Document()
+                                .append("if", new Document("$lt", Arrays.asList("$seq", currentSeq)))
+                                .append("then", allUpDelay)
+                                .append("else", "$allUpDelay")))
+
+                        .append("seq", new Document("$cond", new Document()
+                                .append("if", new Document("$lt", Arrays.asList("$seq", currentSeq)))
+                                .append("then", currentSeq)
+                                .append("else", "$seq")))
+                        .append("uAt", new Document("$cond", new Document()
+                                .append("if", new Document("$lt", Arrays.asList("$seq", currentSeq)))
+                                .append("then", new Date())
+                                .append("else", "$uAt"))))),
+                        new UpdateOptions().upsert(true));
+        }
+        public void processStatusMsg(long matchId, int currentSeq, int delay) {
+                MongoCollection<Document> collection = mongoTemplate.getCollection("matchDelay");
+
+                collection.updateOne(
+                        Filters.eq("_id", new Document("matchId", matchId).append("v", 1)),
+                        Arrays.asList(new Document("$set", new Document()
+                        .append("delay", new Document("$cond", new Document()
+                                .append("if", new Document("$lt", Arrays.asList("$dSeq", currentSeq)))
+                                .append("then", delay)
+                                .append("else", "$delay")))
+                        .append("dSeq", new Document("$cond", new Document()
+                                .append("if", new Document("$lt", Arrays.asList("$dSeq", currentSeq)))
+                                .append("then", currentSeq)
+                                .append("else", "$dSeq")))
+                        .append("uAt", new Document("$cond", new Document()
+                                .append("if", new Document("$lt", Arrays.asList("$dSeq", currentSeq)))
+                                .append("then", new Date())
+                                .append("else", "$uAt"))))),
+                        new UpdateOptions().upsert(true));
         }
 
         private void t() {

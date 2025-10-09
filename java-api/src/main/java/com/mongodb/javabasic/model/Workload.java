@@ -41,6 +41,7 @@ public class Workload {
     @JsonProperty("docSize")
     private int documentSize;
     private String schema;
+    private String description;
     private Converter converter;
     // TODO:Read options?
 

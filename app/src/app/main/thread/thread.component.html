@@ -13,7 +13,7 @@
                 <mat-label>No. of tasks</mat-label>
                 <input matInput [value]="form.get('tasks')?.value" readonly />
             </mat-form-field>
-                <mat-slider min="1" max="100000" step="100">
+                <mat-slider min="100" max="100000" step="100">
                     <input matSliderThumb value="10000" formControlName="tasks">
                 </mat-slider>
             <mat-form-field>
