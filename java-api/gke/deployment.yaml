@@ -22,6 +22,8 @@ spec:
           value: "scheduler,mongo,changeStream"
         - name: DATABASE_PASSWORD
           value: "${DATABASE_PASSWORD}"
+        - name: VOYAGE_AI_KEY
+          value: "${VOYAGE_AI_KEY}"
         - name: POD_NAME
           valueFrom:
             fieldRef:
