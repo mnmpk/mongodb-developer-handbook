@@ -1,5 +1,5 @@
 import { Component, EventEmitter, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Converter, Implementation, OperationType, Workload, WorkloadType, WriteConcern } from '../../shared/models/workload';
 import { WorkloadsService } from './workloads.service';
 import { UtilityService } from '../../shared/utility.service';
@@ -11,7 +11,7 @@ import { Page } from '../../shared/models/page';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
-import { map, merge, startWith, switchMap } from 'rxjs';
+import { debounceTime, distinctUntilChanged, map, merge, startWith, Subject, Subscription, switchMap } from 'rxjs';
 
 @Component({
   selector: 'app-workloads',
@@ -39,7 +39,8 @@ export class WorkloadsComponent {
   page!: Page<any>;
 
   loading = false;
-  searchValue: string = "";
+  searchControl = new FormControl('');
+  private searchSubscription!: Subscription;
 
   constructor(private formBuilder: FormBuilder, private utilityService: UtilityService, private service: WorkloadsService, private metricsService: MetricsService) {
 
@@ -60,6 +61,12 @@ export class WorkloadsComponent {
       w: [WriteConcern.MAJORITY],
       bulk: [false, Validators.required]
     });
+    this.searchSubscription = this.searchControl.valueChanges.pipe(
+      debounceTime(500), // Wait for 500ms after the last keyup event
+      distinctUntilChanged() // Only emit if the value is different from the previous one
+    ).subscribe(searchTerm => {
+      if (searchTerm) this.search(searchTerm);
+    });
   }
 
   ngAfterViewInit() {
@@ -79,26 +86,29 @@ export class WorkloadsComponent {
       }),
     ).subscribe();
   }
-
-  search(event: Event) {
-    if (event.target) {
-      let formValue = { ...this.getFormValue(WorkloadType.READ), query: (event.target as HTMLInputElement).value, qty: this.paginator.pageSize };
-
-      this.loading = true;
-      this.service.search(formValue, this.paginator.pageIndex, this.paginator.pageSize, this.sort.active, this.sort.direction).subscribe({
-        next: (stat: Stat<any>) => {
-          this.metricsService.addResult(stat);
-          this.stat = stat;
-          this.columns = this.stat.fields;
-          this.dataSource = new MatTableDataSource(stat.data[0].content);
-          this.page = stat.data[0];
-        },
-        error: (err: any) => {
-          alert(err.message);
-          this.loading = false;
-        }
-      });
+  ngOnDestroy(): void {
+    if (this.searchSubscription) {
+      this.searchSubscription.unsubscribe();
     }
+  }
+
+  search(text: string) {
+    let formValue = { ...this.getFormValue(WorkloadType.READ), query: text, qty: this.paginator.pageSize };
+
+    this.loading = true;
+    this.service.search(formValue, this.paginator.pageIndex, this.paginator.pageSize, this.sort.active, this.sort.direction).subscribe({
+      next: (stat: Stat<any>) => {
+        this.metricsService.addResult(stat);
+        this.stat = stat;
+        this.columns = this.stat.fields;
+        this.dataSource = new MatTableDataSource(stat.data[0].content);
+        this.page = stat.data[0];
+      },
+      error: (err: any) => {
+        alert(err.message);
+        this.loading = false;
+      }
+    });
   }
   getFields() {
     return this.stat?.fields;
@@ -167,7 +177,7 @@ export class WorkloadsComponent {
   }
 
   applyFilter(event: Event) {
-    this.searchValue = (event.target as HTMLInputElement).value;
+    //this.searchValue = (event.target as HTMLInputElement).value;
     if (this.paginator.pageIndex == 0) {
       this.update$.emit();
     } else {

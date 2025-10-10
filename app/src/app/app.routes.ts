@@ -1,6 +1,5 @@
 import { Routes } from '@angular/router';
 import { ChangeStreamComponent } from './main/change-stream/change-stream.component';
-import { SearchComponent } from './main/search/search.component';
 import { TransactionComponent } from './main/transaction/transaction.component';
 import { WorkloadsComponent } from './main/workloads/workloads.component';
 import { DashboardComponent } from './main/dashboard/dashboard.component';
@@ -18,6 +17,5 @@ export const routes: Routes = [
     { path: 'cache', component: CacheComponent },
     { path: 'session', component: SessionComponent },
     { path: 'thread', component: ThreadComponent },
-    { path: 'search', component: SearchComponent },
     { path: '', redirectTo: 'dashboard', pathMatch: 'prefix' },
 ];
