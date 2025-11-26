@@ -95,6 +95,11 @@ app.get('/test-dirty-update', require('./controllers/date').dirtyUpdate);
 
 app.get('/watch', require('./controllers/change-stream').watch);
 
+const injection = require('./controllers/injection');
+injection.init(db);
+app.post('/injection/secure', injection.findUserSecure);
+app.post('/injection/insecure', injection.findUserInsecure);
+
 app.listen(3000, () => {
   console.log("Server is running at port 3000");
 });
