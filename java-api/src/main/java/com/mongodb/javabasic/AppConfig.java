@@ -19,6 +19,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
+import com.mongodb.ServerApi;
+import com.mongodb.ServerApiVersion;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 
@@ -37,7 +39,9 @@ public class AppConfig {
     public MongoClient mongoClient() {
         return MongoClients.create(
                 MongoClientSettings.builder().codecRegistry(pojoCodecRegistry())
-                        .applyConnectionString(new ConnectionString(uri)).build());
+                        .applyConnectionString(new ConnectionString(uri)).serverApi(ServerApi.builder()
+                                .version(ServerApiVersion.V1).strict(false).deprecationErrors(true).build())
+                        .build());
     }
 
     @Bean
@@ -74,7 +78,9 @@ public class AppConfig {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**").allowedOrigins("http://localhost:4200", "https://mongodb-handbook.mzinx.com/", "https://mongodb-japi.mzinx.com/")
+                registry.addMapping("/**")
+                        .allowedOrigins("http://localhost:4200", "https://mongodb-handbook.mzinx.com/",
+                                "https://mongodb-japi.mzinx.com/")
                         .allowedMethods("*")
                         .allowedHeaders("*")
                         .allowCredentials(true);
