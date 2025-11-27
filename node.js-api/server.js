@@ -97,8 +97,17 @@ app.get('/watch', require('./controllers/change-stream').watch);
 
 const injection = require('./controllers/injection');
 injection.init(db);
-app.post('/injection/secure', injection.findUserSecure);
-app.post('/injection/insecure', injection.findUserInsecure);
+
+
+const { body } = require('express-validator');
+
+// example body requests:
+//{"username":"hello"}
+//{"username":{"$ne":"null"}}
+//{"username":"{\"$ne\":\"null\"}"}
+app.use(/\/injection\/secure/, body('username').isAlphanumeric().withMessage('Username must contain only alphanumeric characters'));
+app.post('/injection/secure', injection.findUser);
+app.post('/injection/insecure', injection.findUser);
 
 app.listen(3000, () => {
   console.log("Server is running at port 3000");
