@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.bson.Document;
 import org.bson.codecs.DecoderContext;
 import org.bson.codecs.configuration.CodecRegistry;
@@ -84,8 +85,9 @@ public class DriverUserService extends UserService {
             pipeline.add(Aggregates.facet(new Facet("meta", List.of(Aggregates.count("count"))),
                     new Facet("data", List.of(Aggregates.skip(pageable.getPageNumber() * pageable.getPageSize()),
                             Aggregates.limit(pageable.getPageSize())))));
+                            String traceId = RandomStringUtils.secure().nextAscii(10);
             Document result = collection.withDocumentClass(Document.class)
-                    .aggregate(pipeline).first();
+                    .aggregate(pipeline).comment("traceId:"+traceId).first();
 
             List<User> list = new ArrayList<User>();
             Stream<Document> s = result.getList("data", Document.class).stream();

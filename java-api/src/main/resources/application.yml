@@ -37,6 +37,9 @@ logging:
           mongodb:
             core:
 #              MongoTemplate: DEBUG
+      mongodb:
+        driver:
+          connection: DEBUG
 settings:
   #App thread pool setting
   corePoolsize: 10 

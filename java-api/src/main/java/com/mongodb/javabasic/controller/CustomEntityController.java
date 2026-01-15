@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -64,7 +63,7 @@ public class CustomEntityController extends GenericController<CustomEntity> {
 	public Stat<CustomEntity> load(Workload workload) {
 		EasyRandom generator = new EasyRandom(new EasyRandomParameters()
 				.seed(new Date().getTime()));
-		String dummyData = RandomStringUtils.randomAscii(workload.getDocumentSize());
+		String dummyData = RandomStringUtils.secure().nextAscii(workload.getDocumentSize());
 		List<CustomEntity> customEntities = new ArrayList<>();
 		switch (workload.getOperationType()) {
 			case INSERT:
