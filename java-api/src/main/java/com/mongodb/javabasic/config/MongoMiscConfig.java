@@ -1,4 +1,4 @@
-package com.mongodb.javabasic;
+package com.mongodb.javabasic.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -15,7 +15,9 @@ import com.mongodb.javabasic.ai.EmbeddingProvider;
 
 
 @Configuration
-public class MongoConfig {
+public class MongoMiscConfig {
+
+
 
     @Autowired
     MongoDatabaseFactory mongoDbFactory;
@@ -35,6 +37,7 @@ public class MongoConfig {
     public GridFSBucket gridFSBucket(){
         return GridFSBuckets.create(mongoDbFactory.getMongoDatabase());
     }
+
     @Bean
     public EmbeddingProvider embeddingProvider(){
         return new EmbeddingProvider();

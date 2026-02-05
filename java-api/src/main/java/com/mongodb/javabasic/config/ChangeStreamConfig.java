@@ -1,4 +1,4 @@
-package com.mongodb.javabasic;
+package com.mongodb.javabasic.config;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -34,7 +34,7 @@ import com.mongodb.javabasic.service.AggregationService;
 
 import jakarta.annotation.PostConstruct;
 
-@Profile("changeStream")
+@Profile("change-stream")
 @Configuration
 public class ChangeStreamConfig {
 

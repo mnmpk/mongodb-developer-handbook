@@ -1,21 +1,7 @@
-package com.mongodb.javabasic;
+package com.mongodb.javabasic.config;
 
-
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.Map;
-
-import org.bson.BsonBinaryWriter;
-import org.bson.BsonDocument;
-import org.bson.BsonDocumentWriter;
 import org.bson.Document;
-import org.bson.codecs.DecoderContext;
-import org.bson.codecs.EncoderContext;
-import org.bson.codecs.configuration.CodecRegistry;
-import org.bson.io.BasicOutputBuffer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

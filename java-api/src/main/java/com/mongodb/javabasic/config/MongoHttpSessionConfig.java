@@ -1,4 +1,4 @@
-package com.mongodb.javabasic;
+package com.mongodb.javabasic.config;
 
 
 import java.time.Duration;
@@ -10,7 +10,7 @@ import org.springframework.session.data.mongo.JacksonMongoSessionConverter;
 import org.springframework.session.data.mongo.JdkMongoSessionConverter;
 import org.springframework.session.data.mongo.config.annotation.web.http.EnableMongoHttpSession;
 
-@Profile("mongo")
+@Profile("mongo-session")
 @Configuration(proxyBeanMethods = false)
 @EnableMongoHttpSession
 public class MongoHttpSessionConfig {

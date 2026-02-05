@@ -15,7 +15,7 @@ management:
       enabled: false
 spring:
   profiles:
-    active: mongo
+    active: mongo-cache,mongo-session
   data:
     mongodb:
       uri: "mongodb+srv://dev:${DATABASE_PASSWORD}@demo.uskpz.mongodb.net/"

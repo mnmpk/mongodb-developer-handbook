@@ -1,4 +1,4 @@
-package com.mongodb.javabasic;
+package com.mongodb.javabasic.config;
 
 import java.util.Date;
 import java.util.concurrent.TimeUnit;

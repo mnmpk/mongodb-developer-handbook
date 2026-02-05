@@ -1,4 +1,4 @@
-package com.mongodb.javabasic;
+package com.mongodb.javabasic.config;
 
 import liquibase.database.DatabaseFactory;
 import liquibase.exception.DatabaseException;
