@@ -268,6 +268,8 @@ public class ChangeStreamService<T> {
 				logger.error("Stopping change stream '" + reg.getChangeStream().getId() + "'' due to unexpected error:",
 						e);
 				this._stop(reg);
+				//Recover for unexpected exception
+				this.run(reg);
 			}
 			return null;
 		}, taskExecutor);

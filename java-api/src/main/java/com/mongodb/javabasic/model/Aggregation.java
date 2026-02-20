@@ -62,7 +62,6 @@ public class Aggregation<T> {
                                     (BsonValue) ((Bson) entry.getValue())
                                             .toBsonDocument());
                         }
-                        System.out.println("Processing entry: " + entry.getKey() + " with value: " + entry.getValue());
                         return Map.entry(entry.getKey(),
                                 entry.getValue() != null ? BsonUtils.simpleToBsonValue(entry.getValue()) : BsonNull.VALUE);
                     }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
