@@ -39,13 +39,13 @@ logging:
 #              MongoTemplate: DEBUG
       mongodb:
         driver:
-          connection: DEBUG
+#          connection: DEBUG
 settings:
   #App thread pool setting
   corePoolsize: 10 
   maxPoolSize: 30
   queueSize: 100000
-  instance-group:
+  instances:
     collection: "_instances"
     heartbeat:
       interval: 2000
@@ -53,4 +53,7 @@ settings:
   changeStream:
     batchSize: 10000
     maxAwaitTime: 800
+    tokenMaxLifeTime: 86400000
     watchColls: tTableRating,tLocn,tArea
+  messaging:
+    maxLifeTime: 86400000

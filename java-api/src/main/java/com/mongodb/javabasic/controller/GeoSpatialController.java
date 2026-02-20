@@ -21,7 +21,6 @@ import com.mongodb.javabasic.service.GeoSpatialService;
 import com.mongodb.javabasic.model.Stop;
 import com.mongodb.javabasic.model.Suggestion;
 import com.mongodb.javabasic.model.Route;
-import com.mongodb.javabasic.model.Stat;
 
 @RestController
 @RequestMapping(path = "/geo-spatial")

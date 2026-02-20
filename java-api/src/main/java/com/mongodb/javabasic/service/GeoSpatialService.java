@@ -1,7 +1,6 @@
 package com.mongodb.javabasic.service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
+
 import org.geotools.referencing.GeodeticCalculator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,9 +23,12 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.geojson.MultiPoint;
 import com.mongodb.client.model.geojson.Point;
 import com.mongodb.client.model.geojson.Position;
+import com.mongodb.javabasic.model.Aggregation;
+import com.mongodb.javabasic.model.PipelineTemplate;
 import com.mongodb.javabasic.model.Route;
 import com.mongodb.javabasic.model.Stop;
 import com.mongodb.javabasic.model.Suggestion;
+import com.mongodb.javabasic.repositories.PipelineRepository;
 
 @Service
 public class GeoSpatialService {
@@ -39,6 +42,8 @@ public class GeoSpatialService {
     private ConfigService<Integer> configService;
     @Autowired
     private ConfigService<Boolean> bConfigService;
+	@Autowired
+	private PipelineRepository pipelineRepository;
 
     public List<Stop> getStops(double lat, double lng) {
         Integer searchThreshold = configService.getConfig("SEARCH_THRESHOLD", Integer.class);
@@ -50,8 +55,14 @@ public class GeoSpatialService {
     public List<Route> getRoutes(double lat, double lng) {
         Integer searchThreshold = configService.getConfig("SEARCH_THRESHOLD", Integer.class);
 
-        return aggregationService.getPipelineResults(mongoTemplate.getCollectionName(Route.class), "direct-route.json",
-                Route.class, Map.of("lat", lat, "lng", lng, "maxDistance", searchThreshold));
+			PipelineTemplate p = this.pipelineRepository.findByName("direct-route");
+			if (p == null || p.getContent() == null)
+				throw new RuntimeException("Pipeline not found");
+
+        return aggregationService.execute(
+                Aggregation
+                        .of(mongoTemplate.getCollectionName(Route.class), p.getContent())
+                        .withClass(Route.class), Map.of("lat", lat, "lng", lng, "maxDistance", searchThreshold));
     }
 
     public List<Suggestion> getRouteSuggestions(List<Route> startRoutes, List<Route> endRoutes) {

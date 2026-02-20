@@ -47,32 +47,7 @@ public class ChangeStreamController {
                 Updates.combine(Updates.set("coll", collection), Updates.set("pipeline", pipeline),
                         Updates.set("mode", mode)),
                 new UpdateOptions().upsert(true));
-       /* new ChangeStream<Document>().run(noOfChangeStream, (ChangeStreamProcessConfig<Document> config) -> {
-            List<Bson> pipeline = (List.of(Aggregates.match(
-                    Filters.in("ns.coll", List.of(collection)))));
-            if (startAt > 0)
-                config.setStartAt(new BsonTimestamp(startAt));
-            if (lastEventTime > 0)
-                config.setEndAt(new BsonTimestamp(lastEventTime));
-            return new ChangeStreamProcess<Document>(config,
-                    (e) -> {
-                        logger.info("Body:" + e.getFullDocument());
-                    }) {
-                @Override
-                public ChangeStreamIterable<Document> initChangeStream(List<Bson> p) {
-                    if (pipeline != null && pipeline.size() > 0)
-                        p.addAll(pipeline);
-                    ChangeStreamIterable<Document> changeStream = mongoTemplate.getDb().watch(p, Document.class)
-                            .batchSize(batchSize)
-                            .maxAwaitTime(maxAwaitTime, TimeUnit.MILLISECONDS);
-                    if (fullDocument) {
-                        changeStream = changeStream.fullDocument(FullDocument.UPDATE_LOOKUP);
-                    }
-                    return changeStream;
-                }
 
-            };
-        }, resume);*/
     }
 
     @RequestMapping("/unwatch/{database}/{collection}")
