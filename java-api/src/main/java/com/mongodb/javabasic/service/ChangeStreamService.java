@@ -1,5 +1,7 @@
 package com.mongodb.javabasic.service;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -62,6 +64,8 @@ public class ChangeStreamService<T> {
 	private long tokenMaxLifeTime;
 	@Value("${settings.instances.collection}")
 	private String instancesCollectionName;
+    @Value("${settings.instances.maxTimeout}")
+    private long maxTimeout;
 
 	@Autowired
 	private MongoClient mongoClient;
@@ -214,6 +218,7 @@ public class ChangeStreamService<T> {
 									clientSession,
 									Filters.eq("_id", podName),
 									Updates.combine(Updates.set("_id", podName),
+									Updates.set(DATE_FIELD, Instant.now().plus(maxTimeout, ChronoUnit.MILLIS)),
 											Updates.addToSet(CHANGE_STREAMS_FIELD, cs.getId())),
 									new UpdateOptions().upsert(true));
 							logger.info("Update result:" + ur);
