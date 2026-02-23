@@ -2,7 +2,6 @@ package com.mongodb.javabasic.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,9 +15,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
-import org.springframework.session.FindByIndexNameSessionRepository;
 import org.springframework.session.Session;
-import org.springframework.session.security.SpringSessionBackedSessionRegistry;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -27,9 +24,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @EnableMethodSecurity(securedEnabled = true, jsr250Enabled = true)
 public class WebSecurityConfig<S extends Session> {
     private final Logger logger = LoggerFactory.getLogger(getClass());
-
-    @Autowired
-    private FindByIndexNameSessionRepository<S> sessionRepository;
 
     @Bean
     public WebMvcConfigurer corsConfigurer() {
@@ -51,15 +45,11 @@ public class WebSecurityConfig<S extends Session> {
         return httpSecurity.csrf(AbstractHttpConfigurer::disable) // disable CSRF protection
                 .sessionManagement((sessionManagement) -> sessionManagement
                         .maximumSessions(2)
-                        .sessionRegistry(sessionRegistry()))
+                    //    .sessionRegistry(sessionRegistry())
+                    )
                 .authorizeHttpRequests(httpRequest -> {
                     httpRequest.anyRequest().permitAll(); // Allow all endpoints
                 }).build(); // build & return DefaultSecurityFilterChain
-    }
-
-    @Bean
-    public SpringSessionBackedSessionRegistry<S> sessionRegistry() {
-        return new SpringSessionBackedSessionRegistry<>(this.sessionRepository);
     }
 
     @Bean

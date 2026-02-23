@@ -14,10 +14,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class MongoLiquibaseRunner implements CommandLineRunner, ResourceLoaderAware {
 
-    @Value("${spring.data.mongodb.database}")
+    @Value("${spring.mongodb.database}")
     public String MONGODB_DATABASE;
 
-    @Value("${spring.data.mongodb.uri}")
+    @Value("${spring.mongodb.uri}")
     public String MONGODB_URL;
 
     @Value("${spring.liquibase.change-log}")

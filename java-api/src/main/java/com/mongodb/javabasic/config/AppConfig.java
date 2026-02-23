@@ -8,14 +8,14 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.retry.annotation.EnableRetry;
+import org.springframework.resilience.annotation.EnableResilientMethods;
 
 import com.mongodb.javabasic.model.ChangeStreamRegistry;
 
 import freemarker.template.TemplateExceptionHandler;
 
 @Configuration
-@EnableRetry
+@EnableResilientMethods
 public class AppConfig {
 
     @Bean

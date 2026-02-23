@@ -16,11 +16,11 @@ management:
 spring:
   profiles:
     active: mongo-cache,mongo-session
-  data:
-    mongodb:
-      uri: "mongodb+srv://dev:${DATABASE_PASSWORD}@demo.uskpz.mongodb.net/"
-      #?w=4&readConcernLevel=majority&readPreference=primary
-      database: mongodb-developer
+  mongodb:
+    uri: "mongodb+srv://dev:${DATABASE_PASSWORD}@demo.uskpz.mongodb.net/"
+    #?w=4&readConcernLevel=majority&readPreference=primary
+    database: mongodb-developer
+  data: 
     redis:
       host: clustercfg.tsp-cache.byysaj.ape1.cache.amazonaws.com
       port: 6379

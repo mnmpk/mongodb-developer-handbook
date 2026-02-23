@@ -2,7 +2,7 @@ package com.mongodb.javabasic.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
+import org.springframework.boot.data.redis.autoconfigure.DataRedisAutoConfiguration;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
@@ -16,7 +16,7 @@ import com.mongodb.javabasic.model.CacheConfig;
 @Profile("mongo-cache")
 @Configuration
 @EnableCaching
-@EnableAutoConfiguration(exclude = {RedisAutoConfiguration.class})
+@EnableAutoConfiguration(exclude = {DataRedisAutoConfiguration.class})
 public class MongoCacheConfig {
 
     @Autowired

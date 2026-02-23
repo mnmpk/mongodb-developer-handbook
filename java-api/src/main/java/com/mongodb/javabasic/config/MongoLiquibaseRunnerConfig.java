@@ -10,10 +10,10 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class MongoLiquibaseRunnerConfig {
 
-    @Value("${spring.data.mongodb.database}")
+    @Value("${spring.mongodb.database}")
     public String MONGODB_DATABASE;
 
-    @Value("${spring.data.mongodb.uri}")
+    @Value("${spring.mongodb.uri}")
     public String MONGODB_URL;
 
     @Bean

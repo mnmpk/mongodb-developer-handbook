@@ -19,8 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
+import org.springframework.resilience.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import com.mongodb.MongoException;
@@ -184,7 +183,8 @@ public class ChangeStreamService<T> {
 		this.run(reg, null);
 	}
 
-	@Retryable(retryFor = { MongoException.class }, maxAttempts = 10, backoff = @Backoff(delay = 5000L, multiplier = 2))
+	@Retryable(includes = { MongoException.class }, maxRetries = 10, delay = 5000,                              // Initial delay in milliseconds (1 second)
+        multiplier = 2)
 	public void run(ChangeStreamRegistry<T> reg, Date earliest) {
 		logger.info("Start running change stream");
 		changeStreams.put(reg.getChangeStream().getId(), reg);
@@ -315,7 +315,8 @@ public class ChangeStreamService<T> {
 		}
 	}
 
-	@Retryable(retryFor = { MongoException.class }, maxAttempts = 1)
+	@Retryable(includes = { MongoException.class }, maxRetries = 10, delay = 1000,                              // Initial delay in milliseconds (1 second)
+        multiplier = 2)
 	private void saveCheckpoint(String csId, BsonString token) {
 		logger.info("save checkpoint");
 		mongoTemplate.getCollection(RESUME_TOKEN_COLL).updateOne(
