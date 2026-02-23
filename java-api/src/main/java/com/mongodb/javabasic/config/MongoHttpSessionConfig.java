@@ -1,8 +1,6 @@
 package com.mongodb.javabasic.config;
 
 
-
-import org.mongodb.spring.session.JacksonMongoSessionConverter;
 import org.mongodb.spring.session.config.annotation.web.http.EnableMongoHttpSession;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,9 +15,13 @@ public class MongoHttpSessionConfig {
 	public JdkMongoSessionConverter jdkMongoSessionConverter() {
 		return new JdkMongoSessionConverter(Duration.ofMinutes(30));
 	}*/
-	@Bean
+	/*@Bean
 	public JacksonMongoSessionConverter jacksonMongoSessionConverter() {
 		return new JacksonMongoSessionConverter();
+	}*/
+	@Bean
+	public MongoSessionConverter mongoSessionConverter() {
+		return new MongoSessionConverter();
 	}
 
 }
