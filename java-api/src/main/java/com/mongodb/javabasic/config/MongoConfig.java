@@ -58,20 +58,6 @@ public class MongoConfig {
                                 settings);
         }
 
-        /*@Bean
-        public String validateMongoConnection(MongoClient mongoClient) {
-                while (true) {
-                        try {
-                                if (mongoClient.listDatabaseNames().first() != null)
-                                        break;
-                                Thread.sleep(1000);
-                        } catch (Exception e) {
-                                logger.info("Waiting for MongoDB connection...");
-                        }
-                }
-                return "OK";
-        }*/
-
         @Bean
         public CodecRegistry pojoCodecRegistry() {
                 CodecProvider pojoCodecProvider = PojoCodecProvider.builder().automatic(true).build();
