@@ -37,7 +37,6 @@ import com.mongodb.javabasic.service.ChangeStreamService;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 
-@Profile("discovery")
 @Configuration
 @EnableScheduling
 public class DiscoveryConfig {
