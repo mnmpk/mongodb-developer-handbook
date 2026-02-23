@@ -6,6 +6,8 @@ import org.bson.codecs.configuration.CodecProvider;
 import org.bson.codecs.configuration.CodecRegistries;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,6 +28,7 @@ import com.mongodb.client.MongoClients;
 @EnableMongoRepositories(basePackages = { "com.mongodb.javabasic.repositories" })
 @EnableSpringDataWebSupport(pageSerializationMode = EnableSpringDataWebSupport.PageSerializationMode.VIA_DTO)
 public class MongoConfig {
+        Logger logger = LoggerFactory.getLogger(getClass());
 
         @Value("${spring.data.mongodb.uri}")
         private String uri;
@@ -62,9 +65,8 @@ public class MongoConfig {
                                 if (mongoClient.listDatabaseNames().first() != null)
                                         break;
                                 Thread.sleep(1000);
-                        } catch (InterruptedException e) {
-                                Thread.currentThread().interrupt();
-                                throw new RuntimeException("MongoDB connection validation interrupted", e);
+                        } catch (Exception e) {
+                                logger.info("Waiting for MongoDB connection...");
                         }
                 }
                 return "OK";
