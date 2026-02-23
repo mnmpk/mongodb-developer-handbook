@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.bson.Document;
@@ -13,10 +12,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
@@ -43,6 +41,7 @@ import jakarta.annotation.PreDestroy;
 @Profile("discovery")
 @Configuration
 @EnableScheduling
+//@DependsOn("validateMongoConnection")
 public class DiscoveryConfig {
     Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -69,16 +68,24 @@ public class DiscoveryConfig {
     @Autowired
     private String podName;
 
+    private void createIndex(MongoCollection<Document> coll) {
+        coll.createIndex(Indexes.descending(INDEX_KEY),
+                new IndexOptions().expireAfter(maxTimeout, TimeUnit.MILLISECONDS).name(INDEX_NAME));
+    }
+
     ChangeStream<Document> cs;
 
     @PostConstruct
     private void init() {
         MongoCollection<Document> coll = mongoTemplate.getCollection(collection);
-        CompletableFuture.supplyAsync(() -> {
+        try {
             createIndex(coll);
-            return null;
-        });
-
+        } catch (MongoCommandException e) {
+            if (e.getErrorCode() == 85 || e.getErrorCode() == 86) {
+                coll.dropIndex(INDEX_NAME);
+                createIndex(coll);
+            }
+        }
         this.instances.addAll(coll.find().projection(Projections.include("_id")).map(d -> d.getString("_id"))
                 .into(new ArrayList<>()));
         cs = ChangeStream.of("discovery", Mode.BOARDCAST,
@@ -103,21 +110,6 @@ public class DiscoveryConfig {
             }
             applicationEventService.publish(event);
         }).changeStream(cs).build());
-    }
-
-    @Retryable(retryFor = { Exception.class }, maxAttempts = 5, backoff = @Backoff(delay = 5000L, multiplier = 2))
-    private void createIndex(MongoCollection<Document> coll) {
-        try {
-            coll.createIndex(Indexes.descending(INDEX_KEY),
-                    new IndexOptions().expireAfter(maxTimeout, TimeUnit.MILLISECONDS).name(INDEX_NAME));
-        } catch (MongoCommandException e) {
-            if (e.getErrorCode() == 85 || e.getErrorCode() == 86) {
-                coll.dropIndex(INDEX_NAME);
-                coll.createIndex(Indexes.descending(INDEX_KEY),
-                        new IndexOptions().expireAfter(maxTimeout, TimeUnit.MILLISECONDS).name(INDEX_NAME));
-            }
-        }
-
     }
 
     @PreDestroy

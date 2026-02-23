@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
@@ -48,6 +49,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 
 @Service
+//@DependsOn("validateMongoConnection")
 public class ChangeStreamService<T> {
 	Logger logger = LoggerFactory.getLogger(getClass());
 	private static final String INDEX_NAME = "ttl";
@@ -87,10 +89,8 @@ public class ChangeStreamService<T> {
 
 	@PostConstruct
 	private void init() {
-		CompletableFuture.supplyAsync(() -> {
-			createIndex();
-			return null;
-		});
+		mongoTemplate.getCollection(RESUME_TOKEN_COLL).createIndex(Indexes.descending(DATE_FIELD),
+				new IndexOptions().expireAfter(tokenMaxLifeTime, TimeUnit.MILLISECONDS).name(INDEX_NAME));
 
 		logger.info("subscribe on node change");
 		applicationEventService.subscribe(ae -> {
@@ -167,12 +167,6 @@ public class ChangeStreamService<T> {
 				logger.error("Unexpected error while processing node changes:", e);
 			}
 		});
-	}
-
-	@Retryable(retryFor = { Exception.class }, maxAttempts = 5, backoff = @Backoff(delay = 5000L, multiplier = 2))
-	public void createIndex() {
-		mongoTemplate.getCollection(RESUME_TOKEN_COLL).createIndex(Indexes.descending(DATE_FIELD),
-				new IndexOptions().expireAfter(tokenMaxLifeTime, TimeUnit.MILLISECONDS).name(INDEX_NAME));
 	}
 
 	@PreDestroy

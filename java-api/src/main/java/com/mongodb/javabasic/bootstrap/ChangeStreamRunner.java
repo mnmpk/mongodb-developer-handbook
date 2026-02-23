@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
@@ -24,6 +25,7 @@ import com.mongodb.client.model.UpdateOneModel;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.model.Updates;
 import com.mongodb.client.model.changestream.FullDocument;
+import com.mongodb.javabasic.config.AppConfig;
 import com.mongodb.javabasic.model.Aggregation;
 import com.mongodb.javabasic.model.ChangeStream;
 import com.mongodb.javabasic.model.ChangeStream.Mode;
@@ -39,7 +41,10 @@ import jakarta.annotation.PreDestroy;
 
 @Profile("change-stream")
 @Component
+//@DependsOn("validateMongoConnection")
 public class ChangeStreamRunner {
+
+        private final AppConfig appConfig;
         Logger logger = LoggerFactory.getLogger(getClass());
 
         @Autowired
@@ -64,6 +69,10 @@ public class ChangeStreamRunner {
         ChangeStream<Document> cs;
         ChangeStream<Document> cs2;
         ChangeStream<Document> cs3;
+
+        ChangeStreamRunner(AppConfig appConfig) {
+                this.appConfig = appConfig;
+        }
 
         @PostConstruct
         private void watch() {
