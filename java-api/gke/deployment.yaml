@@ -39,12 +39,16 @@ spec:
             cpu: 800m
             memory: 800m
         livenessProbe:
-          initialDelaySeconds: 50
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          failureThreshold: 5 
           httpGet:
             path: /actuator/health
             port: 8081
         readinessProbe:
-          initialDelaySeconds: 50
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          failureThreshold: 5 
           httpGet:
             path: /actuator/health
             port: 8081
