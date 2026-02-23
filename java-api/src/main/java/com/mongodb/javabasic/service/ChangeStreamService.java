@@ -49,7 +49,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 
 @Service
-//@DependsOn("validateMongoConnection")
+@DependsOn("validateMongoConnection")
 public class ChangeStreamService<T> {
 	Logger logger = LoggerFactory.getLogger(getClass());
 	private static final String INDEX_NAME = "ttl";

@@ -41,7 +41,7 @@ import jakarta.annotation.PreDestroy;
 
 @Profile("change-stream")
 @Component
-//@DependsOn("validateMongoConnection")
+@DependsOn("validateMongoConnection")
 public class ChangeStreamRunner {
 
         private final AppConfig appConfig;
