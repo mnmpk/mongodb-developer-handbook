@@ -89,11 +89,9 @@ public class ChangeStreamService<T> {
 	private void init() {
 		CompletableFuture.supplyAsync(() -> {
 			createIndex();
-			startChangeStream();
 			return null;
 		});
-	}
-	private void startChangeStream() {
+
 		logger.info("subscribe on node change");
 		applicationEventService.subscribe(ae -> {
 			try {

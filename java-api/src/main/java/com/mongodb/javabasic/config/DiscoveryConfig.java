@@ -76,11 +76,9 @@ public class DiscoveryConfig {
         MongoCollection<Document> coll = mongoTemplate.getCollection(collection);
         CompletableFuture.supplyAsync(() -> {
             createIndex(coll);
-			startChangeStream(coll);
-			return null;
-		});
-	}
-	private void startChangeStream(MongoCollection<Document> coll) {
+            return null;
+        });
+
         this.instances.addAll(coll.find().projection(Projections.include("_id")).map(d -> d.getString("_id"))
                 .into(new ArrayList<>()));
         cs = ChangeStream.of("discovery", Mode.BOARDCAST,
