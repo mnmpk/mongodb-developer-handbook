@@ -21,9 +21,5 @@ public class MongoHttpSessionConfig {
 	public JacksonMongoSessionConverter jacksonMongoSessionConverter() {
 		return new JacksonMongoSessionConverter();
 	}
-	/*@Bean
-	public MongoSessionConverter mongoSessionConverter() {
-		return new MongoSessionConverter();
-	}*/
 
 }
