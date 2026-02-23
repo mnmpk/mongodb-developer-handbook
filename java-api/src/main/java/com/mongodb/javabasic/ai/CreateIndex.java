@@ -15,22 +15,33 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 @Component
 public class CreateIndex {
-	private final Logger logger = LoggerFactory.getLogger(getClass());
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
     MongoTemplate mongoTemplate;
 
     @PostConstruct
     public void init() {
+        CompletableFuture.supplyAsync(() -> {
+            createSearchIndex();
+            return null;
+        });
 
+    }
+
+    @Retryable(retryFor = { Exception.class }, maxAttempts = 5, backoff = @Backoff(delay = 5000L, multiplier = 2))
+    public void createSearchIndex() {
         MongoCollection<Document> collection = mongoTemplate
                 .getCollection(mongoTemplate.getCollectionName(Product.class)).withTimeout(90, TimeUnit.SECONDS);
 
@@ -44,8 +55,9 @@ public class CreateIndex {
                 Collections.singletonList(
                         new Document("type", "vector")
                                 .append("path", "embedding")
-                                .append("numDimensions", 1024/*"dimensionsVoyageAiModel:1024"*/) // replace with var for the
-                                                                                         // model used
+                                .append("numDimensions", 1024/* "dimensionsVoyageAiModel:1024" */) // replace with var
+                                                                                                   // for the
+                                // model used
                                 .append("similarity", "dotProduct")));
 
         // define the index model using the specified details
@@ -57,7 +69,6 @@ public class CreateIndex {
         // Create the index using the model
         List<String> result = collection.createSearchIndexes(Collections.singletonList(indexModel));
         logger.info("Successfully created a vector index named: " + result);
-
 
         // wait for index to build and become queryable
         logger.info("Polling to confirm the index has completed building.");
@@ -83,6 +94,5 @@ public class CreateIndex {
             }
         }
         logger.info(indexName + " index is ready to query");
-
     }
 }
