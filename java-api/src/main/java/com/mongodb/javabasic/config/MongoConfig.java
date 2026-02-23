@@ -57,15 +57,17 @@ public class MongoConfig {
 
         @Bean
         public String validateMongoConnection(MongoClient mongoClient) {
-                while (mongoClient.listDatabaseNames().first() == null) {
+                while (true) {
                         try {
+                                if (mongoClient.listDatabaseNames().first() != null)
+                                        break;
                                 Thread.sleep(1000);
                         } catch (InterruptedException e) {
                                 Thread.currentThread().interrupt();
                                 throw new RuntimeException("MongoDB connection validation interrupted", e);
                         }
                 }
-                return "MongoDB connection validated successfully";
+                return "OK";
         }
 
         @Bean
