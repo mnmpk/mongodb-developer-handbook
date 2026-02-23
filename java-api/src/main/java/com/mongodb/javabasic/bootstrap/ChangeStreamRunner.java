@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
 import com.mongodb.bulk.BulkWriteResult;
@@ -67,14 +69,16 @@ public class ChangeStreamRunner {
         ChangeStream<Document> cs2;
         ChangeStream<Document> cs3;
 
-	@PostConstruct
-	private void init() {
-		CompletableFuture.supplyAsync(() -> {
-			startChangeStream();
-			return null;
-		});
-	}
-	private void startChangeStream() {
+        @PostConstruct
+        private void init() {
+                CompletableFuture.supplyAsync(() -> {
+                        startChangeStream();
+                        return null;
+                });
+        }
+
+        @Retryable(retryFor = { Exception.class }, maxAttempts = 5, backoff = @Backoff(delay = 5000L, multiplier = 2))
+        private void startChangeStream() {
                 cs = ChangeStream.of("bucket-data", Mode.AUTO_RECOVER,
                                 List.of(Aggregates.match(
                                                 Filters.in("ns.coll", watchColls))))

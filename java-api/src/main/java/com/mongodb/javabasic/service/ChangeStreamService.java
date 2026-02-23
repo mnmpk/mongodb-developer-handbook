@@ -93,6 +93,7 @@ public class ChangeStreamService<T> {
 			return null;
 		});
 	}
+    @Retryable(retryFor = { Exception.class }, maxAttempts = 5, backoff = @Backoff(delay = 5000L, multiplier = 2))
 	private void startChangeStream() {
 		logger.info("subscribe on node change");
 		applicationEventService.subscribe(ae -> {
