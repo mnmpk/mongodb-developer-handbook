@@ -24,7 +24,7 @@ spec:
           value: "${DATABASE_PASSWORD}"
         - name: VOYAGE_AI_KEY
           value: "${VOYAGE_AI_KEY}"
-        - name: POD_NAME
+        - name: HOSTNAME
           valueFrom:
             fieldRef:
               fieldPath: metadata.name
