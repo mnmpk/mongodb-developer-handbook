@@ -58,7 +58,7 @@ public class MongoConfig {
                                 settings);
         }
 
-        @Bean
+        /*@Bean
         public String validateMongoConnection(MongoClient mongoClient) {
                 while (true) {
                         try {
@@ -70,7 +70,7 @@ public class MongoConfig {
                         }
                 }
                 return "OK";
-        }
+        }*/
 
         @Bean
         public CodecRegistry pojoCodecRegistry() {

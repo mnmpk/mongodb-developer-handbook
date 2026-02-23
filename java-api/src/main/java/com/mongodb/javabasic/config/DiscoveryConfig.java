@@ -41,7 +41,7 @@ import jakarta.annotation.PreDestroy;
 @Profile("discovery")
 @Configuration
 @EnableScheduling
-@DependsOn("validateMongoConnection")
+//@DependsOn("validateMongoConnection")
 public class DiscoveryConfig {
     Logger logger = LoggerFactory.getLogger(this.getClass());
 

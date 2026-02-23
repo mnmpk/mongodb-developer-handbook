@@ -26,7 +26,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 @Component
-@DependsOn("validateMongoConnection")
+//@DependsOn("validateMongoConnection")
 public class CreateIndex {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
