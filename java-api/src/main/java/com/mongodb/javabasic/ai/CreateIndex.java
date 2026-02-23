@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Component
 public class CreateIndex {
@@ -31,7 +32,7 @@ public class CreateIndex {
     public void init() {
 
         MongoCollection<Document> collection = mongoTemplate
-                .getCollection(mongoTemplate.getCollectionName(Product.class));
+                .getCollection(mongoTemplate.getCollectionName(Product.class)).withTimeout(90, TimeUnit.SECONDS);
 
         // define the index details
         String indexName = "vector_index";
@@ -54,12 +55,9 @@ public class CreateIndex {
                 SearchIndexType.vectorSearch());
 
         // Create the index using the model
-        try {
-            List<String> result = collection.createSearchIndexes(Collections.singletonList(indexModel));
-            logger.info("Successfully created a vector index named: " + result);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        List<String> result = collection.createSearchIndexes(Collections.singletonList(indexModel));
+        logger.info("Successfully created a vector index named: " + result);
+
 
         // wait for index to build and become queryable
         logger.info("Polling to confirm the index has completed building.");
