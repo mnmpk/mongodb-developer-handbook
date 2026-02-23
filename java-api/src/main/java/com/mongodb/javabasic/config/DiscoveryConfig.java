@@ -80,7 +80,6 @@ public class DiscoveryConfig {
 			return null;
 		});
 	}
-    @Retryable(retryFor = { Exception.class }, maxAttempts = 5, backoff = @Backoff(delay = 5000L, multiplier = 2))
 	private void startChangeStream(MongoCollection<Document> coll) {
         this.instances.addAll(coll.find().projection(Projections.include("_id")).map(d -> d.getString("_id"))
                 .into(new ArrayList<>()));
