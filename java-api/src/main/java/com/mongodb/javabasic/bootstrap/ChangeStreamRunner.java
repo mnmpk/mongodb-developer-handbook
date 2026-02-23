@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.slf4j.Logger;
@@ -65,8 +67,14 @@ public class ChangeStreamRunner {
         ChangeStream<Document> cs2;
         ChangeStream<Document> cs3;
 
-        @PostConstruct
-        private void watch() {
+	@PostConstruct
+	private void init() {
+		CompletableFuture.supplyAsync(() -> {
+			startChangeStream();
+			return null;
+		});
+	}
+	private void startChangeStream() {
                 cs = ChangeStream.of("bucket-data", Mode.AUTO_RECOVER,
                                 List.of(Aggregates.match(
                                                 Filters.in("ns.coll", watchColls))))
