@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
@@ -48,6 +49,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 
 @Service
+@DependsOn("validateMongoConnection")
 public class ChangeStreamService<T> {
 	Logger logger = LoggerFactory.getLogger(getClass());
 	private static final String INDEX_NAME = "ttl";
@@ -104,7 +106,7 @@ public class ChangeStreamService<T> {
 						case INSERT:
 							if (Mode.AUTO_SCALE == cs.getMode()) {
 								this._stop(reg);
-								run(reg, ae.getDocument()!=null?((Document)ae.getDocument()).getDate("at"):null);
+								run(reg, ae.getDocument() != null ? ((Document) ae.getDocument()).getDate("at") : null);
 							}
 							break;
 						case UPDATE:
@@ -154,7 +156,7 @@ public class ChangeStreamService<T> {
 								}
 							} else if (Mode.AUTO_SCALE == cs.getMode()) {
 								this._stop(reg);
-								run(reg, ((Document)ae.getDocument()).getDate("at"));
+								run(reg, ((Document) ae.getDocument()).getDate("at"));
 							}
 							break;
 						default:
@@ -237,7 +239,8 @@ public class ChangeStreamService<T> {
 					}
 
 				}, TransactionOptions.builder()
-						.writeConcern(WriteConcern.MAJORITY).readConcern(ReadConcern.MAJORITY).readPreference(ReadPreference.primary())
+						.writeConcern(WriteConcern.MAJORITY).readConcern(ReadConcern.MAJORITY)
+						.readPreference(ReadPreference.primary())
 						.build());
 			} catch (RuntimeException e) {
 				logger.error("Unexpected error while registering change stream " + cs.getId() + ":", e);
@@ -269,7 +272,7 @@ public class ChangeStreamService<T> {
 				logger.error("Stopping change stream '" + reg.getChangeStream().getId() + "'' due to unexpected error:",
 						e);
 				this._stop(reg);
-				//Recover for unexpected exception
+				// Recover for unexpected exception
 				this.run(reg);
 			}
 			return null;

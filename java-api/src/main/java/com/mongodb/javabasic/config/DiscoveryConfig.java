@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -40,6 +41,7 @@ import jakarta.annotation.PreDestroy;
 @Profile("discovery")
 @Configuration
 @EnableScheduling
+@DependsOn("validateMongoConnection")
 public class DiscoveryConfig {
     Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -62,9 +64,9 @@ public class DiscoveryConfig {
 
     @Autowired
     private ApplicationEventService<Document> applicationEventService;
-    
-	@Autowired
-	private String podName;
+
+    @Autowired
+    private String podName;
 
     private void createIndex(MongoCollection<Document> coll) {
         coll.createIndex(Indexes.descending(INDEX_KEY),
@@ -84,11 +86,15 @@ public class DiscoveryConfig {
                 createIndex(coll);
             }
         }
-        this.instances.addAll(coll.find().projection(Projections.include("_id")).map(d->d.getString("_id")).into(new ArrayList<>()));
+        this.instances.addAll(coll.find().projection(Projections.include("_id")).map(d -> d.getString("_id"))
+                .into(new ArrayList<>()));
         cs = ChangeStream.of("discovery", Mode.BOARDCAST,
-                List.of(Aggregates.match(Filters.in("operationType", List.of("insert", "update", "delete"))))).fullDocumentBeforeChange(FullDocumentBeforeChange.REQUIRED);
+                List.of(Aggregates.match(Filters.in("operationType", List.of("insert", "update", "delete")))))
+                .fullDocumentBeforeChange(FullDocumentBeforeChange.REQUIRED);
         changeStreamService.run(ChangeStreamRegistry.<Document>builder().collectionName(collection).body(e -> {
-            ApplicationEvent<Document> event = ApplicationEvent.<Document>builder().name(e.getOperationType().name()).key(e.getDocumentKey().getString("_id").getValue()).updateDescription(e.getUpdateDescription()).build();
+            ApplicationEvent<Document> event = ApplicationEvent.<Document>builder().name(e.getOperationType().name())
+                    .key(e.getDocumentKey().getString("_id").getValue()).updateDescription(e.getUpdateDescription())
+                    .build();
             switch (e.getOperationType()) {
                 case INSERT:
                     instances.add(event.getKey());
