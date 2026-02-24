@@ -12,12 +12,18 @@ import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
 import { getMainDefinition } from '@apollo/client/utilities';
 import { createClient } from 'graphql-ws';
 import { environment } from '../environments/environment';
+import { rxStompServiceFactory } from './shared/rx-stomp-service-factory';
+import { RxStompService } from './shared/rx-stomp.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes), provideAnimationsAsync(),
     provideHttpClient(),
     provideHttpClient(withInterceptors([loaderInterceptor])),
+    {
+      provide: RxStompService,
+      useFactory: rxStompServiceFactory,
+    },
     provideEcharts(),
     provideApollo(() => {
       return {

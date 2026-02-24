@@ -4,5 +4,6 @@ export const environment = {
     production: false,
 	japiUrl: japiUrl,
 	graphQLUrl: "http://localhost:4000/graphql",
-	defaultPageSize: 50
+	defaultPageSize: 50,
+	messageBrokerURL: "ws:"+japiUrl+"/ws",
 };

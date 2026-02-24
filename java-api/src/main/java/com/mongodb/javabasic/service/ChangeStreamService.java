@@ -183,7 +183,7 @@ public class ChangeStreamService<T> {
 		this.run(reg, null);
 	}
 
-	@Retryable(includes = { MongoException.class }, maxRetries = 10, delay = 5000,                              // Initial delay in milliseconds (1 second)
+	@Retryable(includes = { MongoException.class }, maxRetries = 10, delay = 5000,
         multiplier = 2)
 	public void run(ChangeStreamRegistry<T> reg, Date earliest) {
 		logger.info("Start running change stream");
@@ -315,7 +315,7 @@ public class ChangeStreamService<T> {
 		}
 	}
 
-	@Retryable(includes = { MongoException.class }, maxRetries = 10, delay = 1000,                              // Initial delay in milliseconds (1 second)
+	@Retryable(includes = { MongoException.class }, maxRetries = 10, delay = 1000,
         multiplier = 2)
 	private void saveCheckpoint(String csId, BsonString token) {
 		logger.info("save checkpoint");

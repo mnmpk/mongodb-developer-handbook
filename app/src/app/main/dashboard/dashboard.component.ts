@@ -4,322 +4,7 @@ import { MatTableDataSource } from '@angular/material/table';
 import { Apollo, gql } from 'apollo-angular';
 import { EChartsOption } from 'echarts';
 import { Observable, Subscription } from 'rxjs';
-
-const gqlMap: any = {
-  "accountArea15days": [gql`
-    query accountArea15days {
-      getAccountArea15days {
-        _id
-        type
-        bucketSize
-        acct
-        areaCode
-        sumBet
-        sumCasinoWin
-        sumTheorWin
-        noOfTxn
-        avgBet
-        avgCasinoWin
-        avgTheorWin
-      }
-    }`, gql`
-    subscription accountArea15days {
-      watchAccountArea15days {
-        _id
-        type
-        bucketSize
-        acct
-        areaCode
-        sumBet
-        sumCasinoWin
-        sumTheorWin
-        noOfTxn
-        avgBet
-        avgCasinoWin
-        avgTheorWin
-      }
-    }`],
-
-  "accountArea1day": [gql`
-      query accountArea1day {
-        getAccountArea1day {
-          _id
-          type
-          bucketSize
-          acct
-          areaCode
-          sumBet
-          sumCasinoWin
-          sumTheorWin
-          noOfTxn
-          avgBet
-          avgCasinoWin
-          avgTheorWin
-        }
-      }`, gql`
-      subscription accountArea1day {
-        watchAccountArea1day {
-          _id
-          type
-          bucketSize
-          acct
-          areaCode
-          sumBet
-          sumCasinoWin
-          sumTheorWin
-          noOfTxn
-          avgBet
-          avgCasinoWin
-          avgTheorWin
-        }
-      }`],
-
-  "accountArea3mins": [gql`
-      query accountArea3mins {
-        getAccountArea3mins {
-          _id
-          type
-          bucketSize
-          acct
-          areaCode
-          sumBet
-          sumCasinoWin
-          sumTheorWin
-          noOfTxn
-          avgBet
-          avgCasinoWin
-          avgTheorWin
-        }
-      }`, gql`
-      subscription accountArea3mins {
-        watchAccountArea3mins {
-          _id
-          type
-          bucketSize
-          acct
-          areaCode
-          sumBet
-          sumCasinoWin
-          sumTheorWin
-          noOfTxn
-          avgBet
-          avgCasinoWin
-          avgTheorWin
-        }
-      }`],
-
-  "accountCasinoArea15days": [gql`
-        query accountCasinoArea15days {
-          getAccountCasinoArea15days {
-            _id
-            type
-            bucketSize
-            acct
-            casinoCode
-            areaCode
-            sumBet
-            sumCasinoWin
-            sumTheorWin
-            noOfTxn
-            avgBet
-            avgCasinoWin
-            avgTheorWin
-          }
-        }`, gql`
-        subscription accountCasinoArea15days {
-          watchAccountCasinoArea15days {
-            _id
-            type
-            bucketSize
-            acct
-            casinoCode
-            areaCode
-            sumBet
-            sumCasinoWin
-            sumTheorWin
-            noOfTxn
-            avgBet
-            avgCasinoWin
-            avgTheorWin
-          }
-        }`],
-
-  "accountCasinoArea1day": [gql`
-          query accountCasinoArea1day {
-            getAccountCasinoArea1day {
-              _id
-              type
-              bucketSize
-              acct
-              casinoCode
-              areaCode
-              sumBet
-              sumCasinoWin
-              sumTheorWin
-              noOfTxn
-              avgBet
-              avgCasinoWin
-              avgTheorWin
-            }
-          }`, gql`
-          subscription accountCasinoArea1day {
-            watchAccountCasinoArea1day {
-              _id
-              type
-              bucketSize
-              acct
-              casinoCode
-              areaCode
-              sumBet
-              sumCasinoWin
-              sumTheorWin
-              noOfTxn
-              avgBet
-              avgCasinoWin
-              avgTheorWin
-            }
-          }`],
-
-
-
-
-  "accountCasinoArea3mins": [gql`
-        query accountCasinoArea3mins {
-          getAccountCasinoArea3mins {
-            _id
-            type
-            bucketSize
-            acct
-            casinoCode
-            areaCode
-            sumBet
-            sumCasinoWin
-            sumTheorWin
-            noOfTxn
-            avgBet
-            avgCasinoWin
-            avgTheorWin
-          }
-        }`, gql`
-        subscription accountCasinoArea3mins {
-          watchAccountCasinoArea3mins {
-            _id
-            type
-            bucketSize
-            acct
-            casinoCode
-            areaCode
-            sumBet
-            sumCasinoWin
-            sumTheorWin
-            noOfTxn
-            avgBet
-            avgCasinoWin
-            avgTheorWin
-          }
-        }`],
-
-
-
-  "accountCasino15days": [gql`
-          query accountCasino15days {
-            getAccountCasino15days {
-              _id
-              type
-              bucketSize
-              acct
-              casinoCode
-              sumBet
-              sumCasinoWin
-              sumTheorWin
-              noOfTxn
-              avgBet
-              avgCasinoWin
-              avgTheorWin
-            }
-          }`, gql`
-          subscription accountCasino15days {
-            watchAccountCasino15days {
-              _id
-              type
-              bucketSize
-              acct
-              casinoCode
-              sumBet
-              sumCasinoWin
-              sumTheorWin
-              noOfTxn
-              avgBet
-              avgCasinoWin
-              avgTheorWin
-            }
-          }`],
-  "accountCasino1day": [gql`
-          query accountCasino1day {
-            getAccountCasino1day {
-              _id
-              type
-              bucketSize
-              acct
-              casinoCode
-              sumBet
-              sumCasinoWin
-              sumTheorWin
-              noOfTxn
-              avgBet
-              avgCasinoWin
-              avgTheorWin
-            }
-          }`, gql`
-          subscription accountCasino1day {
-            watchAccountCasino1day {
-              _id
-              type
-              bucketSize
-              acct
-              casinoCode
-              sumBet
-              sumCasinoWin
-              sumTheorWin
-              noOfTxn
-              avgBet
-              avgCasinoWin
-              avgTheorWin
-            }
-          }`], "accountCasino3mins": [gql`
-          query accountCasino3mins {
-            getAccountCasino3mins {
-              _id
-              type
-              bucketSize
-              acct
-              casinoCode
-              sumBet
-              sumCasinoWin
-              sumTheorWin
-              noOfTxn
-              avgBet
-              avgCasinoWin
-              avgTheorWin
-            }
-          }`, gql`
-          subscription accountCasino3mins {
-            watchAccountCasino3mins {
-              _id
-              type
-              bucketSize
-              acct
-              casinoCode
-              sumBet
-              sumCasinoWin
-              sumTheorWin
-              noOfTxn
-              avgBet
-              avgCasinoWin
-              avgTheorWin
-            }
-          }`]
-}
+import { RxStompService } from '../../shared/rx-stomp.service';
 
 const tables = [
   [1025, 1000],
@@ -459,10 +144,10 @@ const tables = [
 ];
 
 @Component({
-    selector: 'app-dashboard',
-    templateUrl: './dashboard.component.html',
-    styleUrl: './dashboard.component.scss',
-    standalone: false
+  selector: 'app-dashboard',
+  templateUrl: './dashboard.component.html',
+  styleUrl: './dashboard.component.scss',
+  standalone: false
 })
 export class DashboardComponent {
   public chartQuery!: any;
@@ -479,7 +164,7 @@ export class DashboardComponent {
 
   @ViewChild(MatSort) sort!: MatSort;
 
-  type = 'accountArea';
+  type = 'acct-areaCode';
   duration = '15days';
 
   public query!: any;
@@ -489,8 +174,25 @@ export class DashboardComponent {
   displayedColumns: string[] = ['acct', 'casinoCode', 'areaCode', 'sumBet', 'avgBet'];
 
 
-  constructor(private readonly apollo: Apollo) { }
+  constructor(private stompService: RxStompService, private readonly apollo: Apollo) { }
   ngOnInit(): void {
+    this.stompService.watch('/sync').subscribe(msg => {
+      var obj = JSON.parse(msg.body);
+      //console.log(obj);
+      if (this.type == obj.type && this.duration == obj.bucketSize) {
+        const currentData = this.dataSource.data;
+        const foundItem = currentData.find(item => item._id === obj._id);
+        if (!foundItem) {
+          currentData.push(obj);
+        } else {
+          const updatedItem = { ...foundItem, ...obj };
+          const index = currentData.indexOf(foundItem);
+          currentData[index] = updatedItem;
+        }
+
+        this.dataSource.data = currentData;
+      }
+    });
     let xData: number[] = [];
     let yData: number[] = [];
 
@@ -623,7 +325,6 @@ export class DashboardComponent {
       },
       onError: (err: any) => console.error(err)
     });
-
     this.change();
   }
 
@@ -657,50 +358,9 @@ export class DashboardComponent {
       }
     }
   }
-  /*generateData() {
-    let data = [];
-    for (let i = 0; i < 12; i++) {
-      data.push([...tables[i], (Math.random() * 10000)])
-    }
-    return data;
-  }*/
 
   change() {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-    }
-    const gql = gqlMap[this.type + this.duration];
-    if (gql) {
-      this.query = this.apollo
-        .watchQuery({
-          query: gql[0],
-        });
-      this.queryResult = this.query.valueChanges;
-      this.subscription = this.queryResult.subscribe((result) => {
-        this.dataSource.data = result.data[Object.keys(result.data)[0]];
-      });
-      this.query.subscribeToMore({
-        document: gql[1],
-        updateQuery: (prev: any, result: any) => {
-          if (!result.subscriptionData.data) return prev;
-          const gKey = "get" + String(this.type).charAt(0).toUpperCase() + String(this.type).slice(1) + this.duration;
-          const wKey = Object.keys(result.subscriptionData.data)[0];
-          const newItem = result.subscriptionData.data[`${wKey}`];
-
-          let res: any[] = [];
-          if (prev[gKey]) {
-            res = [...prev[gKey]];
-          }
-          const i = res.findIndex((v: any) => v._id == newItem._id);
-          if (i === -1) res.push(newItem);
-          else res.splice(i, 1, newItem);
-
-          return { [`${gKey}`]: res };
-
-          //console.log(result.subscriptionData.data[Object.keys(result.subscriptionData.data)[0]]);
-        },
-        onError: (err: any) => console.error(err)
-      });
-    }
+    //TODO: query initial data based on type and duration
+    this.dataSource.data = [];
   }
 }
