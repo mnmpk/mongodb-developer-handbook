@@ -96,10 +96,7 @@ public class SessionController {
                         new SecurityContextLogoutHandler().logout(request, response,
                                         SecurityContextHolder.getContext().getAuthentication());
                 }
-                return new Document("principal",
-                                SecurityContextHolder.getContext().getAuthentication() != null
-                                                ? SecurityContextHolder.getContext().getAuthentication().getName()
-                                                : "")
+                return new Document("principal", "")
                                 .append("data", session.getAttribute("data"));
         }
 
