@@ -5,5 +5,5 @@ export const environment = {
 	japiUrl: japiUrl,
 	graphQLUrl: "https://mongodb-graphql.mzinx.com/graphql",
 	defaultPageSize: 50,
-	messageBrokerURL: "ws:"+japiUrl+"/ws",
+	messageBrokerURL: "wss:"+japiUrl+"/ws",
 };
