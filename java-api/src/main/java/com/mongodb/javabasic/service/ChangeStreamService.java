@@ -12,6 +12,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
+import org.bson.BsonDocument;
 import org.bson.BsonString;
 import org.bson.Document;
 import org.slf4j.Logger;
@@ -36,6 +37,7 @@ import com.mongodb.client.model.Indexes;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.model.Updates;
 import com.mongodb.client.model.changestream.OperationType;
+import com.mongodb.client.model.changestream.UpdateDescription;
 import com.mongodb.client.result.UpdateResult;
 import com.mongodb.javabasic.model.Aggregation;
 import com.mongodb.javabasic.model.ChangeStream;
@@ -63,8 +65,8 @@ public class ChangeStreamService<T> {
 	private long tokenMaxLifeTime;
 	@Value("${settings.instances.collection}")
 	private String instancesCollectionName;
-    @Value("${settings.instances.maxTimeout}")
-    private long maxTimeout;
+	@Value("${settings.instances.maxTimeout}")
+	private long maxTimeout;
 
 	@Autowired
 	private MongoClient mongoClient;
@@ -107,22 +109,44 @@ public class ChangeStreamService<T> {
 						case INSERT:
 							if (Mode.AUTO_SCALE == cs.getMode()) {
 								this._stop(reg);
-								run(reg, ae.getDocument()!=null?((Document)ae.getDocument()).getDate("at"):null);
+								run(reg, ae.getDocument() != null ? ((Document) ae.getDocument()).getDate("at") : null);
 							}
 							break;
 						case UPDATE:
 							if (Mode.AUTO_RECOVER == cs.getMode()) {
-								if (ae.getUpdateDescription() != null
-										&& (ae.getUpdateDescription().getRemovedFields().contains(CHANGE_STREAMS_FIELD)
-												|| (ae.getUpdateDescription().getUpdatedFields()
-														.containsKey(CHANGE_STREAMS_FIELD)
-														&& !ae.getUpdateDescription().getUpdatedFields()
-																.getArray(CHANGE_STREAMS_FIELD)
-																.contains(new BsonString(csId))))) {
-									logger.info(
-											"stopping change stream " + csId + ", remove from registry.");
-									this._stop(reg);
-									changeStreams.remove(csId);
+								UpdateDescription ud = ae.getUpdateDescription();
+								if (ud != null) {
+									if (ud.getRemovedFields().contains(CHANGE_STREAMS_FIELD)) {
+										logger.info(
+												"stopping change stream " + csId);
+										this._stop(reg);
+									} else {
+										BsonDocument updatedFields = ud.getUpdatedFields();
+										if (updatedFields != null && updatedFields.containsKey(CHANGE_STREAMS_FIELD)) {
+											if (updatedFields.getArray(CHANGE_STREAMS_FIELD)
+													.contains(new BsonString(csId))) {
+												if (!reg.getChangeStream().isRunning()) {
+													// restart change stream
+													this.run(reg);
+												}
+											} else {
+												logger.info(
+														"stopping change stream " + csId);
+												this._stop(reg);
+											}
+										}
+									}
+									/*
+									 * if (ud.getRemovedFields().contains(CHANGE_STREAMS_FIELD)
+									 * || (updatedFields != null && updatedFields.containsKey(CHANGE_STREAMS_FIELD)
+									 * && !updatedFields.getArray(CHANGE_STREAMS_FIELD)
+									 * .contains(new BsonString(csId)))) {
+									 * logger.info(
+									 * "stopping change stream " + csId + ", remove from registry.");
+									 * this._stop(reg);
+									 * // changeStreams.remove(csId);
+									 * }
+									 */
 								}
 							} else if (Mode.AUTO_SCALE == cs.getMode()) {
 								if (!cs.isRunning()) {
@@ -157,7 +181,7 @@ public class ChangeStreamService<T> {
 								}
 							} else if (Mode.AUTO_SCALE == cs.getMode()) {
 								this._stop(reg);
-								run(reg, ((Document)ae.getDocument()).getDate("at"));
+								run(reg, ((Document) ae.getDocument()).getDate("at"));
 							}
 							break;
 						default:
@@ -183,8 +207,7 @@ public class ChangeStreamService<T> {
 		this.run(reg, null);
 	}
 
-	@Retryable(includes = { MongoException.class }, maxRetries = 10, delay = 5000,
-        multiplier = 2)
+	@Retryable(includes = { MongoException.class }, maxRetries = 10, delay = 5000, multiplier = 2)
 	public void run(ChangeStreamRegistry<T> reg, Date earliest) {
 		logger.info("Start running change stream");
 		changeStreams.put(reg.getChangeStream().getId(), reg);
@@ -218,7 +241,7 @@ public class ChangeStreamService<T> {
 									clientSession,
 									Filters.eq("_id", podName),
 									Updates.combine(Updates.set("_id", podName),
-									Updates.set(DATE_FIELD, Instant.now().plus(maxTimeout, ChronoUnit.MILLIS)),
+											Updates.set(DATE_FIELD, Instant.now().plus(maxTimeout, ChronoUnit.MILLIS)),
 											Updates.addToSet(CHANGE_STREAMS_FIELD, cs.getId())),
 									new UpdateOptions().upsert(true));
 							logger.info("Update result:" + ur);
@@ -242,7 +265,8 @@ public class ChangeStreamService<T> {
 					}
 
 				}, TransactionOptions.builder()
-						.writeConcern(WriteConcern.MAJORITY).readConcern(ReadConcern.MAJORITY).readPreference(ReadPreference.primary())
+						.writeConcern(WriteConcern.MAJORITY).readConcern(ReadConcern.MAJORITY)
+						.readPreference(ReadPreference.primary())
 						.build());
 			} catch (RuntimeException e) {
 				logger.error("Unexpected error while registering change stream " + cs.getId() + ":", e);
@@ -274,7 +298,7 @@ public class ChangeStreamService<T> {
 				logger.error("Stopping change stream '" + reg.getChangeStream().getId() + "'' due to unexpected error:",
 						e);
 				this._stop(reg);
-				//Recover for unexpected exception
+				// Recover for unexpected exception
 				this.run(reg);
 			}
 			return null;
@@ -315,8 +339,7 @@ public class ChangeStreamService<T> {
 		}
 	}
 
-	@Retryable(includes = { MongoException.class }, maxRetries = 10, delay = 1000,
-        multiplier = 2)
+	@Retryable(includes = { MongoException.class }, maxRetries = 10, delay = 1000, multiplier = 2)
 	private void saveCheckpoint(String csId, BsonString token) {
 		logger.info("save checkpoint");
 		mongoTemplate.getCollection(RESUME_TOKEN_COLL).updateOne(
