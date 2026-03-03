@@ -7,21 +7,28 @@
                 <div class="d-flex justify-content-between">
                     <div>
                         <mat-form-field>
-                            <mat-label>Target collection</mat-label>
-                            <input matInput type="text" formControlName="collection" />
+                            <mat-label>Available change stream</mat-label>
+                            <mat-select formControlName="cs">
+                                <mat-option value="bucket-data">Bucket data</mat-option>
+                                <mat-option value="final-data">Final data</mat-option>
+                                <mat-option value="dashboard">Dashboard</mat-option>
+                            </mat-select>
                         </mat-form-field>
                         <mat-form-field>
                             <mat-label>Mode</mat-label>
                             <mat-select formControlName="mode">
-                                <mat-option value="single">Single</mat-option>
-                                <mat-option value="parallel">Parallel</mat-option>
-                                <mat-option value="distributed">Distributed</mat-option>
+                                <mat-option value="BOARDCAST">Boardcast</mat-option>
+                                <mat-option value="AUTO_RECOVER">Auto recover</mat-option>
+                                <mat-option value="AUTO_SCALE">Auto scale</mat-option>
                             </mat-select>
                         </mat-form-field>
                         <mat-form-field>
-                            <mat-label>Pipeline</mat-label>
-                            <mat-select formControlName="pipeline">
-                                <mat-option value="test">Test</mat-option>
+                            <mat-label>Recovery</mat-label>
+                            <mat-select formControlName="recovery">
+                                <mat-option value="NONE">None</mat-option>
+                                <mat-option value="EVERY">Every</mat-option>
+                                <mat-option value="BATCH">Batch</mat-option>
+                                <mat-option value="TIME">Time interval</mat-option>
                             </mat-select>
                         </mat-form-field>
                     </div>
@@ -37,6 +44,14 @@
         <table mat-table [dataSource]="dataSource">
 
 
+            <!-- csId Column -->
+            <ng-container matColumnDef="csId" stickyEnd>
+                <th mat-header-cell *matHeaderCellDef aria-label="row actions">Change stream</th>
+                <td mat-cell *matCellDef="let row">
+                    {{row.csId}}
+                </td>
+                <td mat-footer-cell *matFooterCellDef aria-label="row">&nbsp;</td>
+            </ng-container>
             <!-- collection Column -->
             <ng-container matColumnDef="collection" stickyEnd>
                 <th mat-header-cell *matHeaderCellDef aria-label="row actions">Collection</th>
@@ -53,11 +68,19 @@
                 </td>
                 <td mat-footer-cell *matFooterCellDef aria-label="row">&nbsp;</td>
             </ng-container>
-            <!-- pipeline Column -->
-            <ng-container matColumnDef="pipeline" stickyEnd>
-                <th mat-header-cell *matHeaderCellDef aria-label="row actions">Pipeline</th>
+            <!-- Recovery Column -->
+            <ng-container matColumnDef="recovery" stickyEnd>
+                <th mat-header-cell *matHeaderCellDef aria-label="row actions">Recovery</th>
                 <td mat-cell *matCellDef="let row">
-                    {{row.pipeline}}
+                    {{row.recovery}}
+                </td>
+                <td mat-footer-cell *matFooterCellDef aria-label="row">&nbsp;</td>
+            </ng-container>
+            <!-- instances Column -->
+            <ng-container matColumnDef="instances" stickyEnd>
+                <th mat-header-cell *matHeaderCellDef aria-label="row actions">Instances</th>
+                <td mat-cell *matCellDef="let row">
+                    {{row.instances}}
                 </td>
                 <td mat-footer-cell *matFooterCellDef aria-label="row">&nbsp;</td>
             </ng-container>

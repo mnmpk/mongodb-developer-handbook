@@ -15,7 +15,7 @@ import { ChangeStreamService } from './change-stream.service';
 })
 export class ChangeStreamComponent {
   update$: EventEmitter<any> = new EventEmitter();
-  columns: string[] = ['collection', 'mode', 'pipeline', 'actions'];
+  columns: string[] = ['csId', 'collection', 'mode', 'recovery', 'instances', 'actions'];
   dataSource: MatTableDataSource<any> = new MatTableDataSource();
   form!: FormGroup;
 
@@ -23,9 +23,9 @@ export class ChangeStreamComponent {
 
   ngOnInit() {
     this.form = this.formBuilder.group({
-      collection: [null, Validators.required],
+      cs: [null, Validators.required],
       mode: [null, Validators.required],
-      pipeline: [null, Validators.required],
+      recovery: [null, Validators.required],
     });
   }
   ngAfterViewInit() {

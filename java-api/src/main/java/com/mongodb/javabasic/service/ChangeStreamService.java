@@ -250,6 +250,7 @@ public class ChangeStreamService<T> {
 								start(reg);
 							}
 						} else {
+							//TODO: set doc.getString("_id") to running instances
 							if (podName.equals(doc.getString("_id"))) {
 								if (changeStreams.containsKey(cs.getId())
 										&& cs.isRunning()) {
@@ -317,6 +318,7 @@ public class ChangeStreamService<T> {
 
 	public void _stop(ChangeStreamRegistry<T> reg) {
 		reg.getChangeStream().setRunning(false);
+		//TODO: remove from running instances
 		if (reg.getCompletableFuture() != null)
 			reg.getCompletableFuture().join();
 	}
