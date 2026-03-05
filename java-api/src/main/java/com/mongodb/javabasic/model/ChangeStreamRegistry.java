@@ -1,5 +1,7 @@
 package com.mongodb.javabasic.model;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
@@ -22,4 +24,6 @@ public class ChangeStreamRegistry<T> {
     
     private int instanceIndex;
     private int instanceSize;
+    @Builder.Default
+    private Set<String> instances = new HashSet<>();
 }

@@ -2,6 +2,8 @@ package com.mongodb.javabasic.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.bson.Document;
 import org.slf4j.Logger;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.model.Updates;
+import com.mongodb.javabasic.model.ChangeStreamRegistry;
 
 @RestController
 @RequestMapping(path = "/change-stream")
@@ -25,9 +28,22 @@ public class ChangeStreamController {
     @Autowired
     private MongoTemplate mongoTemplate;
 
+    @Autowired
+    private Map<String, ChangeStreamRegistry<?>> changeStreams;
+
     @RequestMapping("/list")
     public List<Document> list() {
-        return mongoTemplate.getCollection("changeStreams").find().into(new ArrayList<>());
+        return changeStreams.values().stream().map(csReg->{
+            return new Document("coll", csReg.getCollectionName())
+            .append("csId", csReg.getChangeStream().getId())
+            .append("csBatchSize", csReg.getChangeStream().getBatchSize())
+            .append("csMaxAwaitTime", csReg.getChangeStream().getMaxAwaitTime())
+            .append("csResumeStrategy", csReg.getChangeStream().getResumeStrategy())
+            .append("csSaveTokenInterval", csReg.getChangeStream().getSaveTokenInterval())
+            .append("csMode", csReg.getChangeStream().getMode())
+            .append("index", csReg.getInstanceIndex())
+            .append("instances", csReg.getInstances());
+        }).collect(Collectors.toList());
     }
 
     @RequestMapping("/watch/{database}/{collection}")

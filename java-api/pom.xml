@@ -49,6 +49,11 @@
 			<artifactId>mongodb-spring-session</artifactId>
 			<version>4.0.0-rc0</version>
 		</dependency>
+		<!--dependency>
+			<groupId>org.mongodb</groupId>
+			<artifactId>mongodb-spring-change-stream</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency-->
 		
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

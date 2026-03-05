@@ -15,10 +15,9 @@ import { ChangeStreamService } from './change-stream.service';
 })
 export class ChangeStreamComponent {
   update$: EventEmitter<any> = new EventEmitter();
-  columns: string[] = ['csId', 'collection', 'mode', 'recovery', 'instances', 'actions'];
+  columns: string[] = ["coll","csId","csBatchSize","csMaxAwaitTime","csResumeStrategy","csSaveTokenInterval","csMode","csIndex","csInstances", "actions"];
   dataSource: MatTableDataSource<any> = new MatTableDataSource();
   form!: FormGroup;
-
   constructor(private formBuilder: FormBuilder, private service: ChangeStreamService) { }
 
   ngOnInit() {

@@ -42,8 +42,6 @@
     </form>
     <div class="d-flex scroll-container">
         <table mat-table [dataSource]="dataSource">
-
-
             <!-- csId Column -->
             <ng-container matColumnDef="csId" stickyEnd>
                 <th mat-header-cell *matHeaderCellDef aria-label="row actions">Change stream</th>
@@ -53,34 +51,68 @@
                 <td mat-footer-cell *matFooterCellDef aria-label="row">&nbsp;</td>
             </ng-container>
             <!-- collection Column -->
-            <ng-container matColumnDef="collection" stickyEnd>
+            <ng-container matColumnDef="coll" stickyEnd>
                 <th mat-header-cell *matHeaderCellDef aria-label="row actions">Collection</th>
                 <td mat-cell *matCellDef="let row">
-                    {{row.collection}}
+                    {{row.coll}}
                 </td>
                 <td mat-footer-cell *matFooterCellDef aria-label="row">&nbsp;</td>
             </ng-container>
             <!-- mode Column -->
-            <ng-container matColumnDef="mode" stickyEnd>
+            <ng-container matColumnDef="csMode" stickyEnd>
                 <th mat-header-cell *matHeaderCellDef aria-label="row actions">Mode</th>
                 <td mat-cell *matCellDef="let row">
-                    {{row.mode}}
+                    {{row.csMode}}
                 </td>
                 <td mat-footer-cell *matFooterCellDef aria-label="row">&nbsp;</td>
             </ng-container>
             <!-- Recovery Column -->
-            <ng-container matColumnDef="recovery" stickyEnd>
+            <ng-container matColumnDef="csResumeStrategy" stickyEnd>
                 <th mat-header-cell *matHeaderCellDef aria-label="row actions">Recovery</th>
                 <td mat-cell *matCellDef="let row">
-                    {{row.recovery}}
+                    {{row.csResumeStrategy}}
                 </td>
                 <td mat-footer-cell *matFooterCellDef aria-label="row">&nbsp;</td>
             </ng-container>
+            <!--  Column -->
+            <ng-container matColumnDef="csBatchSize" stickyEnd>
+                <th mat-header-cell *matHeaderCellDef aria-label="row actions">Batch size</th>
+                <td mat-cell *matCellDef="let row">
+                    {{row.csBatchSize}}
+                </td>
+                <td mat-footer-cell *matFooterCellDef aria-label="row">&nbsp;</td>
+            </ng-container>
+            <!-- Max await time Column -->
+            <ng-container matColumnDef="csMaxAwaitTime" stickyEnd>
+                <th mat-header-cell *matHeaderCellDef aria-label="row actions">Max await time</th>
+                <td mat-cell *matCellDef="let row">
+                    {{row.csMaxAwaitTime}}
+                </td>
+                <td mat-footer-cell *matFooterCellDef aria-label="row">&nbsp;</td>
+            </ng-container>
+            <!-- Save token interval Column -->
+            <ng-container matColumnDef="csSaveTokenInterval" stickyEnd>
+                <th mat-header-cell *matHeaderCellDef aria-label="row actions">Save token interval</th>
+                <td mat-cell *matCellDef="let row">
+                    {{row.csSaveTokenInterval}}
+                </td>
+                <td mat-footer-cell *matFooterCellDef aria-label="row">&nbsp;</td>
+            </ng-container>
+            <!-- Index Column -->
+            <ng-container matColumnDef="csIndex" stickyEnd>
+                <th mat-header-cell *matHeaderCellDef aria-label="row actions">Index</th>
+                <td mat-cell *matCellDef="let row">
+                    {{row.csIndex}}
+                </td>
+                <td mat-footer-cell *matFooterCellDef aria-label="row">&nbsp;</td>
+            </ng-container>
+
+
             <!-- instances Column -->
-            <ng-container matColumnDef="instances" stickyEnd>
+            <ng-container matColumnDef="csInstances" stickyEnd>
                 <th mat-header-cell *matHeaderCellDef aria-label="row actions">Instances</th>
                 <td mat-cell *matCellDef="let row">
-                    {{row.instances}}
+                    {{row.csInstances}}
                 </td>
                 <td mat-footer-cell *matFooterCellDef aria-label="row">&nbsp;</td>
             </ng-container>

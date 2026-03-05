@@ -250,7 +250,7 @@ public class ChangeStreamService<T> {
 								start(reg);
 							}
 						} else {
-							//TODO: set doc.getString("_id") to running instances
+							reg.getInstances().add(doc.getString("_id"));
 							if (podName.equals(doc.getString("_id"))) {
 								if (changeStreams.containsKey(cs.getId())
 										&& cs.isRunning()) {
@@ -305,6 +305,7 @@ public class ChangeStreamService<T> {
 			return null;
 		}, taskExecutor);
 		reg.setCompletableFuture(completableFuture);
+		reg.getInstances().add(podName);
 		logger.info("Change stream " + reg.getChangeStream().getId() + " started");
 	}
 
@@ -318,7 +319,7 @@ public class ChangeStreamService<T> {
 
 	public void _stop(ChangeStreamRegistry<T> reg) {
 		reg.getChangeStream().setRunning(false);
-		//TODO: remove from running instances
+		reg.getInstances().remove(podName);
 		if (reg.getCompletableFuture() != null)
 			reg.getCompletableFuture().join();
 	}
