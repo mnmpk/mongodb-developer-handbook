@@ -110,6 +110,8 @@ public class ChangeStreamService<T> {
 							if (Mode.AUTO_SCALE == cs.getMode()) {
 								this._stop(reg);
 								run(reg, ae.getDocument() != null ? ((Document) ae.getDocument()).getDate("at") : null);
+							} else {
+								reg.getInstances().add(ae.getKey());
 							}
 							break;
 						case UPDATE:
@@ -182,6 +184,8 @@ public class ChangeStreamService<T> {
 							} else if (Mode.AUTO_SCALE == cs.getMode()) {
 								this._stop(reg);
 								run(reg, ((Document) ae.getDocument()).getDate("at"));
+							} else {
+								reg.getInstances().remove(ae.getKey());
 							}
 							break;
 						default:
@@ -330,6 +334,8 @@ public class ChangeStreamService<T> {
 		int index = new ArrayList<String>(this.instances).indexOf(podName);
 		reg.setInstanceSize(instances.size());
 		reg.setInstanceIndex(index);
+		reg.getInstances().clear();
+		reg.getInstances().addAll(instances);
 		if (instances.size() > 0 && index >= 0) {
 			if (cs.isRunning()) {
 				this._stop(reg);
