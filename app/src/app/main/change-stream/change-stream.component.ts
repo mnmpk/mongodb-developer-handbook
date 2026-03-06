@@ -15,7 +15,7 @@ import { ChangeStreamService } from './change-stream.service';
 })
 export class ChangeStreamComponent {
   update$: EventEmitter<any> = new EventEmitter();
-  columns: string[] = ["coll","csId","csBatchSize","csMaxAwaitTime","csResumeStrategy","csSaveTokenInterval","csMode","index","instances", "actions"];
+  columns: string[] = ["coll", "csId", "csBatchSize", "csMaxAwaitTime", "csResumeStrategy", "csSaveTokenInterval", "csMode", "index", "instances"/*, "actions"*/];
   dataSource: MatTableDataSource<any> = new MatTableDataSource();
   form!: FormGroup;
   constructor(private formBuilder: FormBuilder, private service: ChangeStreamService) { }
