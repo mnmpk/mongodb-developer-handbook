@@ -1,7 +1,6 @@
 import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
-import { Apollo, gql } from 'apollo-angular';
 import { EChartsOption } from 'echarts';
 import { Observable, Subscription } from 'rxjs';
 import { RxStompService } from '../../shared/rx-stomp.service';
@@ -154,7 +153,7 @@ export class DashboardComponent {
   public chartResult!: Observable<any>;
   chartSubscription!: Subscription;
 
-  data: any[] = [];
+  data: number[][] = [];
   heatMap!: EChartsOption;
   heatMapUpdate!: EChartsOption;
 
@@ -174,23 +173,39 @@ export class DashboardComponent {
   displayedColumns: string[] = ['acct', 'casinoCode', 'areaCode', 'sumBet', 'avgBet'];
 
 
-  constructor(private stompService: RxStompService, private readonly apollo: Apollo) { }
+  constructor(private stompService: RxStompService) { }
   ngOnInit(): void {
     this.stompService.watch('/sync').subscribe(msg => {
-      var obj = JSON.parse(msg.body);
-      //console.log(obj);
-      if (this.type == obj.type && this.duration == obj.bucketSize) {
-        const currentData = this.dataSource.data;
-        const foundItem = currentData.find(item => item._id === obj._id);
-        if (!foundItem) {
-          currentData.push(obj);
-        } else {
-          const updatedItem = { ...foundItem, ...obj };
-          const index = currentData.indexOf(foundItem);
-          currentData[index] = updatedItem;
-        }
+      var res = JSON.parse(msg.body);
+      if (res.content.type == "REFRESH") {
+        var obj = res.content.data;
+        if (this.type == obj.type && this.duration == obj.bucketSize) {
+          const currentData = this.dataSource.data;
+          const foundItem = currentData.find(item => item._id === obj._id);
+          if (!foundItem) {
+            currentData.push(obj);
+          } else {
+            const updatedItem = { ...foundItem, ...obj };
+            const index = currentData.indexOf(foundItem);
+            currentData[index] = updatedItem;
+          }
 
-        this.dataSource.data = currentData;
+          this.dataSource.data = currentData;
+        }
+      } else {
+        var obj = res.content;
+        tables.forEach((table, index) => {
+          if(index==obj.locnIndex){
+            this.data.push([...table, obj.headCount]);
+          }
+        });
+        this.heatMapUpdate = {
+          series: [
+            {
+              data: this.data,
+            },
+          ],
+        };
       }
     });
     let xData: number[] = [];
@@ -252,79 +267,7 @@ export class DashboardComponent {
         },
       ],
     };
-    /*this.timer = setInterval(() => {
-      this.heatMapUpdate = {
-        series: [
-          {
-            data: this.generateData(),
-          },
-        ],
-      };
-    }, 1500);*/
-
-
-    if (this.chartSubscription) {
-      this.chartSubscription.unsubscribe();
-    }
-    this.chartQuery = this.apollo
-      .watchQuery({
-        query: gql`
-          query casinoAreaLocation1day {
-            getCasinoAreaLocation1day {
-              locnIndex
-              locnCode
-              areaCode
-              casinoCode
-              headCount
-            }
-          }`,
-      });
-    this.chartResult = this.chartQuery.valueChanges;
-    this.chartSubscription = this.chartResult.subscribe((result) => {
-      let data: number[][] = [];
-      tables.forEach((table, index) => {
-        const counts = result.data[Object.keys(result.data)[0]].filter((i: any) => i.locnIndex == index).map((i: any) => i.headCount);
-        if (counts && counts.length)
-          data.push([...table, counts.reduce((sum: any, num: any) => sum + num)]);
-      });
-      this.heatMapUpdate = {
-        series: [
-          {
-            data: data,
-          },
-        ],
-      };
-    });
-    this.chartQuery.subscribeToMore({
-      document: gql`
-        subscription casinoAreaLocation1day {
-          watchCasinoAreaLocation1day {
-              locnIndex
-              locnCode
-              areaCode
-              casinoCode
-              headCount
-          }
-        }`,
-      updateQuery: (prev: any, result: any) => {
-        if (!result.subscriptionData.data) return prev;
-        const gKey = "getCasinoAreaLocation1day";
-        const wKey = Object.keys(result.subscriptionData.data)[0];
-        const newItem = result.subscriptionData.data[`${wKey}`];
-        let res: any[] = [];
-        if (prev[gKey]) {
-          res = [...prev[gKey]];
-        }
-        const i = res.findIndex((v: any) => v._id == newItem._id);
-        if (i === -1) res.push(newItem);
-        else res.splice(i, 1, newItem);
-
-        return { [`${gKey}`]: res };
-
-        //console.log(result.subscriptionData.data[Object.keys(result.subscriptionData.data)[0]]);
-      },
-      onError: (err: any) => console.error(err)
-    });
+    
     this.change();
   }
 

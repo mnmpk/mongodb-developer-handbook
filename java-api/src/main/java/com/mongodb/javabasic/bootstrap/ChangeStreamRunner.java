@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
 import com.mongodb.bulk.BulkWriteResult;
@@ -31,10 +30,13 @@ import com.mongodb.javabasic.model.ChangeStream;
 import com.mongodb.javabasic.model.ChangeStream.Mode;
 import com.mongodb.javabasic.model.ChangeStream.ResumeStrategy;
 import com.mongodb.javabasic.model.ChangeStreamRegistry;
+import com.mongodb.javabasic.model.Message;
+import com.mongodb.javabasic.model.Message.Type;
 import com.mongodb.javabasic.model.PipelineTemplate;
 import com.mongodb.javabasic.repositories.PipelineRepository;
 import com.mongodb.javabasic.service.AggregationService;
 import com.mongodb.javabasic.service.ChangeStreamService;
+import com.mongodb.javabasic.service.MessageService;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
@@ -65,11 +67,11 @@ public class ChangeStreamRunner {
         @Autowired
         private PipelineRepository pipelineRepository;
         @Autowired
-        private SimpMessagingTemplate simpMessagingTemplate;
+        private MessageService messageService;
 
-        ChangeStream<Document> cs;
-        ChangeStream<Document> cs2;
-        ChangeStream<Document> cs3;
+        ChangeStream<Document> csBucketData;
+        ChangeStream<Document> csPublishHeatMapUpdate;
+        ChangeStream<Document> csPublishTableUpdate;
 
         ChangeStreamRunner(AppConfig appConfig) {
                 this.appConfig = appConfig;
@@ -77,7 +79,7 @@ public class ChangeStreamRunner {
 
         @PostConstruct
         private void watch() {
-                cs = ChangeStream.of("bucket-data", Mode.AUTO_RECOVER,
+                csBucketData = ChangeStream.of("bucket-data", Mode.AUTO_SCALE,
                                 List.of(Aggregates.match(
                                                 Filters.in("ns.coll", watchColls))))
                                 .resumeStrategy(ResumeStrategy.TIME, 60000).batchSize(batchSize)
@@ -217,16 +219,35 @@ public class ChangeStreamRunner {
                         } catch (Exception ex) {
                                 ex.printStackTrace();
                         }
-                }).changeStream(cs).build());
+                }).changeStream(csBucketData).build());
 
-                cs2 = ChangeStream.of("final-data", Mode.AUTO_SCALE,
+                csPublishTableUpdate = ChangeStream.of("dashboard", Mode.BOARDCAST,
                                 List.of(
-                                                Aggregates.addFields(new Field<>("fullDocument.locnIndex",
-                                                                new Document("$abs",
-                                                                                new Document("$mod", List.of(
-                                                                                                new Document("$toHashedIndexKey",
-                                                                                                                "$fullDocument.locnCode"),
-                                                                                                100))))),
+                                                Aggregates.addFields(new Field<>("fullDocument.noOfTxn",
+                                                                new Document("$size",
+                                                                                new Document("$ifNull", List.of(
+                                                                                                "$fullDocument.trans",
+                                                                                                List.of())))),
+                                                                new Field<>("fullDocument.avgBet",
+                                                                                new Document("$avg",
+                                                                                                "$fullDocument.trans.bet")),
+                                                                new Field<>("fullDocument.avgCasinoWin",
+                                                                                new Document("$avg",
+                                                                                                "$fullDocument.trans.casinoWin")),
+                                                                new Field<>("fullDocument.avgTheorWin",
+                                                                                new Document("$avg",
+                                                                                                "$fullDocument.trans.theorWin")))))
+                                .fullDocument(FullDocument.UPDATE_LOOKUP);
+                changeStreamService.run(
+                                ChangeStreamRegistry.<Document>builder().collectionName("tRatingBucket").body(e -> {
+                                        messageService.send(Message.builder().type(Message.Type.RES).target("/sync")
+                                                        .content(new Document().append("type", "REFRESH").append("data",
+                                                                        e.getFullDocument()))
+                                                        .build());
+                                }).changeStream(csPublishTableUpdate).build());
+
+                csPublishHeatMapUpdate = ChangeStream.of("final-data", Mode.AUTO_RECOVER,
+                                List.of(
                                                 Aggregates.match(Filters.and(
                                                                 Filters.eq("fullDocument.type",
                                                                                 "acct-casinoCode-areaCode-locnCode"),
@@ -248,44 +269,26 @@ public class ChangeStreamRunner {
                                                                                                 .getFullDocument()
                                                                                                 .getString("locnCode")));
 
-                                                // TODO: replace graphQL with Change stream Websocket
+                                                /*
+                                                 * messageService.queue(Message.builder().type(Type.RES).target("/sync")
+                                                 * .content(e.getFullDocument())
+                                                 * .build());
+                                                 */
 
                                         } catch (Exception ex) {
                                                 ex.printStackTrace();
                                         }
-                                }).changeStream(cs2).build());
-
-                cs3 = ChangeStream.of("dashboard", Mode.BOARDCAST,
-                                List.of(
-                                                Aggregates.addFields(new Field<>("fullDocument.noOfTxn",
-                                                                new Document("$size",
-                                                                                new Document("$ifNull", List.of(
-                                                                                                "$fullDocument.trans",
-                                                                                                List.of())))),
-                                                                new Field<>("fullDocument.avgBet",
-                                                                                new Document("$avg",
-                                                                                                "$fullDocument.trans.bet")),
-                                                                new Field<>("fullDocument.avgCasinoWin",
-                                                                                new Document("$avg",
-                                                                                                "$fullDocument.trans.casinoWin")),
-                                                                new Field<>("fullDocument.avgTheorWin",
-                                                                                new Document("$avg",
-                                                                                                "$fullDocument.trans.theorWin")))))
-                                .fullDocument(FullDocument.UPDATE_LOOKUP);
-                changeStreamService.run(
-                                ChangeStreamRegistry.<Document>builder().collectionName("tRatingBucket").body(e -> {
-                                        this.simpMessagingTemplate.convertAndSend("/sync", (Object) e.getFullDocument());
-                                }).changeStream(cs3).build());
+                                }).changeStream(csPublishHeatMapUpdate).build());
         }
 
         @PreDestroy
         private void clear() {
-                if (cs != null)
-                        cs.setRunning(false);
-                if (cs2 != null)
-                        cs2.setRunning(false);
-                if (cs3 != null)
-                        cs3.setRunning(false);
+                if (csBucketData != null)
+                        csBucketData.setRunning(false);
+                if (csPublishHeatMapUpdate != null)
+                        csPublishHeatMapUpdate.setRunning(false);
+                if (csPublishTableUpdate != null)
+                        csPublishTableUpdate.setRunning(false);
         }
 
         private UpdateOneModel<Document> createPlayerBucketUpdateModel(Document d, String bucketSize, Date bucketDt,
