@@ -27,11 +27,6 @@ import lombok.NoArgsConstructor;
 public class PipelineTemplate {
     @Id
     @BsonId
-    @BsonRepresentation(BsonType.OBJECT_ID)
-    private String id;
-
-    @Field("name")
-    @BsonProperty("name")
     private String name;
 
     @Field("v")

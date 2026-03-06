@@ -7,6 +7,5 @@ import com.mongodb.javabasic.model.PipelineTemplate;
 
 public interface PipelineRepository extends MongoRepository<PipelineTemplate, String>, CustomPipelineRepository {
 
-    public PipelineTemplate findByName(String name);
 
 }

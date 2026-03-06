@@ -16,7 +16,7 @@ public class PipelineRepositoryImpl implements CustomPipelineRepository {
 
     public PipelineTemplate findByName(String name) {
         PipelineTemplate p = mongoTemplate.getCollection(mongoTemplate.getCollectionName(PipelineTemplate.class))
-                .withDocumentClass(PipelineTemplate.class).find(Filters.eq("name", name)).first();
+                .withDocumentClass(PipelineTemplate.class).find(Filters.eq("_id", name)).first();
         return p;
     }
 }
