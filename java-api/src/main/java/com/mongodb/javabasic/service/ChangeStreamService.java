@@ -306,6 +306,7 @@ public class ChangeStreamService<T> {
 		}, taskExecutor);
 		reg.setCompletableFuture(completableFuture);
 		reg.getInstances().add(podName);
+		logger.info(reg.getInstances() + " are running change stream " + reg.getChangeStream().getId());
 		logger.info("Change stream " + reg.getChangeStream().getId() + " started");
 	}
 

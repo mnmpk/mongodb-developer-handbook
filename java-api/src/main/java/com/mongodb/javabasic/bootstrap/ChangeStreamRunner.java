@@ -219,7 +219,7 @@ public class ChangeStreamRunner {
                         }
                 }).changeStream(cs).build());
 
-                cs2 = ChangeStream.of("final-data", Mode.AUTO_RECOVER,
+                cs2 = ChangeStream.of("final-data", Mode.AUTO_SCALE,
                                 List.of(
                                                 Aggregates.addFields(new Field<>("fullDocument.locnIndex",
                                                                 new Document("$abs",
