@@ -1,14 +1,12 @@
 package com.mongodb.javabasic.model;
 
-import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
-import org.bson.BsonDocument;
-import org.bson.BsonType;
 import org.bson.codecs.pojo.annotations.BsonId;
 import org.bson.codecs.pojo.annotations.BsonIgnore;
 import org.bson.codecs.pojo.annotations.BsonProperty;
-import org.bson.codecs.pojo.annotations.BsonRepresentation;
+import org.bson.conversions.Bson;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -31,10 +29,10 @@ public class PipelineTemplate {
 
     @Field("v")
     @BsonIgnore
-    private List<LinkedHashMap<String, Object>> aggs;
+    private List<Map<String, Object>> aggs;
     
     @BsonProperty("v")
     @Transient
-    private List<BsonDocument> content;
+    private List<Bson> content;
 
 }
