@@ -7,6 +7,7 @@ import org.bson.BsonType;
 import org.bson.codecs.pojo.annotations.BsonProperty;
 import org.bson.codecs.pojo.annotations.BsonRepresentation;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
@@ -30,6 +31,7 @@ public class Product {
     private String sku;
 
     private String description;
+	@Transient
 	private List<BsonArray> embedding;
     private double score;
 
