@@ -9,7 +9,6 @@ import org.bson.codecs.pojo.PojoCodecProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 
 import com.mongodb.ConnectionString;
@@ -24,7 +23,6 @@ import com.mongodb.client.MongoClients;
 
 
 @Configuration
-@EnableMongoRepositories(basePackages = { "com.mongodb.javabasic.repositories" })
 @EnableSpringDataWebSupport(pageSerializationMode = EnableSpringDataWebSupport.PageSerializationMode.VIA_DTO)
 public class MongoConfig {
 

@@ -25,18 +25,16 @@ import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.model.Updates;
 import com.mongodb.client.model.changestream.FullDocument;
 import com.mongodb.javabasic.config.AppConfig;
-import com.mongodb.javabasic.model.Aggregation;
-import com.mongodb.javabasic.model.ChangeStream;
-import com.mongodb.javabasic.model.ChangeStream.Mode;
-import com.mongodb.javabasic.model.ChangeStream.ResumeStrategy;
-import com.mongodb.javabasic.model.ChangeStreamRegistry;
-import com.mongodb.javabasic.model.Message;
-import com.mongodb.javabasic.model.Message.Type;
-import com.mongodb.javabasic.model.PipelineTemplate;
-import com.mongodb.javabasic.repositories.PipelineRepository;
-import com.mongodb.javabasic.service.AggregationService;
-import com.mongodb.javabasic.service.ChangeStreamService;
-import com.mongodb.javabasic.service.MessageService;
+import com.mzinx.mongodb.aggregation.dao.PipelineRepository;
+import com.mzinx.mongodb.aggregation.model.Aggregation;
+import com.mzinx.mongodb.aggregation.model.PipelineTemplate;
+import com.mzinx.mongodb.aggregation.service.AggregationService;
+import com.mzinx.mongodb.changestream.model.ChangeStream;
+import com.mzinx.mongodb.changestream.model.ChangeStream.Mode;
+import com.mzinx.mongodb.changestream.model.ChangeStreamRegistry;
+import com.mzinx.mongodb.changestream.service.ChangeStreamService;
+import com.mzinx.mongodb.messaging.model.Message;
+import com.mzinx.mongodb.messaging.service.MessageService;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
@@ -82,7 +80,7 @@ public class ChangeStreamRunner {
                 csBucketData = ChangeStream.of("bucket-data", Mode.AUTO_SCALE,
                                 List.of(Aggregates.match(
                                                 Filters.in("ns.coll", watchColls))))
-                                .resumeStrategy(ResumeStrategy.TIME, 60000).batchSize(batchSize)
+                                .batchSize(batchSize)
                                 .maxAwaitTime(maxAwaitTime)
                                 .fullDocument(FullDocument.UPDATE_LOOKUP);
                 changeStreamService.run(ChangeStreamRegistry.<Document>builder().body(e -> {
@@ -252,7 +250,7 @@ public class ChangeStreamRunner {
                                                                 Filters.eq("fullDocument.type",
                                                                                 "acct-casinoCode-areaCode-locnCode"),
                                                                 Filters.eq("fullDocument.bucketSize", "1day")))))
-                                .resumeStrategy(ResumeStrategy.TIME, 60000).batchSize(batchSize)
+                                .batchSize(batchSize)
                                 .maxAwaitTime(maxAwaitTime)
                                 .fullDocument(FullDocument.UPDATE_LOOKUP);
                 changeStreamService.run(

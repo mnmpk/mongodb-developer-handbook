@@ -23,12 +23,13 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.geojson.MultiPoint;
 import com.mongodb.client.model.geojson.Point;
 import com.mongodb.client.model.geojson.Position;
-import com.mongodb.javabasic.model.Aggregation;
-import com.mongodb.javabasic.model.PipelineTemplate;
 import com.mongodb.javabasic.model.Route;
 import com.mongodb.javabasic.model.Stop;
 import com.mongodb.javabasic.model.Suggestion;
-import com.mongodb.javabasic.repositories.PipelineRepository;
+import com.mzinx.mongodb.aggregation.dao.PipelineRepository;
+import com.mzinx.mongodb.aggregation.model.Aggregation;
+import com.mzinx.mongodb.aggregation.model.PipelineTemplate;
+import com.mzinx.mongodb.aggregation.service.AggregationService;
 
 @Service
 public class GeoSpatialService {

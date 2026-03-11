@@ -1,6 +1,5 @@
 package com.mongodb.javabasic.controller;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -18,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.model.Updates;
-import com.mongodb.javabasic.model.ChangeStreamRegistry;
+import com.mzinx.mongodb.changestream.model.ChangeStreamRegistry;
 
 @RestController
 @RequestMapping(path = "/change-stream")

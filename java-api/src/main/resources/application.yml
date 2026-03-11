@@ -57,3 +57,12 @@ settings:
     watchColls: tTableRating,tLocn,tArea
   messaging:
     maxLifeTime: 86400000
+aggregation:
+  pipeline-collection: "pipelines"
+#change-stream:
+#  hostname: test #${HOSTNAME:test}
+#discovery:
+#  hostname: test #${HOSTNAME:test}
+messaging:  
+  watch-collections: 
+    - "tRatingFinal"

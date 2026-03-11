@@ -1,16 +1,9 @@
 package com.mongodb.javabasic.config;
 
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.resilience.annotation.EnableResilientMethods;
-
-import com.mongodb.javabasic.model.ChangeStreamRegistry;
 
 import freemarker.template.TemplateExceptionHandler;
 
@@ -30,19 +23,4 @@ public class AppConfig {
         return freemarkerConfig;
     }
 
-    @Bean
-    public Set<String> instances() {
-        return Collections.synchronizedSet(new LinkedHashSet<>());
-
-    }
-
-    @Bean
-    public Map<String, ChangeStreamRegistry<?>> changeStreams() {
-        return new ConcurrentHashMap<>();
-    }
-
-    @Bean
-    public String podName() {
-        return System.getenv("HOSTNAME");
-    }
 }
