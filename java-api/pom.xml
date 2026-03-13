@@ -49,12 +49,12 @@
 		<dependency>
 			<groupId>com.mzinx</groupId>
 			<artifactId>mongodb-spring-discovery</artifactId>
-			<version>0.0.3</version>
+			<version>0.0.4</version>
 		</dependency>
 		<dependency>
 			<groupId>com.mzinx</groupId>
 			<artifactId>mongodb-spring-message-queuing</artifactId>
-			<version>0.0.3</version>
+			<version>0.0.4</version>
 		</dependency>
 		
 		<dependency>
