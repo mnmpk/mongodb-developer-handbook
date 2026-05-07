@@ -76,9 +76,9 @@ public class ProductController extends GenericController<Product> {
 					o.setVersion(1);
 					if (workload.getDescription() != null && !workload.getDescription().isEmpty()) {
 						o.setDescription(workload.getDescription());
-						o.setEmbedding(embeddingProvider.getEmbeddings(Arrays.asList(o.getDescription())));
+						//o.setEmbedding(embeddingProvider.getEmbeddings(Arrays.asList(o.getDescription())));
 					} else {
-						o.setEmbedding(null);
+						//o.setEmbedding(null);
 					}
 					return o;
 				}).collect(Collectors.toList());

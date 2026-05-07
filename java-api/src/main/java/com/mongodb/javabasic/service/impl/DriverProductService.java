@@ -77,8 +77,8 @@ public class DriverProductService extends ProductService {
         }
 
         // define $vectorSearch pipeline
-        String indexName = "vector_index";
-        FieldSearchPath fieldSearchPath = SearchPath.fieldPath("embedding");
+        String indexName = "autoembed_index";
+        FieldSearchPath fieldSearchPath = SearchPath.fieldPath("description");
 
         List<Bson> pipeline = Arrays.asList(
                 Aggregates.vectorSearch(
