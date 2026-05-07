@@ -4,16 +4,24 @@ import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+
+import org.bsc.langgraph4j.GraphStateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.util.StopWatch;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.mongodb.javabasic.model.Stat;
 import com.mongodb.javabasic.model.Workload;
+import com.mongodb.javabasic.service.AIService;
+
 @RestController
 @RequestMapping(path = "/")
 public class ApplicationController {
@@ -114,4 +122,14 @@ public class ApplicationController {
         // Application Parameters
         // Translations
         // Stream processing
+
+        @Autowired
+        AIService aiService;
+
+        @PostMapping("/test-ai")
+        public void testAI(@RequestBody String prompt) throws GraphStateException {
+                // "perform test twice and return number of current active threads"
+                aiService.runAgent(prompt);
+        }
+
 }
