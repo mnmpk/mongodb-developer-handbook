@@ -22,7 +22,7 @@ public class EmbeddingProvider {
 
             return VoyageAiEmbeddingModel.builder()
                     .apiKey(apiKey)
-                    .modelName("voyage-3-large")
+                    .modelName("voyage-4")
                     .build();
         }
         return embeddingModel;

@@ -22,12 +22,12 @@ import java.util.List;
 
 @Component
 public class CreateIndex {
-	private final Logger logger = LoggerFactory.getLogger(getClass());
+       private final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
     MongoTemplate mongoTemplate;
 
-    @PostConstruct
+    //  @PostConstruct
     public void init() {
 
         MongoCollection<Document> collection = mongoTemplate
@@ -43,8 +43,9 @@ public class CreateIndex {
                 Collections.singletonList(
                         new Document("type", "vector")
                                 .append("path", "embedding")
-                                .append("numDimensions", 1024/*"dimensionsVoyageAiModel:1024"*/) // replace with var for the
-                                                                                         // model used
+                                .append("numDimensions", 1024/* "dimensionsVoyageAiModel:1024" */) // replace with var
+                                                                                                   // for the
+                                // model used
                                 .append("similarity", "dotProduct")));
 
         // define the index model using the specified details
@@ -72,14 +73,16 @@ public class CreateIndex {
                 if (!cursor.hasNext()) {
                     break;
                 }
-                Document current = cursor.next();
-                String name = current.getString("name");
-                boolean queryable = current.getBoolean("queryable");
-                if (name.equals(indexName) && queryable) {
-                    doc = current;
-                } else {
-                    Thread.sleep(500);
+                while (cursor.hasNext()) {
+                    Document current = cursor.next();
+                    String name = current.getString("name");
+                    boolean queryable = current.getBoolean("queryable");
+                    if (name.equals(indexName) && queryable) {
+                        doc = current;
+                        break;
+                    }
                 }
+                Thread.sleep(500);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

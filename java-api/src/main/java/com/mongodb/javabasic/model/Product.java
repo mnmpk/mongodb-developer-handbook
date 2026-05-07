@@ -31,9 +31,9 @@ public class Product {
     private String sku;
 
     private String description;
-	//@Transient
-	//@Field("embedding")
-	//private List<BsonArray> embedding;
+	@Transient
+	@Field("embedding")
+	private List<BsonArray> embedding;
     private double score;
 
 	@Field("uPrice")

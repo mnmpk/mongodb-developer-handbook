@@ -23,6 +23,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.convert.MongoConverter;
 import org.springframework.stereotype.Service;
 
+import com.mongodb.ReadConcern;
 import com.mongodb.WriteConcern;
 import com.mongodb.bulk.BulkWriteInsert;
 import com.mongodb.bulk.BulkWriteUpsert;
@@ -67,7 +68,7 @@ public class DriverProductService extends ProductService {
 
         Stat<Page<Product>> stat = new Stat<>(Product.class);
         MongoCollection<Document> collection = mongoTemplate
-                .getCollection(mongoTemplate.getCollectionName(Product.class));
+                .getCollection(mongoTemplate.getCollectionName(Product.class)).withReadConcern(ReadConcern.LOCAL);
         EmbeddingProvider embeddingProvider = new EmbeddingProvider();
         BsonArray embeddingBsonArray = embeddingProvider.getEmbedding(query);
 
@@ -77,8 +78,10 @@ public class DriverProductService extends ProductService {
         }
 
         // define $vectorSearch pipeline
-        String indexName = "autoembed_index";
-        FieldSearchPath fieldSearchPath = SearchPath.fieldPath("description");
+        //String indexName = "autoembed_index";
+        String indexName = "vector_index";
+        //FieldSearchPath fieldSearchPath = SearchPath.fieldPath("description");
+        FieldSearchPath fieldSearchPath = SearchPath.fieldPath("embedding");
 
         List<Bson> pipeline = Arrays.asList(
                 Aggregates.vectorSearch(
@@ -86,7 +89,7 @@ public class DriverProductService extends ProductService {
                         embedding,
                         indexName,
                         pageable.getPageSize(),
-                        VectorSearchOptions.exactVectorSearchOptions()),
+                        VectorSearchOptions.approximateVectorSearchOptions(100)),
                 Aggregates.project(Projections.fields(Projections.include("sku", "description", "embedding", "uPrice", "soh", "version"), Projections.metaVectorSearchScore("score"))),
                 Aggregates.facet(new Facet("meta", List.of(Aggregates.count("count"))),
                         new Facet("data", List.of(Aggregates.skip(pageable.getPageNumber() * pageable.getPageSize()),
@@ -99,7 +102,7 @@ public class DriverProductService extends ProductService {
                 DecoderContext dc = DecoderContext.builder().build();
                 list = s.map(d -> pojoCodecRegistry.get(Product.class).decode(d.toBsonDocument().asBsonReader(), dc))
                         .toList();
-        if (result.size() > 0)
+        if (result.size() > 0 && result.getList("meta", Document.class).size() > 0)
             stat.setData(List.of(new PageImpl<>(list, pageable,
                     result.getList("meta", Document.class).get(0).getInteger("count"))));
         else
