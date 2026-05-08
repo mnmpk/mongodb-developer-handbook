@@ -6,6 +6,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import org.bsc.langgraph4j.GraphStateException;
+import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -127,9 +128,8 @@ public class ApplicationController {
         AIService aiService;
 
         @PostMapping("/test-ai")
-        public void testAI(@RequestBody String prompt) throws GraphStateException {
-                // "perform test twice and return number of current active threads"
-                aiService.runAgent(prompt);
+        public Document testAI(@RequestBody String prompt) throws GraphStateException {
+                return new Document("text", aiService.runAgent(prompt));
         }
 
 }

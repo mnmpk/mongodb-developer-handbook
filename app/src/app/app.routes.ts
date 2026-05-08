@@ -7,6 +7,7 @@ import { GeoSpatialComponent } from './main/geo-spatial/geo-spatial.component';
 import { CacheComponent } from './main/cache/cache.component';
 import { SessionComponent } from './main/session/session.component';
 import { ThreadComponent } from './main/thread/thread.component';
+import { AIComponent } from './main/ai/ai.component';
 
 export const routes: Routes = [
     { path: 'dashboard', component: DashboardComponent },
@@ -17,5 +18,6 @@ export const routes: Routes = [
     { path: 'cache', component: CacheComponent },
     { path: 'session', component: SessionComponent },
     { path: 'thread', component: ThreadComponent },
+    { path: 'ai', component: AIComponent },
     { path: '', redirectTo: 'dashboard', pathMatch: 'prefix' },
 ];

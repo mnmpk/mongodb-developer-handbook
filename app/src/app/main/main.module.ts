@@ -8,11 +8,12 @@ import { GeoSpatialComponent } from './geo-spatial/geo-spatial.component';
 import { CacheComponent } from './cache/cache.component';
 import { SessionComponent } from './session/session.component';
 import { ThreadComponent } from './thread/thread.component';
+import { AIComponent } from './ai/ai.component';
 
 
 
 @NgModule({
-  declarations: [DashboardComponent, WorkloadsComponent, ChangeStreamComponent, GeoSpatialComponent, CacheComponent, SessionComponent, ThreadComponent],
+  declarations: [DashboardComponent, WorkloadsComponent, ChangeStreamComponent, GeoSpatialComponent, CacheComponent, SessionComponent, ThreadComponent, AIComponent],
   imports: [
     SharedModule, MetricsModule
   ]

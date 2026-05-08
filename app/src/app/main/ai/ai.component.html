@@ -1,0 +1,22 @@
+<div class="flex-fill d-flex flex-column">
+    <form [formGroup]="form" submit="return false;">
+        <div class="flex-fill d-flex flex-column">
+            <h1>AI</h1>
+            <mat-form-field>
+                <mat-label>Message</mat-label>
+                <input matInput type="text" formControlName="message" placeholder="Enter your message">
+            </mat-form-field>
+            <div class="flex-fill d-flex flex-column">
+                <div class="d-flex flex-column justify-content-around">
+                    <div class="d-flex justify-content-between">
+                            <button type="button" mat-flat-button [disabled]="form.invalid"
+                                (click)="submit()"><mat-icon>check</mat-icon>Submit</button>
+                    </div>
+                </div>
+            </div>
+            
+            <textarea style="min-height: 500px;">{{result}}</textarea>
+        </div>
+    </form>
+    <app-metrics></app-metrics>
+</div>

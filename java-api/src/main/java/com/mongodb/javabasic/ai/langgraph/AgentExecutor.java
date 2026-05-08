@@ -18,7 +18,6 @@ import org.bsc.langgraph4j.prebuilt.MessagesState;
 import org.bsc.langgraph4j.serializer.StateSerializer;
 
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 
 import static java.util.Optional.ofNullable;
 import static java.util.concurrent.CompletableFuture.completedFuture;
