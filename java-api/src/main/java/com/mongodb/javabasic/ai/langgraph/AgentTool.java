@@ -18,13 +18,16 @@ public class AgentTool {
     @Autowired
     MongoTemplate mongoTemplate;
 
-    @Tool("tool for getting all MongoDB collections' name")
-    List<String> getDBCollections() {
-        List<String> collections = mongoTemplate.getDb().listCollectionNames().into(new ArrayList<>());
-        logger.info("Retrieved collections: {}", collections);
-        return collections;
+    @Tool("tool for getting total number of MongoDB collections")
+    int getTotalNoOfCollections() {
+        return getDBCollections().size();
     }
 
+    @Tool("tool for getting all MongoDB collections' name")
+    List<String> getDBCollections() {
+        return mongoTemplate.getDb().listCollectionNames().into(new ArrayList<>());
+    }
+    
     @Tool("tool for test AI agent executor")
     String execTest(@P("test message") String message) {
         return String.format("test tool ('%s') executed with result 'OK'", message);

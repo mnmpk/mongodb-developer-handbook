@@ -2,7 +2,6 @@ package com.mongodb.javabasic.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 
 import dev.langchain4j.model.chat.Capability;
 import dev.langchain4j.model.chat.ChatModel;
@@ -12,7 +11,6 @@ import dev.langchain4j.model.ollama.OllamaChatModel;
 public class ChatModelConfiguration {
 
         @Bean
-        //@Profile("ollama")
         public ChatModel ollamaModel() {
                 return OllamaChatModel.builder()
                                 .modelName("llama3.2")
@@ -24,6 +22,5 @@ public class ChatModelConfiguration {
                                 .temperature(0.1)
                                 .build();
         }
-
 
 }

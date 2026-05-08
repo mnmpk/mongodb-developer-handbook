@@ -106,16 +106,16 @@
             <artifactId>langgraph4j-langchain4j</artifactId>
 			<version>1.8.15</version>
         </dependency>
+		<!--dependency>
+			<groupId>org.bsc.langgraph4j</groupId>
+			<artifactId>langgraph4j-mongodb-saver</artifactId>
+			<version>1.8.15</version>
+		</dependency-->
         <dependency>
             <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j-ollama</artifactId>
 			<version>1.14.1</version>
         </dependency>
-		<dependency>
-			<groupId>org.bsc.langgraph4j</groupId>
-			<artifactId>langgraph4j-spring-ai</artifactId>
-			<version>1.8.15</version>
-		</dependency>
 
 		
 
