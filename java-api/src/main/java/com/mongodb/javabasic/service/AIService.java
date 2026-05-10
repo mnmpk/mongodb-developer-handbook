@@ -35,23 +35,30 @@ public class AIService {
                                 .chatModel(chatModel)
                                 .toolsFromObject(tools)
                                 .build()
-                                .compile(/*CompileConfig.builder()
-                                                .checkpointSaver(MongoDBSaver.builder()
-                                                                .mongoClient(mongoClient)
-                                                                .database("agent_logs")
-                                                                .collection("logs")
-                                                .build()*/);
+                                .compile(/*
+                                          * CompileConfig.builder()
+                                          * .checkpointSaver(MongoDBSaver.builder()
+                                          * .mongoClient(mongoClient)
+                                          * .database("agent_logs")
+                                          * .collection("logs")
+                                          * .build()
+                                          */);
 
                 var result = agent.stream(Map.of("messages", UserMessage.from(prompt)));
 
                 var state = result.stream()
                                 .peek(s -> logger.debug(s.node()))
                                 .reduce((a, b) -> b)
-                                .map(NodeOutput::state)
+                                // .map(NodeOutput::state)
                                 .orElseThrow();
-
-        return state.lastMessage().map(AiMessage.class::cast)
-                .map(AiMessage::text)
-                                .orElseThrow();
+                if (state.isEND()) {
+                        return state.state().finalResponse().orElseThrow();
+                }
+                return null;
+                /*
+                 * return state.lastMessage().map(AiMessage.class::cast)
+                 * .map(AiMessage::text)
+                 * .orElseThrow();
+                 */
         }
 }
