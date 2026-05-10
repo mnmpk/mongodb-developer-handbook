@@ -43,7 +43,7 @@ logging:
 settings:
   ai:
     url: "http://mzinx.servehttp.com:11434"
-    model: "gemma4"
+    model: "qwen3.6"
   #App thread pool setting
   corePoolsize: 10 
   maxPoolSize: 30

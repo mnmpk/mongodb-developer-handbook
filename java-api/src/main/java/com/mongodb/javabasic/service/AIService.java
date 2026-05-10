@@ -31,7 +31,7 @@ public class AIService {
         private MongoClient mongoClient;
 
         public String runAgent(String prompt) throws GraphStateException {
-                var agent = AgentExecutorEx.builder()
+                var agent = AgentExecutor.builder()
                                 .chatModel(chatModel)
                                 .toolsFromObject(tools)
                                 .build()
@@ -49,16 +49,16 @@ public class AIService {
                 var state = result.stream()
                                 .peek(s -> logger.debug(s.node()))
                                 .reduce((a, b) -> b)
-                                // .map(NodeOutput::state)
+                                .map(NodeOutput::state)
                                 .orElseThrow();
-                if (state.isEND()) {
+                /*if (state.isEND()) {
                         return state.state().finalResponse().orElseThrow();
                 }
-                return null;
-                /*
-                 * return state.lastMessage().map(AiMessage.class::cast)
-                 * .map(AiMessage::text)
-                 * .orElseThrow();
-                 */
+                return null;*/
+                
+                  return state.lastMessage().map(AiMessage.class::cast)
+                  .map(AiMessage::text)
+                  .orElseThrow();
+                 
         }
 }
