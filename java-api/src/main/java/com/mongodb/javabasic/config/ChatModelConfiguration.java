@@ -12,8 +12,11 @@ public class ChatModelConfiguration {
 
         @Bean
         public ChatModel ollamaModel() {
+                String modelName = "gemma4";
+                //String modelName = "llama3.2";
+                //String modelName = "llama3-groq-tool-use";
                 return OllamaChatModel.builder()
-                                .modelName("llama3.2")
+                                .modelName(modelName)
                                 .baseUrl("http://localhost:11434")
                                 .supportedCapabilities(Capability.RESPONSE_FORMAT_JSON_SCHEMA)
                                 .logRequests(true)
