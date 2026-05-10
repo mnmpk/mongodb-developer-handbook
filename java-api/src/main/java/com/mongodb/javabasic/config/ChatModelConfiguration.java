@@ -14,7 +14,7 @@ public class ChatModelConfiguration {
         @Value("${settings.ai.url}")
         private String url;
 
-        @Value("${settings.ai.url}")
+        @Value("${settings.ai.model}")
         private String model;
 
         @Bean
