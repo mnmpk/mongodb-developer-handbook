@@ -12,6 +12,6 @@ export class AIService {
 	constructor(private httpClient: HttpClient) { }
 
 	test(message: string): Observable<any> {
-		return this.httpClient.post<any>(`${baseURL}/test-ai`, { params: message });
+		return this.httpClient.post<any>(`${baseURL}/test-ai`, message);
 	}
 }
