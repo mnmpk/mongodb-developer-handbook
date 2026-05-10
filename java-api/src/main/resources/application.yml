@@ -41,6 +41,9 @@ logging:
         driver:
 #          connection: DEBUG
 settings:
+  ai:
+    url: "http://mzinx.servehttp.com:11434"
+    model: "gemma4"
   #App thread pool setting
   corePoolsize: 10 
   maxPoolSize: 30

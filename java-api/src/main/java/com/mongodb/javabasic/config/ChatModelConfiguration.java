@@ -1,5 +1,6 @@
 package com.mongodb.javabasic.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -10,14 +11,17 @@ import dev.langchain4j.model.ollama.OllamaChatModel;
 @Configuration
 public class ChatModelConfiguration {
 
+        @Value("${settings.ai.url}")
+        private String url;
+
+        @Value("${settings.ai.url}")
+        private String model;
+
         @Bean
         public ChatModel ollamaModel() {
-                String modelName = "gemma4";
-                //String modelName = "llama3.2";
-                //String modelName = "llama3-groq-tool-use";
                 return OllamaChatModel.builder()
-                                .modelName(modelName)
-                                .baseUrl("http://localhost:11434")
+                                .modelName(model)
+                                .baseUrl(url)
                                 .supportedCapabilities(Capability.RESPONSE_FORMAT_JSON_SCHEMA)
                                 .logRequests(true)
                                 .logResponses(true)
