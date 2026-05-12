@@ -2,17 +2,18 @@ package com.mongodb.javabasic.service;
 
 import java.util.Map;
 
+import org.bsc.langgraph4j.CompileConfig;
 import org.bsc.langgraph4j.GraphStateException;
 import org.bsc.langgraph4j.NodeOutput;
+import org.bsc.langgraph4j.RunnableConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.mongodb.client.MongoClient;
 import com.mongodb.javabasic.ai.langgraph.AgentExecutor;
-import com.mongodb.javabasic.ai.langgraph.AgentExecutorEx;
 import com.mongodb.javabasic.ai.langgraph.AgentTool;
+import com.mongodb.javabasic.ai.langgraph.MongoDBSaver;
 
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.UserMessage;
@@ -28,37 +29,35 @@ public class AIService {
         private AgentTool tools;
 
         @Autowired
-        private MongoClient mongoClient;
+        private MongoDBSaver mongoDBSaver;
 
-        public String runAgent(String prompt) throws GraphStateException {
+        public String runAgent(String tId, String prompt) throws GraphStateException {
                 var agent = AgentExecutor.builder()
                                 .chatModel(chatModel)
                                 .toolsFromObject(tools)
                                 .build()
-                                .compile(/*
-                                          * CompileConfig.builder()
-                                          * .checkpointSaver(MongoDBSaver.builder()
-                                          * .mongoClient(mongoClient)
-                                          * .database("agent_logs")
-                                          * .collection("logs")
-                                          * .build()
-                                          */);
+                                .compile(
+                                                CompileConfig.builder()
+                                                                .checkpointSaver(mongoDBSaver).releaseThread(false)
+                                                                .build());
 
-                var result = agent.stream(Map.of("messages", UserMessage.from(prompt)));
+                var result = agent.stream(Map.of("messages", UserMessage.from(prompt)), RunnableConfig.builder().threadId(tId).build());
 
                 var state = result.stream()
                                 .peek(s -> logger.debug(s.node()))
                                 .reduce((a, b) -> b)
                                 .map(NodeOutput::state)
                                 .orElseThrow();
-                /*if (state.isEND()) {
-                        return state.state().finalResponse().orElseThrow();
-                }
-                return null;*/
-                
-                  return state.lastMessage().map(AiMessage.class::cast)
-                  .map(AiMessage::text)
-                  .orElseThrow();
-                 
+                /*
+                 * if (state.isEND()) {
+                 * return state.state().finalResponse().orElseThrow();
+                 * }
+                 * return null;
+                 */
+
+                return state.lastMessage().map(AiMessage.class::cast)
+                                .map(AiMessage::text)
+                                .orElseThrow();
+
         }
 }

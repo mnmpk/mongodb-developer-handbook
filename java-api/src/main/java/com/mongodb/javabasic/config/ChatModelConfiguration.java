@@ -1,5 +1,7 @@
 package com.mongodb.javabasic.config;
 
+import java.time.Duration;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,6 +27,7 @@ public class ChatModelConfiguration {
                                 .supportedCapabilities(Capability.RESPONSE_FORMAT_JSON_SCHEMA)
                                 .logRequests(true)
                                 .logResponses(true)
+                                .timeout(Duration.ofSeconds(600))
                                 .maxRetries(2)
                                 .temperature(0.1)
                                 .build();

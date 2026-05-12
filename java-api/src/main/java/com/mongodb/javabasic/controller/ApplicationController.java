@@ -1,16 +1,19 @@
 package com.mongodb.javabasic.controller;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+
+import jakarta.servlet.http.HttpSession;
 
 import org.bsc.langgraph4j.GraphStateException;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.util.StopWatch;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -128,8 +131,14 @@ public class ApplicationController {
         AIService aiService;
 
         @PostMapping("/test-ai")
-        public Document testAI(@RequestBody String prompt) throws GraphStateException {
-                return new Document("text", aiService.runAgent(prompt));
+        public Document testAI(@RequestBody String prompt, HttpSession session) throws GraphStateException {
+                List<String> prompts = (List<String>) session.getAttribute("prompt");
+                if (prompts == null)
+                        prompts =  new ArrayList<String>();
+                prompts.add(prompt);
+                session.setAttribute("prompt",prompts);
+
+                return new Document("text", aiService.runAgent(session.getId(), prompt));
         }
 
 }
