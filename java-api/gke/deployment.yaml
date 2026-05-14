@@ -48,3 +48,9 @@ spec:
           httpGet:
             path: /actuator/health
             port: 8081
+      - name: ${APP_NAME}-mcp
+        image: mongodb/mongodb-mcp-server:latest
+        imagePullPolicy: Always
+        env:
+        - name: MDB_MCP_CONNECTION_STRING
+          value: "mongodb+srv://dev:${DATABASE_PASSWORD}@demo.uskpz.mongodb.net/"
