@@ -1,5 +1,6 @@
 package com.mongodb.javabasic.service;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
@@ -51,12 +52,13 @@ public class AIService {
                                 .logEvents(true).environment(Map.of(
                                                 // "MDB_MCP_API_CLIENT_ID", "<client-id>",
                                                 // "MDB_MCP_API_CLIENT_SECRET", "<client-secret>",
-                                                "MDB_MCP_CONNECTION_STRING", uri+dbName))
+                                                "MDB_MCP_CONNECTION_STRING", uri + dbName))
                                 .build();
 
                 // 2. Create the MCP Client
                 McpClient mcpClient = new DefaultMcpClient.Builder()
-                                .transport(transport)
+                                .transport(transport).promptsTimeout(Duration.ofSeconds(300))
+                                .resourcesTimeout(Duration.ofSeconds(300)).toolExecutionTimeout(Duration.ofSeconds(30))
                                 .build();
 
                 // 3. Optional: Perform a health check
