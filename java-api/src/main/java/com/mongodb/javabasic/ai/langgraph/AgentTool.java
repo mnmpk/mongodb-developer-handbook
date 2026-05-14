@@ -17,16 +17,6 @@ public class AgentTool {
     private final Logger logger = LoggerFactory.getLogger(getClass());
     @Autowired
     MongoTemplate mongoTemplate;
-
-    @Tool("tool for getting total number of MongoDB collections")
-    int getTotalNoOfCollections() {
-        return getDBCollections().size();
-    }
-
-    @Tool("tool for getting all MongoDB collections' name")
-    List<String> getDBCollections() {
-        return mongoTemplate.getDb().listCollectionNames().into(new ArrayList<>());
-    }
     
     @Tool("tool for test AI agent executor")
     String execTest(@P("test message") String message) {
